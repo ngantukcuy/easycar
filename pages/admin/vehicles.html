@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Manajemen Kendaraan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <style>
+    body.ec-loading { visibility: hidden; }
+  </style>
+</head>
+<body class="ec-loading">
+
+  <div class="page-wrapper">
+    <header class="page-topbar">
+      <div style="padding-left:3rem;">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Manajemen Kendaraan</h2>
+        <p id="carCount" style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">—</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <input type="text" id="searchInput" oninput="filterCars()" placeholder="Cari kendaraan..." class="ec-input" style="width:190px;" />
+        <button onclick="openForm(null)" class="btn btn-accent btn-sm">
+          <i class='bx bx-plus'></i> Tambah
+        </button>
+      </div>
+    </header>
+
+    <main class="page-content fade-in">
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Foto</th>
+                <th>Nama</th>
+                <th>Tipe</th>
+                <th>Transmisi</th>
+                <th>Kapasitas</th>
+                <th>Harga/Hari</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="carTable">
+              <tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--color-text-muted);">Memuat...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Form Modal -->
+  <div id="formOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;">
+    <div style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);position:sticky;top:0;background:#fff;z-index:1;">
+        <h3 id="formTitle" style="font-family:var(--font-body);font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Tambah Kendaraan</h3>
+        <button onclick="closeForm()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--color-text-muted);">✕</button>
+      </div>
+      <div style="padding:1.5rem;">
+        <div id="formError" style="display:none;background:#fef2f2;color:#dc2626;border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:0.875rem;font-weight:500;margin-bottom:1rem;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div style="grid-column:1/-1;">
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Nama Kendaraan *</label>
+            <input type="text" id="fNama" class="ec-input" placeholder="Toyota Avanza" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Tipe</label>
+            <select id="fTipe" class="ec-input">
+              <option value="">— Pilih —</option>
+              <option>MPV</option><option>SUV</option><option>Sedan</option><option>Pickup</option><option>Minibus</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Transmisi</label>
+            <select id="fTrans" class="ec-input">
+              <option value="">— Pilih —</option>
+              <option>Matic</option><option>Manual</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Kapasitas (orang)</label>
+            <input type="number" id="fKap" class="ec-input" placeholder="7" min="1" max="50" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Tahun</label>
+            <input type="number" id="fTahun" class="ec-input" placeholder="2022" min="2000" max="2030" />
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Harga per Hari (Rp) *</label>
+            <input type="number" id="fHarga" class="ec-input" placeholder="350000" min="0" />
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">URL Foto</label>
+            <input type="text" id="fFoto" class="ec-input" placeholder="https://..." />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Status</label>
+            <select id="fStatus" class="ec-input">
+              <option>Tersedia</option>
+              <option>Disewa</option>
+              <option>Perawatan</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Nomor Plat</label>
+            <input type="text" id="fPlat" class="ec-input" placeholder="BM 1234 XX" />
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Deskripsi</label>
+            <textarea id="fDesc" class="ec-input" rows="2" placeholder="Keterangan tambahan..."></textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+          <button onclick="closeForm()" class="btn btn-ghost" style="flex:1;justify-content:center;">Batal</button>
+          <button id="saveCarBtn" onclick="saveCar()" class="btn btn-accent" style="flex:1;justify-content:center;">
+            <i class='bx bx-save'></i> Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/components/admin-sidebar.js"></script>
+  <script src="/utils/ui.js"></script>
+
+  <script>
+    let allCars   = [];
+    let editingId = null;
+    let searchTerm = "";
+
+    (async () => {
+      const user = await requireAdmin();
+      if (!user) return;
+      initAdminSidebar("vehicles", user);
+      await loadCars();
+      document.body.classList.add("ec-ready");
+    })();
+
+    async function loadCars() {
+      const { data } = await supabase.from("cars").select("*").order("created_at", { ascending: false });
+      allCars = data || [];
+      renderTable();
+    }
+
+    function filterCars() {
+      searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      renderTable();
+    }
+
+    function renderTable() {
+      const filtered = allCars.filter(c => !searchTerm || c.nama.toLowerCase().includes(searchTerm));
+      document.getElementById("carCount").textContent = filtered.length + " kendaraan";
+
+      const tbody = document.getElementById("carTable");
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--color-text-muted);">Tidak ada data</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(c => {
+        const img = c.foto_url
+          ? `<img src="${c.foto_url}" style="width:52px;height:38px;object-fit:cover;border-radius:8px;" />`
+          : `<div style="width:52px;height:38px;background:var(--color-bg);border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class='bx bxs-car' style="color:var(--color-text-subtle);"></i></div>`;
+        return `
+          <tr>
+            <td>${img}</td>
+            <td style="font-weight:700;font-size:0.875rem;color:var(--color-primary);">${c.nama}</td>
+            <td style="font-size:0.8125rem;">${c.tipe || "—"}</td>
+            <td style="font-size:0.8125rem;">${c.transmisi || "—"}</td>
+            <td style="font-size:0.8125rem;text-align:center;">${c.kapasitas || "—"}</td>
+            <td style="font-weight:600;font-size:0.8125rem;">${formatRupiah(c.harga_per_hari || 0)}</td>
+            <td><span class="badge ${statusBadgeClass(c.status)}">${c.status || "—"}</span></td>
+            <td>
+              <div style="display:flex;gap:0.375rem;">
+                <button onclick="openForm('${c.id}')" class="btn btn-ghost btn-sm"><i class='bx bx-edit'></i></button>
+                <button onclick="deleteCar('${c.id}','${c.nama.replace(/'/g,"&#39;")}')" class="btn btn-danger btn-sm"><i class='bx bx-trash'></i></button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function openForm(id) {
+      editingId = id;
+      document.getElementById("formError").style.display = "none";
+
+      if (id) {
+        const c = allCars.find(x => x.id === id);
+        document.getElementById("formTitle").textContent = "Edit Kendaraan";
+        document.getElementById("fNama").value   = c.nama || "";
+        document.getElementById("fTipe").value   = c.tipe || "";
+        document.getElementById("fTrans").value  = c.transmisi || "";
+        document.getElementById("fKap").value    = c.kapasitas || "";
+        document.getElementById("fTahun").value  = c.tahun || "";
+        document.getElementById("fHarga").value  = c.harga_per_hari || "";
+        document.getElementById("fFoto").value   = c.foto_url || "";
+        document.getElementById("fStatus").value = c.status || "Tersedia";
+        document.getElementById("fPlat").value   = c.nomor_plat || "";
+        document.getElementById("fDesc").value   = c.deskripsi || "";
+      } else {
+        document.getElementById("formTitle").textContent = "Tambah Kendaraan";
+        ["fNama","fTipe","fTrans","fKap","fTahun","fHarga","fFoto","fPlat","fDesc"].forEach(id => {
+          document.getElementById(id).value = "";
+        });
+        document.getElementById("fStatus").value = "Tersedia";
+      }
+
+      document.getElementById("formOverlay").style.display = "flex";
+    }
+
+    function closeForm() {
+      document.getElementById("formOverlay").style.display = "none";
+      editingId = null;
+    }
+    document.getElementById("formOverlay").addEventListener("click", e => {
+      if (e.target === e.currentTarget) closeForm();
+    });
+
+    async function saveCar() {
+      const btn    = document.getElementById("saveCarBtn");
+      const errEl  = document.getElementById("formError");
+      const nama   = document.getElementById("fNama").value.trim();
+      const harga  = parseFloat(document.getElementById("fHarga").value) || 0;
+
+      errEl.style.display = "none";
+
+      if (!nama) { errEl.textContent = "Nama kendaraan wajib diisi."; errEl.style.display = "block"; return; }
+      if (!harga){ errEl.textContent = "Harga per hari wajib diisi."; errEl.style.display = "block"; return; }
+
+      const payload = {
+        nama,
+        tipe:         document.getElementById("fTipe").value   || null,
+        transmisi:    document.getElementById("fTrans").value  || null,
+        kapasitas:    parseInt(document.getElementById("fKap").value)   || null,
+        tahun:        parseInt(document.getElementById("fTahun").value) || null,
+        harga_per_hari: harga,
+        foto_url:     document.getElementById("fFoto").value.trim()   || null,
+        status:       document.getElementById("fStatus").value,
+        nomor_plat:   document.getElementById("fPlat").value.trim()   || null,
+        deskripsi:    document.getElementById("fDesc").value.trim()   || null,
+      };
+
+      setButtonLoading(btn, true);
+      const { error } = editingId
+        ? await supabase.from("cars").update(payload).eq("id", editingId)
+        : await supabase.from("cars").insert(payload);
+      setButtonLoading(btn, false);
+
+      if (error) { errEl.textContent = "Gagal: " + error.message; errEl.style.display = "block"; return; }
+
+      showToast(editingId ? "Kendaraan diperbarui!" : "Kendaraan ditambahkan!", "success");
+      closeForm();
+      await loadCars();
+    }
+
+    async function deleteCar(id, nama) {
+      const confirmed = await showModal({
+        title: "Hapus Kendaraan?",
+        message: `Apakah Anda yakin ingin menghapus <strong>${nama}</strong>? Tindakan ini tidak dapat dibatalkan.`,
+        confirmText: "Ya, Hapus",
+        type: "danger"
+      });
+      if (!confirmed) return;
+
+      showLoading("Menghapus...");
+      const { error } = await supabase.from("cars").delete().eq("id", id);
+      hideLoading();
+      if (error) { showToast("Gagal: " + error.message, "error"); return; }
+      showToast("Kendaraan dihapus.", "success");
+      await loadCars();
+    }
+  </script>
+</body>
+</html>

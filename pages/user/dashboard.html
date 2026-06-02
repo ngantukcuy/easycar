@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <style>
+    body.ec-loading { visibility: hidden; }
+    .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  </style>
+</head>
+<body class="ec-loading">
+
+  <div class="page-wrapper" id="pageWrapper">
+
+    <!-- TOPBAR -->
+    <header class="page-topbar">
+      <div style="padding-left:3rem;" id="topbarLeft">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Dashboard</h2>
+        <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;" id="topbarDate">—</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <a href="/pages/user/booking.html" class="btn btn-accent btn-sm">
+          <i class='bx bx-plus'></i> Booking Baru
+        </a>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="page-content fade-in">
+
+      <!-- Welcome -->
+      <div style="background:linear-gradient(135deg,var(--color-primary) 0%,var(--color-primary-light) 100%);border-radius:var(--radius-xl);padding:1.75rem;margin-bottom:1.5rem;position:relative;overflow:hidden;">
+        <div style="position:absolute;right:-20px;top:-30px;width:160px;height:160px;background:rgba(255,255,255,0.05);border-radius:50%;"></div>
+        <div style="position:absolute;right:60px;bottom:-40px;width:100px;height:100px;background:rgba(232,93,4,0.15);border-radius:50%;"></div>
+        <div style="position:relative;z-index:1;">
+          <p style="color:rgba(255,255,255,0.6);font-size:0.8125rem;margin:0 0 0.25rem;">Selamat datang,</p>
+          <h3 id="welcomeName" style="color:#fff;font-size:1.5rem;font-weight:800;margin:0 0 0.35rem;">—</h3>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.8rem;margin:0;">Kelola booking dan cek riwayat perjalanan Anda di sini</p>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">
+        <div class="card stat-card" style="padding:1.25rem;">
+          <div style="width:40px;height:40px;background:#eff6ff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:0.875rem;">
+            <i class='bx bxs-calendar-check' style="color:#3b82f6;font-size:1.25rem;"></i>
+          </div>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Total Booking</p>
+          <p id="statTotal" style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
+        </div>
+        <div class="card stat-card" style="padding:1.25rem;">
+          <div style="width:40px;height:40px;background:#fef3c7;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:0.875rem;">
+            <i class='bx bxs-time' style="color:#f59e0b;font-size:1.25rem;"></i>
+          </div>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Menunggu</p>
+          <p id="statPending" style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
+        </div>
+        <div class="card stat-card" style="padding:1.25rem;">
+          <div style="width:40px;height:40px;background:#dcfce7;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:0.875rem;">
+            <i class='bx bxs-car' style="color:#16a34a;font-size:1.25rem;"></i>
+          </div>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Aktif</p>
+          <p id="statActive" style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
+        </div>
+        <div class="card stat-card" style="padding:1.25rem;">
+          <div style="width:40px;height:40px;background:#f5f3ff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:0.875rem;">
+            <i class='bx bxs-check-circle' style="color:#7c3aed;font-size:1.25rem;"></i>
+          </div>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Selesai</p>
+          <p id="statDone" style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
+        </div>
+      </div>
+
+      <!-- Two columns -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+
+        <!-- Recent bookings -->
+        <div class="card" style="grid-column: 1 / -1;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);">
+            <h3 style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0;">Pesanan Terbaru</h3>
+            <a href="/pages/user/my-orders.html" style="font-size:0.75rem;color:var(--color-primary-mid);font-weight:600;text-decoration:none;">Lihat semua →</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Kode</th>
+                  <th>Kendaraan</th>
+                  <th>Tanggal</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="recentBookings">
+                <tr><td colspan="5" style="text-align:center;color:var(--color-text-muted);padding:2rem;">Memuat...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="card" style="padding:1.5rem;">
+        <h3 style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0 0 1rem;">Aksi Cepat</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;">
+          <a href="/pages/user/booking.html" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1rem;border-radius:var(--radius-md);background:#eff6ff;text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+            <i class='bx bxs-calendar-plus' style="font-size:1.5rem;color:#3b82f6;"></i>
+            <span style="font-size:0.75rem;font-weight:600;color:#1d4ed8;text-align:center;">Booking Baru</span>
+          </a>
+          <a href="/pages/user/my-orders.html" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1rem;border-radius:var(--radius-md);background:#fef3c7;text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='#fde68a'" onmouseout="this.style.background='#fef3c7'">
+            <i class='bx bxs-receipt' style="font-size:1.5rem;color:#f59e0b;"></i>
+            <span style="font-size:0.75rem;font-weight:600;color:#b45309;text-align:center;">Pesanan Saya</span>
+          </a>
+          <a href="/pages/user/profile.html" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1rem;border-radius:var(--radius-md);background:#f5f3ff;text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='#f5f3ff'">
+            <i class='bx bxs-user-circle' style="font-size:1.5rem;color:#7c3aed;"></i>
+            <span style="font-size:0.75rem;font-weight:600;color:#6d28d9;text-align:center;">Edit Profil</span>
+          </a>
+          <a href="/index.html#armada" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1rem;border-radius:var(--radius-md);background:#dcfce7;text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='#bbf7d0'" onmouseout="this.style.background='#dcfce7'">
+            <i class='bx bxs-car' style="font-size:1.5rem;color:#16a34a;"></i>
+            <span style="font-size:0.75rem;font-weight:600;color:#15803d;text-align:center;">Lihat Armada</span>
+          </a>
+        </div>
+      </div>
+
+    </main>
+
+    <footer style="text-align:center;color:var(--color-text-subtle);font-size:0.75rem;padding:1.25rem;">&copy; 2026 EasyCar</footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/components/user-sidebar.js"></script>
+  <script src="/utils/ui.js"></script>
+
+  <script>
+    (async () => {
+      // requireLogin shows auth screen, checks role, hides screen then reveals page
+      const user = await requireLogin();
+      if (!user) return;
+
+      // Init sidebar WITH user data — no flicker possible
+      initUserSidebar("dashboard", user);
+
+      // Fill welcome
+      document.getElementById("welcomeName").textContent = user.full_name || user.email || "—";
+      document.getElementById("topbarDate").textContent  = new Date().toLocaleDateString("id-ID", { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
+
+      // Load bookings
+      await loadMyStats(user.id);
+      await loadRecentBookings(user.id);
+
+      document.body.classList.add("ec-ready");
+    })();
+
+    async function loadMyStats(userId) {
+      const { data } = await supabase.from("bookings").select("status").eq("user_id", userId);
+      if (!data) return;
+      document.getElementById("statTotal").textContent   = data.length;
+      document.getElementById("statPending").textContent = data.filter(b => b.status === "Menunggu").length;
+      document.getElementById("statActive").textContent  = data.filter(b => b.status === "Aktif" || b.status === "Dikonfirmasi").length;
+      document.getElementById("statDone").textContent    = data.filter(b => b.status === "Selesai").length;
+    }
+
+    async function loadRecentBookings(userId) {
+      const { data } = await supabase
+        .from("bookings")
+        .select("*, cars(nama)")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      const tbody = document.getElementById("recentBookings");
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--color-text-muted);padding:2.5rem;">Belum ada pesanan</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(b => `
+        <tr>
+          <td style="font-weight:600;color:var(--color-primary);font-size:0.8125rem;">${b.kode_booking || ("BK" + b.id.slice(-6).toUpperCase())}</td>
+          <td>${b.cars?.nama || "—"}</td>
+          <td style="color:var(--color-text-muted);font-size:0.8125rem;">${formatTanggalShort(b.tanggal_mulai)}</td>
+          <td style="font-weight:600;">${formatRupiah(b.total_harga || 0)}</td>
+          <td><span class="badge ${statusBadgeClass(b.status)}">${b.status}</span></td>
+        </tr>
+      `).join("");
+    }
+  </script>
+</body>
+</html>

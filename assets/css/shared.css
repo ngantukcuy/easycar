@@ -1,0 +1,56 @@
+/* =====================================================
+   EASYCAR — SHARED CSS
+   Tailwind digunakan via CDN, file ini untuk:
+   - Print media query struk
+   - Custom scrollbar sidebar
+   - Animasi tambahan
+   ===================================================== */
+
+/* ── SIDEBAR SCROLL ── */
+.sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
+/* ── FLATPICKR CUSTOM ── */
+.flatpickr-calendar { font-family: 'Poppins', sans-serif !important; border-radius: 12px !important; box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important; }
+.flatpickr-day.selected, .flatpickr-day.selected:hover { background: #4f46e5 !important; border-color: #4f46e5 !important; }
+
+/* ── TRANSITIONS ── */
+.fade-in { animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── TABLE RESPONSIVE ── */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-wrap table { min-width: 600px; }
+
+/* ═══════════════════════════════════════════════════
+   PRINT STRUK — HANYA CETAK #struk-print
+   ═══════════════════════════════════════════════════ */
+@media print {
+  /* Sembunyikan semua elemen */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Tampilkan hanya struk */
+  #struk-print,
+  #struk-print * {
+    visibility: visible !important;
+  }
+
+  #struk-print {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    background: #fff !important;
+    z-index: 99999 !important;
+    padding: 20px !important;
+  }
+
+  /* Reset halaman untuk print */
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+}

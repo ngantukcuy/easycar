@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Laporan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <style>
+    body.ec-loading { visibility: hidden; }
+    .report-bar { height: 32px; background: var(--color-primary-mid); border-radius: 6px; transition: width 0.6s ease; }
+  </style>
+</head>
+<body class="ec-loading">
+
+  <div class="page-wrapper">
+    <header class="page-topbar">
+      <div style="padding-left:3rem;">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Laporan</h2>
+        <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">Ringkasan performa rental</p>
+      </div>
+    </header>
+
+    <main class="page-content fade-in">
+
+      <!-- Summary stats -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">
+        <div class="card" style="padding:1.25rem;">
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Total Pendapatan</p>
+          <p id="rTotal" style="font-size:1.25rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
+        </div>
+        <div class="card" style="padding:1.25rem;">
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Transaksi Selesai</p>
+          <p id="rDone" style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
+        </div>
+        <div class="card" style="padding:1.25rem;">
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Rata-rata per Transaksi</p>
+          <p id="rAvg" style="font-size:1.25rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
+        </div>
+        <div class="card" style="padding:1.25rem;">
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Kendaraan Aktif</p>
+          <p id="rActive" style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+
+        <!-- Top vehicles -->
+        <div class="card">
+          <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);">
+            <h3 style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0;">Kendaraan Paling Banyak Disewa</h3>
+          </div>
+          <div id="topVehicles" style="padding:1.25rem;">
+            <div style="text-align:center;padding:2rem;color:var(--color-text-muted);">Memuat...</div>
+          </div>
+        </div>
+
+        <!-- Status breakdown -->
+        <div class="card">
+          <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);">
+            <h3 style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0;">Distribusi Status Pemesanan</h3>
+          </div>
+          <div id="statusBreakdown" style="padding:1.25rem;">
+            <div style="text-align:center;padding:2rem;color:var(--color-text-muted);">Memuat...</div>
+          </div>
+        </div>
+
+        <!-- Recent completed -->
+        <div class="card" style="grid-column:1/-1;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);">
+            <h3 style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0;">Transaksi Selesai Terbaru</h3>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Kode</th>
+                  <th>Pemesan</th>
+                  <th>Kendaraan</th>
+                  <th>Durasi</th>
+                  <th>Pendapatan</th>
+                  <th>Tanggal Selesai</th>
+                </tr>
+              </thead>
+              <tbody id="completedTable">
+                <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--color-text-muted);">Memuat...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/components/admin-sidebar.js"></script>
+  <script src="/utils/ui.js"></script>
+
+  <script>
+    (async () => {
+      const user = await requireAdmin();
+      if (!user) return;
+      initAdminSidebar("reports", user);
+      await Promise.all([loadSummary(), loadTopVehicles(), loadStatusBreakdown(), loadCompleted()]);
+      document.body.classList.add("ec-ready");
+    })();
+
+    async function loadSummary() {
+      const { data: done } = await supabase.from("bookings").select("total_harga").eq("status","Selesai");
+      const { data: active } = await supabase.from("cars").select("id").eq("status","Disewa");
+
+      const total = (done || []).reduce((s, b) => s + (b.total_harga || 0), 0);
+      const count = (done || []).length;
+      const avg   = count ? total / count : 0;
+
+      document.getElementById("rTotal").textContent  = formatRupiah(total);
+      document.getElementById("rDone").textContent   = count;
+      document.getElementById("rAvg").textContent    = formatRupiah(avg);
+      document.getElementById("rActive").textContent = (active || []).length;
+    }
+
+    async function loadTopVehicles() {
+      const { data } = await supabase
+        .from("bookings")
+        .select("car_id, cars(nama)")
+        .in("status", ["Selesai","Aktif","Dikonfirmasi"]);
+
+      const counts = {};
+      (data || []).forEach(b => {
+        const key  = b.car_id;
+        const name = b.cars?.nama || "Tidak diketahui";
+        if (!counts[key]) counts[key] = { name, count: 0 };
+        counts[key].count++;
+      });
+
+      const sorted = Object.values(counts).sort((a, b) => b.count - a.count).slice(0, 6);
+      const max    = sorted[0]?.count || 1;
+
+      document.getElementById("topVehicles").innerHTML = sorted.length
+        ? sorted.map(v => `
+            <div style="margin-bottom:0.875rem;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;">
+                <span style="font-size:0.8125rem;font-weight:600;color:var(--color-text);">${v.name}</span>
+                <span style="font-size:0.75rem;color:var(--color-text-muted);">${v.count} sewa</span>
+              </div>
+              <div style="background:var(--color-bg);border-radius:6px;overflow:hidden;height:10px;">
+                <div style="height:100%;background:var(--color-primary-mid);border-radius:6px;width:${Math.round(v.count/max*100)}%;transition:width 0.6s ease;"></div>
+              </div>
+            </div>
+          `).join("")
+        : `<div style="text-align:center;padding:2rem;color:var(--color-text-muted);">Belum ada data</div>`;
+    }
+
+    async function loadStatusBreakdown() {
+      const { data } = await supabase.from("bookings").select("status");
+      const counts = {};
+      (data || []).forEach(b => { counts[b.status] = (counts[b.status] || 0) + 1; });
+      const total = Object.values(counts).reduce((s, c) => s + c, 0) || 1;
+
+      const colors = {
+        "Menunggu":     "#f59e0b",
+        "Dikonfirmasi": "#3b82f6",
+        "Aktif":        "#16a34a",
+        "Selesai":      "#6b7280",
+        "Dibatalkan":   "#ef4444",
+      };
+
+      document.getElementById("statusBreakdown").innerHTML = Object.entries(counts).length
+        ? Object.entries(counts).map(([s, c]) => `
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.875rem;">
+              <div style="width:12px;height:12px;border-radius:3px;background:${colors[s] || "#9ca3af"};flex-shrink:0;"></div>
+              <span style="flex:1;font-size:0.8125rem;font-weight:600;color:var(--color-text);">${s}</span>
+              <span style="font-size:0.8125rem;font-weight:700;color:var(--color-primary);">${c}</span>
+              <span style="font-size:0.75rem;color:var(--color-text-muted);width:40px;text-align:right;">${Math.round(c/total*100)}%</span>
+            </div>
+          `).join("")
+        : `<div style="text-align:center;padding:2rem;color:var(--color-text-muted);">Belum ada data</div>`;
+    }
+
+    async function loadCompleted() {
+      const { data } = await supabase
+        .from("bookings")
+        .select("*, profiles(full_name), cars(nama)")
+        .eq("status","Selesai")
+        .order("tanggal_selesai", { ascending: false })
+        .limit(10);
+
+      const tbody = document.getElementById("completedTable");
+      if (!data?.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--color-text-muted);">Belum ada transaksi selesai</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = data.map(b => `
+        <tr>
+          <td style="font-weight:600;font-family:monospace;font-size:0.8rem;">${b.kode_booking || ("BK"+b.id.slice(-6).toUpperCase())}</td>
+          <td style="font-size:0.8125rem;">${b.profiles?.full_name || b.nama_pemesan || "—"}</td>
+          <td style="font-size:0.8125rem;">${b.cars?.nama || "—"}</td>
+          <td style="font-size:0.8125rem;text-align:center;">${b.durasi_hari || "—"} hari</td>
+          <td style="font-weight:700;color:var(--color-accent);">${formatRupiah(b.total_harga||0)}</td>
+          <td style="font-size:0.8rem;color:var(--color-text-muted);">${formatTanggalShort(b.tanggal_selesai)}</td>
+        </tr>
+      `).join("");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Profil Saya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <style>
+    body.ec-loading { visibility: hidden; }
+  </style>
+</head>
+<body class="ec-loading">
+
+  <div class="page-wrapper">
+    <header class="page-topbar">
+      <div style="padding-left:3rem;">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Profil Saya</h2>
+        <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">Kelola informasi akun Anda</p>
+      </div>
+    </header>
+
+    <main class="page-content fade-in" style="max-width:720px;">
+
+      <!-- Profile card -->
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:1.5rem;">
+        <div style="background:linear-gradient(135deg,var(--color-primary) 0%,var(--color-primary-light) 100%);padding:2rem;display:flex;align-items:center;gap:1.25rem;">
+          <div id="profileAvatar" style="width:64px;height:64px;background:linear-gradient(135deg,#e85d04,#ff7733);border-radius:16px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1.5rem;flex-shrink:0;box-shadow:0 6px 20px rgba(0,0,0,0.2);">U</div>
+          <div>
+            <h2 id="profileName" style="color:#fff;font-size:1.25rem;font-weight:800;margin:0 0 0.2rem;">—</h2>
+            <p id="profileEmail" style="color:rgba(255,255,255,0.6);font-size:0.8125rem;margin:0;">—</p>
+            <span style="display:inline-flex;align-items:center;gap:0.35rem;background:rgba(255,255,255,0.12);border-radius:999px;padding:0.2rem 0.75rem;font-size:0.7rem;font-weight:700;color:rgba(255,255,255,0.85);margin-top:0.5rem;">
+              <i class='bx bxs-user-check' style="font-size:0.875rem;"></i> Pelanggan
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit form -->
+      <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
+        <h3 style="font-size:0.9375rem;font-weight:700;color:var(--color-primary);margin:0 0 1.25rem;">Edit Informasi</h3>
+        <div id="profileMsg" style="display:none;border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:0.875rem;font-weight:500;margin-bottom:1rem;"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div style="grid-column:1/-1;">
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Nama Lengkap</label>
+            <input type="text" id="editName" class="ec-input" />
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Email</label>
+            <input type="email" id="editEmail" class="ec-input" disabled style="opacity:0.6;cursor:not-allowed;" />
+            <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0.25rem 0 0;">Email tidak dapat diubah</p>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">No. HP</label>
+            <input type="tel" id="editPhone" class="ec-input" placeholder="08xx..." />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">No. KTP</label>
+            <input type="text" id="editKtp" class="ec-input" placeholder="16 digit" />
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Alamat</label>
+            <textarea id="editAlamat" class="ec-input" rows="2" placeholder="Alamat lengkap Anda"></textarea>
+          </div>
+        </div>
+
+        <button id="saveBtn" onclick="saveProfile()" class="btn btn-primary" style="margin-top:1.25rem;">
+          <i class='bx bx-save'></i> Simpan Perubahan
+        </button>
+      </div>
+
+      <!-- Change password -->
+      <div class="card" style="padding:1.5rem;">
+        <h3 style="font-size:0.9375rem;font-weight:700;color:var(--color-primary);margin:0 0 1.25rem;">Ubah Password</h3>
+        <div id="pwMsg" style="display:none;border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:0.875rem;font-weight:500;margin-bottom:1rem;"></div>
+
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Password Baru</label>
+            <input type="password" id="newPw" class="ec-input" placeholder="Minimal 6 karakter" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Konfirmasi Password</label>
+            <input type="password" id="confirmPw" class="ec-input" placeholder="Ulangi password baru" />
+          </div>
+        </div>
+
+        <button id="pwBtn" onclick="changePassword()" class="btn btn-ghost" style="margin-top:1.25rem;">
+          <i class='bx bx-lock-alt'></i> Ubah Password
+        </button>
+      </div>
+
+    </main>
+    <footer style="text-align:center;color:var(--color-text-subtle);font-size:0.75rem;padding:1.25rem;">&copy; 2026 EasyCar</footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/components/user-sidebar.js"></script>
+  <script src="/utils/ui.js"></script>
+
+  <script>
+    let currentUser;
+
+    (async () => {
+      currentUser = await requireLogin();
+      if (!currentUser) return;
+
+      initUserSidebar("profile", currentUser);
+      fillProfile(currentUser);
+      document.body.classList.add("ec-ready");
+    })();
+
+    function fillProfile(user) {
+      const name  = user.full_name || "";
+      const email = user.email || "";
+      const init  = name ? name[0].toUpperCase() : "U";
+
+      document.getElementById("profileName").textContent  = name || "—";
+      document.getElementById("profileEmail").textContent = email;
+      document.getElementById("profileAvatar").textContent = init;
+
+      document.getElementById("editName").value   = name;
+      document.getElementById("editEmail").value  = email;
+      document.getElementById("editPhone").value  = user.phone || "";
+      document.getElementById("editKtp").value    = user.no_ktp || "";
+      document.getElementById("editAlamat").value = user.alamat || "";
+    }
+
+    async function saveProfile() {
+      const btn  = document.getElementById("saveBtn");
+      const msg  = document.getElementById("profileMsg");
+      const name = document.getElementById("editName").value.trim();
+
+      msg.style.display = "none";
+      if (!name) { showToast("Nama tidak boleh kosong.", "warning"); return; }
+
+      setButtonLoading(btn, true);
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: name,
+          phone:     document.getElementById("editPhone").value.trim(),
+          no_ktp:    document.getElementById("editKtp").value.trim(),
+          alamat:    document.getElementById("editAlamat").value.trim(),
+        })
+        .eq("id", currentUser.id);
+
+      setButtonLoading(btn, false);
+
+      if (error) {
+        showToast("Gagal menyimpan: " + error.message, "error");
+      } else {
+        showToast("Profil berhasil disimpan!", "success");
+        document.getElementById("profileName").textContent  = name;
+        document.getElementById("profileAvatar").textContent = name[0].toUpperCase();
+      }
+    }
+
+    async function changePassword() {
+      const btn  = document.getElementById("pwBtn");
+      const msg  = document.getElementById("pwMsg");
+      const pw   = document.getElementById("newPw").value;
+      const conf = document.getElementById("confirmPw").value;
+
+      msg.style.display = "none";
+
+      if (!pw || !conf) { showToast("Isi semua field password.", "warning"); return; }
+      if (pw.length < 6) { showToast("Password minimal 6 karakter.", "warning"); return; }
+      if (pw !== conf)   { showToast("Password tidak cocok.", "error"); return; }
+
+      setButtonLoading(btn, true);
+      const { error } = await supabase.auth.updateUser({ password: pw });
+      setButtonLoading(btn, false);
+
+      if (error) {
+        showToast("Gagal: " + error.message, "error");
+      } else {
+        showToast("Password berhasil diubah!", "success");
+        document.getElementById("newPw").value    = "";
+        document.getElementById("confirmPw").value = "";
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Pesanan Saya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <style>
+    body.ec-loading { visibility: hidden; }
+    .order-card { transition: box-shadow 0.2s; }
+    .order-card:hover { box-shadow: var(--shadow-md); }
+  </style>
+</head>
+<body class="ec-loading">
+
+  <div class="page-wrapper">
+    <header class="page-topbar">
+      <div style="padding-left:3rem;">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Pesanan Saya</h2>
+        <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">Riwayat dan status pesanan Anda</p>
+      </div>
+      <a href="/pages/user/booking.html" class="btn btn-accent btn-sm">
+        <i class='bx bx-plus'></i> Booking Baru
+      </a>
+    </header>
+
+    <main class="page-content fade-in">
+
+      <!-- Filter tabs -->
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem;">
+        <button class="filter-chip active" data-status="all"          onclick="setFilter(this,'all')">Semua</button>
+        <button class="filter-chip"        data-status="Menunggu"     onclick="setFilter(this,'Menunggu')">Menunggu</button>
+        <button class="filter-chip"        data-status="Dikonfirmasi" onclick="setFilter(this,'Dikonfirmasi')">Dikonfirmasi</button>
+        <button class="filter-chip"        data-status="Aktif"        onclick="setFilter(this,'Aktif')">Aktif</button>
+        <button class="filter-chip"        data-status="Selesai"      onclick="setFilter(this,'Selesai')">Selesai</button>
+        <button class="filter-chip"        data-status="Dibatalkan"   onclick="setFilter(this,'Dibatalkan')">Dibatalkan</button>
+      </div>
+
+      <!-- Orders list -->
+      <div id="ordersList">
+        <div style="text-align:center;padding:3rem;color:var(--color-text-muted);">
+          <i class='bx bx-loader-alt' style="font-size:2.5rem;animation:spin 1s linear infinite;display:block;"></i>
+          <p style="margin-top:0.5rem;">Memuat pesanan...</p>
+        </div>
+      </div>
+
+    </main>
+
+    <footer style="text-align:center;color:var(--color-text-subtle);font-size:0.75rem;padding:1.25rem;">&copy; 2026 EasyCar</footer>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detailOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:480px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);">
+        <h3 style="font-family:var(--font-body);font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Detail Pesanan</h3>
+        <button onclick="closeDetail()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--color-text-muted);">✕</button>
+      </div>
+      <div id="detailContent" style="padding:1.5rem;"></div>
+      <div style="padding:0 1.5rem 1.5rem;">
+        <button id="cancelBtn" onclick="cancelBooking()" class="btn btn-danger" style="width:100%;justify-content:center;display:none;">
+          <i class='bx bx-x-circle'></i> Batalkan Pesanan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/components/user-sidebar.js"></script>
+  <script src="/utils/ui.js"></script>
+
+  <script>
+    let allOrders   = [];
+    let activeFilter = "all";
+    let openBookingId = null;
+
+    // Filter chip style
+    document.head.insertAdjacentHTML("beforeend", `
+      <style>
+        .filter-chip { padding:0.4rem 1rem;border-radius:999px;border:1.5px solid var(--color-border);background:var(--color-surface);font-size:0.8125rem;font-weight:600;color:var(--color-text-muted);cursor:pointer;transition:all 0.15s;font-family:var(--font-body); }
+        .filter-chip:hover { border-color:var(--color-primary-mid);color:var(--color-primary-mid); }
+        .filter-chip.active { background:var(--color-primary-mid);border-color:var(--color-primary-mid);color:#fff; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+      </style>
+    `);
+
+    (async () => {
+      const user = await requireLogin();
+      if (!user) return;
+
+      initUserSidebar("my-orders", user);
+      await loadOrders(user.id);
+      document.body.classList.add("ec-ready");
+    })();
+
+    async function loadOrders(userId) {
+      const { data } = await supabase
+        .from("bookings")
+        .select("*, cars(nama, foto_url, tipe, transmisi)")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      allOrders = data || [];
+      renderOrders();
+    }
+
+    function setFilter(btn, status) {
+      document.querySelectorAll(".filter-chip").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeFilter = status;
+      renderOrders();
+    }
+
+    function renderOrders() {
+      const list = document.getElementById("ordersList");
+      const filtered = activeFilter === "all"
+        ? allOrders
+        : allOrders.filter(o => o.status === activeFilter);
+
+      if (!filtered.length) {
+        list.innerHTML = `
+          <div style="text-align:center;padding:4rem 1rem;">
+            <i class='bx bxs-receipt' style="font-size:3rem;color:var(--color-text-subtle);"></i>
+            <p style="color:var(--color-text-muted);margin-top:0.75rem;font-weight:500;">Belum ada pesanan ${activeFilter === "all" ? "" : "dengan status " + activeFilter}</p>
+            <a href="/pages/user/booking.html" class="btn btn-accent" style="display:inline-flex;margin-top:1rem;">
+              <i class='bx bx-plus'></i> Buat Pesanan
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;">` +
+        filtered.map(o => orderCardHTML(o)).join("") +
+        `</div>`;
+    }
+
+    function orderCardHTML(o) {
+      const car   = o.cars || {};
+      const img   = car.foto_url
+        ? `<img src="${car.foto_url}" style="width:80px;height:60px;object-fit:cover;border-radius:var(--radius-md);flex-shrink:0;" />`
+        : `<div style="width:80px;height:60px;background:var(--color-bg);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class='bx bxs-car' style="font-size:1.5rem;color:var(--color-text-subtle);"></i></div>`;
+      const kode  = o.kode_booking || ("BK" + o.id.slice(-6).toUpperCase());
+      const canCancel = ["Menunggu"].includes(o.status);
+
+      return `
+        <div class="card order-card" style="padding:1.25rem;cursor:pointer;" onclick="openDetail('${o.id}')">
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+            ${img}
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
+                <div>
+                  <p style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0 0 0.2rem;">${car.nama || "Kendaraan"}</p>
+                  <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;font-family:monospace;font-weight:600;">${kode}</p>
+                </div>
+                <span class="badge ${statusBadgeClass(o.status)}">${o.status}</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:1rem;margin-top:0.75rem;">
+                <div>
+                  <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0 0 0.1rem;">Tanggal</p>
+                  <p style="font-size:0.8125rem;font-weight:600;color:var(--color-text);margin:0;">${formatTanggalShort(o.tanggal_mulai)} — ${formatTanggalShort(o.tanggal_selesai)}</p>
+                </div>
+                <div>
+                  <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0 0 0.1rem;">Durasi</p>
+                  <p style="font-size:0.8125rem;font-weight:600;color:var(--color-text);margin:0;">${o.durasi_hari || "—"} hari</p>
+                </div>
+                <div>
+                  <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0 0 0.1rem;">Total</p>
+                  <p style="font-size:0.8125rem;font-weight:700;color:var(--color-accent);margin:0;">${formatRupiah(o.total_harga || 0)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openDetail(id) {
+      const o = allOrders.find(x => x.id === id);
+      if (!o) return;
+      openBookingId = id;
+      const car   = o.cars || {};
+      const kode  = o.kode_booking || ("BK" + o.id.slice(-6).toUpperCase());
+      const canCancel = ["Menunggu"].includes(o.status);
+
+      document.getElementById("detailContent").innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:0.875rem;">
+          <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:1rem;display:flex;align-items:center;gap:0.875rem;margin-bottom:0.5rem;">
+            ${car.foto_url ? `<img src="${car.foto_url}" style="width:72px;height:52px;object-fit:cover;border-radius:var(--radius-md);flex-shrink:0;" />` : ""}
+            <div>
+              <p style="font-weight:700;color:var(--color-primary);margin:0 0 0.15rem;">${car.nama || "—"}</p>
+              <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">${car.tipe || ""} ${car.transmisi ? "· " + car.transmisi : ""}</p>
+            </div>
+          </div>
+          ${row("Kode Booking", `<code style="font-family:monospace;font-weight:700;">${kode}</code>`)}
+          ${row("Status", `<span class="badge ${statusBadgeClass(o.status)}">${o.status}</span>`)}
+          ${row("Tanggal Mulai", formatTanggal(o.tanggal_mulai))}
+          ${row("Tanggal Selesai", formatTanggal(o.tanggal_selesai))}
+          ${row("Durasi", (o.durasi_hari || "—") + " hari")}
+          ${row("Nama Pemesan", o.nama_pemesan || "—")}
+          ${row("No. HP", o.no_hp || "—")}
+          ${o.catatan ? row("Catatan", o.catatan) : ""}
+          <div style="border-top:2px solid var(--color-border);padding-top:0.875rem;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-weight:700;color:var(--color-primary);">Total Harga</span>
+            <span style="font-size:1.25rem;font-weight:800;color:var(--color-accent);">${formatRupiah(o.total_harga || 0)}</span>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("cancelBtn").style.display = canCancel ? "flex" : "none";
+      document.getElementById("detailOverlay").style.display = "flex";
+    }
+
+    function row(label, val) {
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;">
+          <span style="font-size:0.8125rem;color:var(--color-text-muted);">${label}</span>
+          <span style="font-size:0.8125rem;font-weight:600;color:var(--color-text);text-align:right;">${val}</span>
+        </div>
+      `;
+    }
+
+    function closeDetail() {
+      document.getElementById("detailOverlay").style.display = "none";
+      openBookingId = null;
+    }
+
+    document.getElementById("detailOverlay").addEventListener("click", e => {
+      if (e.target === e.currentTarget) closeDetail();
+    });
+
+    async function cancelBooking() {
+      if (!openBookingId) return;
+      const confirmed = await showModal({
+        title: "Batalkan Pesanan?",
+        message: "Apakah Anda yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.",
+        confirmText: "Ya, Batalkan",
+        cancelText: "Tidak",
+        type: "danger"
+      });
+      if (!confirmed) return;
+
+      showLoading("Membatalkan pesanan...");
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status: "Dibatalkan" })
+        .eq("id", openBookingId);
+      hideLoading();
+
+      if (error) {
+        showToast("Gagal membatalkan: " + error.message, "error"); return;
+      }
+
+      showToast("Pesanan berhasil dibatalkan.", "success");
+      closeDetail();
+
+      // Refresh
+      const user = await getCurrentUser();
+      if (user) await loadOrders(user.id);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Manajemen Pemesanan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <style>
+    body.ec-loading { visibility: hidden; }
+    .filter-chip { padding:0.375rem 0.875rem;border-radius:999px;border:1.5px solid var(--color-border);background:var(--color-surface);font-size:0.8rem;font-weight:600;color:var(--color-text-muted);cursor:pointer;transition:all 0.15s;font-family:var(--font-body); }
+    .filter-chip:hover  { border-color:var(--color-primary-mid);color:var(--color-primary-mid); }
+    .filter-chip.active { background:var(--color-primary-mid);border-color:var(--color-primary-mid);color:#fff; }
+  </style>
+</head>
+<body class="ec-loading">
+
+  <div class="page-wrapper">
+    <header class="page-topbar">
+      <div style="padding-left:3rem;">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Manajemen Pemesanan</h2>
+        <p id="subCount" style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">—</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <input type="text" id="searchInput" oninput="filterBookings()" placeholder="Cari nama / kode..." class="ec-input" style="width:200px;" />
+      </div>
+    </header>
+
+    <main class="page-content fade-in">
+
+      <!-- Filter tabs -->
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem;">
+        <button class="filter-chip active" data-s="all"          onclick="setFilter(this,'all')">Semua</button>
+        <button class="filter-chip"        data-s="Menunggu"     onclick="setFilter(this,'Menunggu')">Menunggu</button>
+        <button class="filter-chip"        data-s="Dikonfirmasi" onclick="setFilter(this,'Dikonfirmasi')">Dikonfirmasi</button>
+        <button class="filter-chip"        data-s="Aktif"        onclick="setFilter(this,'Aktif')">Aktif</button>
+        <button class="filter-chip"        data-s="Selesai"      onclick="setFilter(this,'Selesai')">Selesai</button>
+        <button class="filter-chip"        data-s="Dibatalkan"   onclick="setFilter(this,'Dibatalkan')">Dibatalkan</button>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Kode</th>
+                <th>Pemesan</th>
+                <th>Kendaraan</th>
+                <th>Tanggal</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="bookingTable">
+              <tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--color-text-muted);">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Edit Status Modal -->
+  <div id="editOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:480px;overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);">
+        <h3 style="font-family:var(--font-body);font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Detail & Update Status</h3>
+        <button onclick="closeEdit()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--color-text-muted);">✕</button>
+      </div>
+      <div id="editContent" style="padding:1.5rem;"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/components/admin-sidebar.js"></script>
+  <script src="/utils/ui.js"></script>
+
+  <script>
+    let allBookings   = [];
+    let activeFilter  = "all";
+    let searchTerm    = "";
+
+    (async () => {
+      const user = await requireAdmin();
+      if (!user) return;
+      initAdminSidebar("bookings", user);
+      await loadBookings();
+      document.body.classList.add("ec-ready");
+    })();
+
+    async function loadBookings() {
+      const { data } = await supabase
+        .from("bookings")
+        .select("*, profiles(full_name, email), cars(nama)")
+        .order("created_at", { ascending: false });
+      allBookings = data || [];
+      renderTable();
+    }
+
+    function setFilter(btn, s) {
+      document.querySelectorAll(".filter-chip").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeFilter = s;
+      renderTable();
+    }
+
+    function filterBookings() {
+      searchTerm = document.getElementById("searchInput").value.toLowerCase().trim();
+      renderTable();
+    }
+
+    function renderTable() {
+      const filtered = allBookings.filter(b => {
+        const matchStatus = activeFilter === "all" || b.status === activeFilter;
+        const matchSearch = !searchTerm ||
+          (b.kode_booking || "").toLowerCase().includes(searchTerm) ||
+          (b.nama_pemesan || "").toLowerCase().includes(searchTerm) ||
+          (b.profiles?.full_name || "").toLowerCase().includes(searchTerm);
+        return matchStatus && matchSearch;
+      });
+
+      document.getElementById("subCount").textContent = filtered.length + " pesanan";
+
+      const tbody = document.getElementById("bookingTable");
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--color-text-muted);">Tidak ada data</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(b => {
+        const kode = b.kode_booking || ("BK" + b.id.slice(-6).toUpperCase());
+        const nama = b.profiles?.full_name || b.nama_pemesan || "—";
+        return `
+          <tr>
+            <td style="font-weight:600;font-size:0.8rem;font-family:monospace;color:var(--color-primary);">${kode}</td>
+            <td style="font-size:0.8125rem;">${nama}</td>
+            <td style="font-size:0.8125rem;">${b.cars?.nama || "—"}</td>
+            <td style="font-size:0.8rem;color:var(--color-text-muted);">${formatTanggalShort(b.tanggal_mulai)} — ${formatTanggalShort(b.tanggal_selesai)}</td>
+            <td style="font-weight:600;font-size:0.8125rem;">${formatRupiah(b.total_harga || 0)}</td>
+            <td><span class="badge ${statusBadgeClass(b.status)}">${b.status}</span></td>
+            <td>
+              <button onclick="openEdit('${b.id}')" class="btn btn-ghost btn-sm">
+                <i class='bx bx-edit'></i> Edit
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function openEdit(id) {
+      const b    = allBookings.find(x => x.id === id);
+      if (!b) return;
+      const kode = b.kode_booking || ("BK" + b.id.slice(-6).toUpperCase());
+      const nama = b.profiles?.full_name || b.nama_pemesan || "—";
+
+      const statuses = ["Menunggu","Dikonfirmasi","Aktif","Selesai","Dibatalkan"];
+      const opts = statuses.map(s =>
+        `<option value="${s}" ${b.status === s ? "selected" : ""}>${s}</option>`
+      ).join("");
+
+      document.getElementById("editContent").innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.25rem;">
+          ${detailRow("Kode", `<code>${kode}</code>`)}
+          ${detailRow("Pemesan", nama)}
+          ${detailRow("Kendaraan", b.cars?.nama || "—")}
+          ${detailRow("Tanggal", `${formatTanggalShort(b.tanggal_mulai)} — ${formatTanggalShort(b.tanggal_selesai)}`)}
+          ${detailRow("Durasi", (b.durasi_hari || "—") + " hari")}
+          ${detailRow("Total", `<strong style="color:var(--color-accent);">${formatRupiah(b.total_harga||0)}</strong>`)}
+        </div>
+        <div>
+          <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Update Status</label>
+          <select id="newStatus" class="ec-input" style="margin-bottom:1rem;">${opts}</select>
+          <button onclick="updateStatus('${id}')" class="btn btn-primary" style="width:100%;justify-content:center;">
+            <i class='bx bx-save'></i> Simpan Status
+          </button>
+        </div>
+      `;
+      document.getElementById("editOverlay").style.display = "flex";
+    }
+
+    function detailRow(label, val) {
+      return `<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid var(--color-border);">
+        <span style="font-size:0.8125rem;color:var(--color-text-muted);">${label}</span>
+        <span style="font-size:0.8125rem;font-weight:600;color:var(--color-text);">${val}</span>
+      </div>`;
+    }
+
+    function closeEdit() {
+      document.getElementById("editOverlay").style.display = "none";
+    }
+    document.getElementById("editOverlay").addEventListener("click", e => {
+      if (e.target === e.currentTarget) closeEdit();
+    });
+
+    async function updateStatus(id) {
+      const newStatus = document.getElementById("newStatus").value;
+      showLoading("Menyimpan...");
+      const { error } = await supabase.from("bookings").update({ status: newStatus }).eq("id", id);
+      hideLoading();
+      if (error) { showToast("Gagal: " + error.message, "error"); return; }
+      showToast("Status diperbarui!", "success");
+      closeEdit();
+      await loadBookings();
+    }
+  </script>
+</body>
+</html>

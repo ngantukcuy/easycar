@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Rental Kendaraan Terpercaya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <style>
+    .hero-section {
+      background: linear-gradient(135deg, #0f2347 0%, #1a3c6e 60%, #2a5298 100%);
+      min-height: 520px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    .hero-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      pointer-events: none;
+    }
+    .hero-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+    }
+    .hero-title span { color: #fb923c; }
+    .car-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--color-border);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .car-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+    .filter-chip {
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      border: 1.5px solid var(--color-border);
+      background: var(--color-surface);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font-body);
+    }
+    .filter-chip:hover  { border-color: var(--color-primary-mid); color: var(--color-primary-mid); }
+    .filter-chip.active { background: var(--color-primary-mid); border-color: var(--color-primary-mid); color: #fff; }
+    .stat-strip { background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+    .stat-item  { text-align: center; padding: 2rem 1rem; }
+    .stat-num   { font-size: 2rem; font-weight: 800; color: var(--color-primary); }
+    .stat-label { font-size: 0.8125rem; color: var(--color-text-muted); margin-top: 0.2rem; }
+    .step-icon {
+      width: 56px; height: 56px;
+      background: var(--color-bg);
+      border: 2px solid var(--color-border);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero-section">
+    <div class="hero-blob" style="width:600px;height:600px;background:rgba(255,255,255,0.04);top:-200px;right:-100px;"></div>
+    <div class="hero-blob" style="width:300px;height:300px;background:rgba(232,93,4,0.12);bottom:-100px;left:40%;"></div>
+    <div class="hero-blob" style="width:200px;height:200px;background:rgba(79,70,229,0.1);top:80px;left:60%;"></div>
+
+    <div style="max-width:1200px;margin:0 auto;padding:4rem 2rem;width:100%;position:relative;z-index:1;">
+      <div style="max-width:600px;">
+        <div style="display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:999px;padding:0.35rem 0.875rem;margin-bottom:1.5rem;">
+          <span style="width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block;"></span>
+          <span style="color:rgba(255,255,255,0.75);font-size:0.75rem;font-weight:600;">Armada Siap Tersedia</span>
+        </div>
+        <h1 class="hero-title">Rental Kendaraan<br>Mudah &amp; <span>Terpercaya</span></h1>
+        <p style="color:rgba(255,255,255,0.65);margin-top:1rem;font-size:1rem;line-height:1.7;max-width:480px;">
+          Pilih kendaraan terbaik untuk perjalanan Anda. Proses booking cepat, harga transparan, dan armada terawat.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:2rem;">
+          <a href="#armada" class="btn btn-accent btn-lg">
+            <i class='bx bxs-car'></i> Lihat Armada
+          </a>
+          <a href="#cara-pesan" class="btn btn-lg" style="background:rgba(255,255,255,0.1);color:#fff;border:1.5px solid rgba(255,255,255,0.2);">
+            <i class='bx bx-info-circle'></i> Cara Booking
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ STAT STRIP ═══ -->
+  <div class="stat-strip">
+    <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
+      <div class="stat-item" style="border-right:1px solid var(--color-border);">
+        <div class="stat-num" id="statUnits">—</div>
+        <div class="stat-label">Unit Armada</div>
+      </div>
+      <div class="stat-item" style="border-right:1px solid var(--color-border);">
+        <div class="stat-num" id="statOrders">—</div>
+        <div class="stat-label">Total Pemesanan</div>
+      </div>
+      <div class="stat-item" style="border-right:1px solid var(--color-border);">
+        <div class="stat-num">24/7</div>
+        <div class="stat-label">Layanan Support</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">&#11088; 4.9</div>
+        <div class="stat-label">Rating Pelanggan</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ARMADA ═══ -->
+  <section id="armada" style="max-width:1200px;margin:0 auto;padding:4rem 2rem;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
+      <div>
+        <h2 style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin:0;">Armada Kendaraan</h2>
+        <p style="color:var(--color-text-muted);margin-top:0.25rem;font-size:0.9rem;">Pilih sesuai kebutuhan perjalanan Anda</p>
+      </div>
+      <div style="position:relative;">
+        <i class='bx bx-search' style="position:absolute;left:0.875rem;top:50%;transform:translateY(-50%);color:var(--color-text-subtle);font-size:1rem;"></i>
+        <input type="text" id="searchInput" placeholder="Cari kendaraan..." oninput="filterCars()"
+          class="ec-input" style="padding-left:2.5rem;width:220px;" />
+      </div>
+    </div>
+
+    <!-- Filter chips -->
+    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.75rem;">
+      <button class="filter-chip active" onclick="setFilter(this,'all')">Semua</button>
+      <button class="filter-chip" onclick="setFilter(this,'MPV')">MPV</button>
+      <button class="filter-chip" onclick="setFilter(this,'SUV')">SUV</button>
+      <button class="filter-chip" onclick="setFilter(this,'Sedan')">Sedan</button>
+      <button class="filter-chip" onclick="setFilter(this,'Pickup')">Pickup</button>
+      <button class="filter-chip" onclick="setFilter(this,'Matic')">Matic</button>
+      <button class="filter-chip" onclick="setFilter(this,'Manual')">Manual</button>
+    </div>
+
+    <!-- Car Grid -->
+    <div id="carGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;">
+      <!-- Skeleton placeholders -->
+      <div class="car-card"><div class="skeleton" style="height:180px;"></div><div style="padding:1rem;"><div class="skeleton" style="height:18px;width:60%;margin-bottom:0.75rem;"></div><div class="skeleton" style="height:14px;width:40%;margin-bottom:1rem;"></div><div class="skeleton" style="height:36px;border-radius:10px;"></div></div></div>
+      <div class="car-card"><div class="skeleton" style="height:180px;"></div><div style="padding:1rem;"><div class="skeleton" style="height:18px;width:60%;margin-bottom:0.75rem;"></div><div class="skeleton" style="height:14px;width:40%;margin-bottom:1rem;"></div><div class="skeleton" style="height:36px;border-radius:10px;"></div></div></div>
+      <div class="car-card"><div class="skeleton" style="height:180px;"></div><div style="padding:1rem;"><div class="skeleton" style="height:18px;width:60%;margin-bottom:0.75rem;"></div><div class="skeleton" style="height:14px;width:40%;margin-bottom:1rem;"></div><div class="skeleton" style="height:36px;border-radius:10px;"></div></div></div>
+      <div class="car-card"><div class="skeleton" style="height:180px;"></div><div style="padding:1rem;"><div class="skeleton" style="height:18px;width:60%;margin-bottom:0.75rem;"></div><div class="skeleton" style="height:14px;width:40%;margin-bottom:1rem;"></div><div class="skeleton" style="height:36px;border-radius:10px;"></div></div></div>
+      <div class="car-card"><div class="skeleton" style="height:180px;"></div><div style="padding:1rem;"><div class="skeleton" style="height:18px;width:60%;margin-bottom:0.75rem;"></div><div class="skeleton" style="height:14px;width:40%;margin-bottom:1rem;"></div><div class="skeleton" style="height:36px;border-radius:10px;"></div></div></div>
+      <div class="car-card"><div class="skeleton" style="height:180px;"></div><div style="padding:1rem;"><div class="skeleton" style="height:18px;width:60%;margin-bottom:0.75rem;"></div><div class="skeleton" style="height:14px;width:40%;margin-bottom:1rem;"></div><div class="skeleton" style="height:36px;border-radius:10px;"></div></div></div>
+    </div>
+
+    <div id="carEmpty" style="display:none;text-align:center;padding:4rem 1rem;color:var(--color-text-muted);">
+      <i class='bx bx-car' style="font-size:3rem;opacity:0.3;display:block;"></i>
+      <p style="margin-top:0.75rem;">Tidak ada kendaraan yang sesuai filter</p>
+    </div>
+  </section>
+
+  <!-- ═══ CARA PESAN ═══ -->
+  <section id="cara-pesan" style="background:var(--color-surface);border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border);padding:4rem 2rem;">
+    <div style="max-width:900px;margin:0 auto;text-align:center;">
+      <h2 style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin-bottom:0.5rem;">Cara Booking</h2>
+      <p style="color:var(--color-text-muted);margin-bottom:3rem;">Hanya 4 langkah mudah untuk memesan kendaraan</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:2rem;">
+
+        <div style="text-align:center;">
+          <div class="step-icon"><i class='bx bx-search' style="font-size:1.5rem;color:var(--color-primary-mid);"></i></div>
+          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;">Pilih Kendaraan</div>
+          <div style="font-size:0.8125rem;color:var(--color-text-muted);line-height:1.6;">Pilih armada yang cocok dengan kebutuhan Anda</div>
+        </div>
+
+        <div style="text-align:center;">
+          <div class="step-icon"><i class='bx bx-user' style="font-size:1.5rem;color:var(--color-primary-mid);"></i></div>
+          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;">Daftar / Masuk</div>
+          <div style="font-size:0.8125rem;color:var(--color-text-muted);line-height:1.6;">Buat akun gratis atau masuk jika sudah punya</div>
+        </div>
+
+        <div style="text-align:center;">
+          <div class="step-icon"><i class='bx bx-calendar' style="font-size:1.5rem;color:var(--color-primary-mid);"></i></div>
+          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;">Pilih Tanggal</div>
+          <div style="font-size:0.8125rem;color:var(--color-text-muted);line-height:1.6;">Tentukan periode sewa yang Anda inginkan</div>
+        </div>
+
+        <div style="text-align:center;">
+          <div class="step-icon"><i class='bx bx-check-circle' style="font-size:1.5rem;color:var(--color-primary-mid);"></i></div>
+          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;">Konfirmasi</div>
+          <div style="font-size:0.8125rem;color:var(--color-text-muted);line-height:1.6;">Booking dikonfirmasi dan kendaraan siap</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA ═══ -->
+  <section style="max-width:1200px;margin:0 auto;padding:4rem 2rem;">
+    <div style="background:linear-gradient(135deg,#0f2347,#1a3c6e);border-radius:24px;padding:3rem 2rem;position:relative;overflow:hidden;text-align:center;">
+      <div style="position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:rgba(255,255,255,0.04);border-radius:50%;"></div>
+      <div style="position:absolute;bottom:-40px;left:5%;width:150px;height:150px;background:rgba(232,93,4,0.1);border-radius:50%;"></div>
+      <div style="position:relative;z-index:1;">
+        <h2 style="color:#fff;font-size:1.75rem;font-weight:800;margin-bottom:0.75rem;">Siap Mulai Perjalanan?</h2>
+        <p style="color:rgba(255,255,255,0.6);margin-bottom:2rem;">Daftar sekarang dan nikmati kemudahan rental kendaraan</p>
+        <a href="/auth.html?tab=register" class="btn btn-accent btn-lg" style="display:inline-flex;">
+          <i class='bx bx-user-plus'></i> Daftar Gratis
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="background:var(--color-primary);color:rgba(255,255,255,0.45);text-align:center;padding:1.5rem;font-size:0.8125rem;">
+    &copy; 2026 EasyCar &mdash; Rental Kendaraan Terpercaya
+  </footer>
+
+  <!-- Scripts — TANPA tailwind CDN (sudah pakai theme.css) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/components/public-navbar.js"></script>
+
+  <script>
+    let allCars      = [];
+    let activeFilter = "all";
+    let searchTerm   = "";
+
+    (async () => {
+      await initPublicNavbar();
+      await loadStats();
+      await loadCars();
+    })();
+
+    async function loadStats() {
+      const [res1, res2] = await Promise.all([
+        supabase.from("cars").select("id", { count: "exact", head: true }).eq("status", "Tersedia"),
+        supabase.from("bookings").select("id", { count: "exact", head: true }),
+      ]);
+      const su = document.getElementById("statUnits");
+      const so = document.getElementById("statOrders");
+      if (su) su.textContent = res1.count ?? "—";
+      if (so) so.textContent = res2.count ?? "—";
+    }
+
+    async function loadCars() {
+      const { data, error } = await supabase
+        .from("cars")
+        .select("*")
+        .eq("status", "Tersedia")
+        .order("created_at", { ascending: false });
+
+      if (error || !data) {
+        document.getElementById("carGrid").innerHTML =
+          '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--color-text-muted);">' +
+          '<i class="bx bxs-error-circle" style="font-size:2.5rem;display:block;margin-bottom:0.5rem;"></i>' +
+          'Gagal memuat kendaraan. Coba muat ulang halaman.</div>';
+        return;
+      }
+
+      allCars = data;
+      renderCars();
+    }
+
+    function renderCars() {
+      var grid  = document.getElementById("carGrid");
+      var empty = document.getElementById("carEmpty");
+
+      var filtered = allCars.filter(function(c) {
+        var matchFilter = activeFilter === "all" ||
+          c.tipe === activeFilter ||
+          c.transmisi === activeFilter;
+        var matchSearch = !searchTerm ||
+          c.nama.toLowerCase().indexOf(searchTerm) !== -1 ||
+          (c.tipe || "").toLowerCase().indexOf(searchTerm) !== -1;
+        return matchFilter && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = "";
+        empty.style.display = "block";
+        return;
+      }
+
+      empty.style.display = "none";
+      grid.innerHTML = filtered.map(function(car) {
+        return carCardHTML(car);
+      }).join("");
+    }
+
+    function carCardHTML(car) {
+      var price = formatRupiah(car.harga_per_hari || 0);
+
+      var imgHTML;
+      if (car.foto_url) {
+        imgHTML = '<img src="' + car.foto_url + '" alt="' + car.nama +
+          '" style="width:100%;height:180px;object-fit:cover;" loading="lazy"' +
+          ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" />' +
+          '<div style="display:none;height:180px;background:var(--color-bg);align-items:center;justify-content:center;">' +
+          '<i class=\'bx bxs-car\' style="font-size:3rem;color:#b0bdce;"></i></div>';
+      } else {
+        imgHTML = '<div style="height:180px;background:linear-gradient(135deg,#e8edf5,#d0dae8);' +
+          'display:flex;align-items:center;justify-content:center;">' +
+          '<i class=\'bx bxs-car\' style="font-size:3rem;color:#b0bdce;"></i></div>';
+      }
+
+      var chips = "";
+      if (car.tipe)      chips += '<span style="font-size:0.7rem;background:#f0f4f8;color:#64748b;padding:0.2rem 0.55rem;border-radius:6px;font-weight:600;">' + car.tipe + '</span>';
+      if (car.transmisi) chips += '<span style="font-size:0.7rem;background:#f0f4f8;color:#64748b;padding:0.2rem 0.55rem;border-radius:6px;font-weight:600;">' + car.transmisi + '</span>';
+      if (car.kapasitas) chips += '<span style="font-size:0.7rem;background:#f0f4f8;color:#64748b;padding:0.2rem 0.55rem;border-radius:6px;font-weight:600;"><i class=\'bx bxs-user\' style="vertical-align:middle;"></i> ' + car.kapasitas + '</span>';
+
+      return '<div class="car-card">' +
+        '<div style="position:relative;">' + imgHTML +
+        '<span class="badge badge-success" style="position:absolute;top:10px;left:10px;">Tersedia</span>' +
+        '</div>' +
+        '<div style="padding:1.25rem;flex:1;display:flex;flex-direction:column;">' +
+        '<div style="flex:1;">' +
+        '<h3 style="font-weight:700;color:var(--color-primary);font-size:0.95rem;margin:0 0 0.35rem;">' + car.nama + '</h3>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.875rem;">' + chips + '</div>' +
+        '<p style="font-size:1rem;font-weight:700;color:var(--color-accent);margin:0;">' + price +
+        '<span style="font-size:0.75rem;font-weight:500;color:var(--color-text-muted);">/hari</span></p>' +
+        '</div>' +
+        '<button onclick="handleBookClick(\'' + car.id + '\',\'' + car.nama.replace(/'/g, "\\'") + '\')"' +
+        ' class="btn btn-primary" style="width:100%;margin-top:1rem;justify-content:center;">' +
+        '<i class=\'bx bx-calendar-plus\'></i> Pesan Sekarang</button>' +
+        '</div></div>';
+    }
+
+    function setFilter(btn, filter) {
+      document.querySelectorAll(".filter-chip").forEach(function(b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      activeFilter = filter;
+      renderCars();
+    }
+
+    function filterCars() {
+      searchTerm = document.getElementById("searchInput").value.toLowerCase().trim();
+      renderCars();
+    }
+
+    async function handleBookClick(carId, carName) {
+      var session = (await supabase.auth.getSession()).data.session;
+      if (!session) {
+        var returnUrl = encodeURIComponent("/pages/user/booking.html?car_id=" + carId);
+        window.location.href = "/auth.html?tab=login&redirect=" + returnUrl;
+        return;
+      }
+      window.location.href = "/pages/user/booking.html?car_id=" + carId;
+    }
+  </script>
+</body>
+</html>

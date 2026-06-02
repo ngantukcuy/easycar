@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <style>
+    body.ec-loading { visibility: hidden; }
+    .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  </style>
+</head>
+<body class="ec-loading">
+
+  <div class="page-wrapper">
+    <header class="page-topbar">
+      <div style="padding-left:3rem;">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Admin Dashboard</h2>
+        <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;" id="topbarDate">—</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <button onclick="toggleNotif()" style="position:relative;width:38px;height:38px;background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+          <i class='bx bx-bell' style="font-size:1.125rem;color:var(--color-text-muted);"></i>
+          <span id="notifDot" style="display:none;position:absolute;top:8px;right:8px;width:7px;height:7px;background:var(--color-accent);border-radius:50%;"></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="page-content fade-in">
+
+      <!-- Welcome -->
+      <div style="background:linear-gradient(135deg,var(--color-primary) 0%,var(--color-primary-light) 100%);border-radius:var(--radius-xl);padding:1.75rem;margin-bottom:1.5rem;position:relative;overflow:hidden;">
+        <div style="position:absolute;right:-20px;top:-30px;width:160px;height:160px;background:rgba(255,255,255,0.05);border-radius:50%;"></div>
+        <div style="position:absolute;right:60px;bottom:-40px;width:100px;height:100px;background:rgba(232,93,4,0.12);border-radius:50%;"></div>
+        <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+          <div>
+            <p style="color:rgba(255,255,255,0.55);font-size:0.8125rem;margin:0 0 0.25rem;">Selamat datang,</p>
+            <h3 id="welcomeName" style="color:#fff;font-size:1.5rem;font-weight:800;margin:0 0 0.25rem;">Admin</h3>
+            <p style="color:rgba(255,255,255,0.45);font-size:0.8rem;margin:0;">Kelola armada, pemesanan, dan pengguna</p>
+          </div>
+          <a href="/pages/admin/bookings.html" class="btn btn-accent">
+            <i class='bx bx-plus'></i> Pemesanan Baru
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">
+        <div class="card stat-card" style="padding:1.25rem;">
+          <div style="width:40px;height:40px;background:#eff6ff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:0.875rem;">
+            <i class='bx bxs-car' style="color:#3b82f6;font-size:1.25rem;"></i>
+          </div>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Total Kendaraan</p>
+          <p id="sKendaraan" style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
+          <p style="font-size:0.7rem;color:var(--color-text-subtle);margin:0.15rem 0 0;">Unit aktif</p>
+        </div>
+        <div class="card stat-card" style="padding:1.25rem;">
+          <div style="width:40px;height:40px;background:#fef3c7;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:0.875rem;">
+            <i class='bx bxs-calendar-check' style="color:#f59e0b;font-size:1.25rem;"></i>
+          </div>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Total Pemesanan</p>
+          <p id="sPemesanan" style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
+          <p style="font-size:0.7rem;color:var(--color-text-subtle);margin:0.15rem 0 0;">Transaksi tercatat</p>
+        </div>
+        <div class="card stat-card" style="padding:1.25rem;">
+          <div style="width:40px;height:40px;background:#dcfce7;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:0.875rem;">
+            <i class='bx bxs-user-check' style="color:#16a34a;font-size:1.25rem;"></i>
+          </div>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Pelanggan Aktif</p>
+          <p id="sPelanggan" style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
+          <p style="font-size:0.7rem;color:var(--color-text-subtle);margin:0.15rem 0 0;">Pengguna terdaftar</p>
+        </div>
+        <div class="card stat-card" style="padding:1.25rem;">
+          <div style="width:40px;height:40px;background:#f5f3ff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:0.875rem;">
+            <i class='bx bxs-wallet' style="color:#7c3aed;font-size:1.25rem;"></i>
+          </div>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Total Pendapatan</p>
+          <p id="sPendapatan" style="font-size:1rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
+          <p style="font-size:0.7rem;color:var(--color-text-subtle);margin:0.15rem 0 0;">Dari transaksi lunas</p>
+        </div>
+      </div>
+
+      <!-- Two cols -->
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+
+        <!-- Recent bookings -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);">
+            <h3 style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0;">Pemesanan Terbaru</h3>
+            <a href="/pages/admin/bookings.html" style="font-size:0.75rem;color:var(--color-primary-mid);font-weight:600;text-decoration:none;">Lihat semua →</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Kode</th>
+                  <th>Pemesan</th>
+                  <th>Kendaraan</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="recentBookings">
+                <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--color-text-muted);">Memuat...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pending alerts -->
+        <div class="card">
+          <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);">
+            <h3 style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0;">Menunggu Konfirmasi</h3>
+          </div>
+          <div id="pendingList" style="padding:1rem;max-height:300px;overflow-y:auto;">
+            <div style="text-align:center;padding:2rem;color:var(--color-text-muted);">Memuat...</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick actions -->
+      <div class="card" style="padding:1.5rem;">
+        <h3 style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0 0 1rem;">Aksi Cepat Admin</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;">
+          <a href="/pages/admin/vehicles.html" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1rem;border-radius:var(--radius-md);background:#eff6ff;text-decoration:none;">
+            <i class='bx bxs-car' style="font-size:1.5rem;color:#3b82f6;"></i>
+            <span style="font-size:0.75rem;font-weight:600;color:#1d4ed8;text-align:center;">Tambah Kendaraan</span>
+          </a>
+          <a href="/pages/admin/bookings.html" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1rem;border-radius:var(--radius-md);background:#fef3c7;text-decoration:none;">
+            <i class='bx bxs-calendar-check' style="font-size:1.5rem;color:#f59e0b;"></i>
+            <span style="font-size:0.75rem;font-weight:600;color:#b45309;text-align:center;">Kelola Pemesanan</span>
+          </a>
+          <a href="/pages/admin/reports.html" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1rem;border-radius:var(--radius-md);background:#dcfce7;text-decoration:none;">
+            <i class='bx bxs-bar-chart-alt-2' style="font-size:1.5rem;color:#16a34a;"></i>
+            <span style="font-size:0.75rem;font-weight:600;color:#15803d;text-align:center;">Lihat Laporan</span>
+          </a>
+          <a href="/pages/admin/users.html" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1rem;border-radius:var(--radius-md);background:#f5f3ff;text-decoration:none;">
+            <i class='bx bxs-user-account' style="font-size:1.5rem;color:#7c3aed;"></i>
+            <span style="font-size:0.75rem;font-weight:600;color:#6d28d9;text-align:center;">Manajemen User</span>
+          </a>
+          <a href="/pages/admin/promos.html" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1rem;border-radius:var(--radius-md);background:#fff1f2;text-decoration:none;">
+            <i class='bx bxs-tag' style="font-size:1.5rem;color:#e11d48;"></i>
+            <span style="font-size:0.75rem;font-weight:600;color:#be123c;text-align:center;">Kelola Promo</span>
+          </a>
+        </div>
+      </div>
+
+    </main>
+    <footer style="text-align:center;color:var(--color-text-subtle);font-size:0.75rem;padding:1.25rem;">&copy; 2026 EasyCar Admin</footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/components/admin-sidebar.js"></script>
+  <script src="/utils/ui.js"></script>
+
+  <script>
+    (async () => {
+      // requireAdmin() blocks render until role confirmed as 'admin'
+      const user = await requireAdmin();
+      if (!user) return;
+
+      initAdminSidebar("dashboard", user);
+      document.getElementById("welcomeName").textContent = user.full_name || user.email || "Admin";
+      document.getElementById("topbarDate").textContent  = new Date().toLocaleDateString("id-ID", { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
+
+      await Promise.all([loadStats(), loadRecentBookings(), loadPending()]);
+      document.body.classList.add("ec-ready");
+    })();
+
+    async function loadStats() {
+      const [
+        { count: cars },
+        { count: bookings },
+        { count: users },
+        { data: revenue },
+      ] = await Promise.all([
+        supabase.from("cars").select("id", { count:"exact", head:true }),
+        supabase.from("bookings").select("id", { count:"exact", head:true }),
+        supabase.from("profiles").select("id", { count:"exact", head:true }).eq("role","user"),
+        supabase.from("bookings").select("total_harga").eq("status","Selesai"),
+      ]);
+
+      document.getElementById("sKendaraan").textContent  = cars ?? "—";
+      document.getElementById("sPemesanan").textContent  = bookings ?? "—";
+      document.getElementById("sPelanggan").textContent  = users ?? "—";
+      const total = (revenue || []).reduce((s, b) => s + (b.total_harga || 0), 0);
+      document.getElementById("sPendapatan").textContent = formatRupiah(total);
+    }
+
+    async function loadRecentBookings() {
+      const { data } = await supabase
+        .from("bookings")
+        .select("*, profiles(full_name), cars(nama)")
+        .order("created_at", { ascending: false })
+        .limit(8);
+
+      const tbody = document.getElementById("recentBookings");
+      if (!data?.length) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--color-text-muted);">Belum ada pemesanan</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = data.map(b => `
+        <tr>
+          <td style="font-weight:600;font-size:0.8rem;font-family:monospace;">${b.kode_booking || ("BK" + b.id.slice(-6).toUpperCase())}</td>
+          <td style="font-size:0.8125rem;">${b.profiles?.full_name || b.nama_pemesan || "—"}</td>
+          <td style="font-size:0.8125rem;">${b.cars?.nama || "—"}</td>
+          <td><span class="badge ${statusBadgeClass(b.status)}">${b.status}</span></td>
+        </tr>
+      `).join("");
+    }
+
+    async function loadPending() {
+      const { data } = await supabase
+        .from("bookings")
+        .select("*, profiles(full_name), cars(nama)")
+        .eq("status", "Menunggu")
+        .order("created_at", { ascending: true })
+        .limit(10);
+
+      const list = document.getElementById("pendingList");
+      if (!data?.length) {
+        list.innerHTML = `<div style="text-align:center;padding:2rem;color:#16a34a;font-weight:600;font-size:0.875rem;"><i class='bx bxs-check-circle' style="display:block;font-size:2rem;margin-bottom:0.5rem;"></i>Tidak ada yang menunggu</div>`;
+        return;
+      }
+
+      list.innerHTML = data.map(b => `
+        <div style="display:flex;align-items:flex-start;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--color-border);">
+          <div style="width:8px;height:8px;background:#f59e0b;border-radius:50%;flex-shrink:0;margin-top:4px;"></div>
+          <div style="flex:1;min-width:0;">
+            <p style="font-size:0.8125rem;font-weight:600;color:var(--color-primary);margin:0 0 0.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${b.profiles?.full_name || b.nama_pemesan || "—"}</p>
+            <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">${b.cars?.nama || "—"} · ${formatTanggalShort(b.tanggal_mulai)}</p>
+          </div>
+          <a href="/pages/admin/bookings.html" style="font-size:0.75rem;color:var(--color-primary-mid);font-weight:600;text-decoration:none;white-space:nowrap;flex-shrink:0;">Review →</a>
+        </div>
+      `).join("");
+
+      // Show notif dot
+      if (data.length > 0) document.getElementById("notifDot").style.display = "block";
+    }
+
+    function toggleNotif() {
+      showToast(`${document.querySelectorAll("#pendingList [style*='f59e0b']").length} pesanan menunggu konfirmasi`, "warning");
+    }
+  </script>
+</body>
+</html>
