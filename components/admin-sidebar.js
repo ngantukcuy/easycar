@@ -61,7 +61,7 @@ const ADMIN_SIDEBAR_HTML = `
       <div id="sbAvatar" style="width:36px;height:36px;background:linear-gradient(135deg,#e85d04,#ff7733);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.9rem;flex-shrink:0;">A</div>
       <div style="flex:1;min-width:0;">
         <div id="sbName" style="color:#fff;font-size:0.8125rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Admin</div>
-        <div style="color:rgba(255,255,255,0.3);font-size:0.7rem;">Admin</div>
+        <div style="color:rgba(255,255,255,0.3);font-size:0.7rem;">Super Admin</div>
       </div>
       <button onclick="handleLogout()" title="Keluar" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.3);padding:4px;transition:color 0.15s;" onmouseover="this.style.color='#fb923c'" onmouseout="this.style.color='rgba(255,255,255,0.3)'">
         <i class='bx bx-log-out' style="font-size:1.1rem;"></i>
