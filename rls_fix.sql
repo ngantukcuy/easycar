@@ -89,7 +89,7 @@ CREATE POLICY "bookings_user_insert"
 
 CREATE POLICY "bookings_user_cancel"
   ON bookings FOR UPDATE
-  USING (auth.uid() = user_id AND status = 'Menunggu');
+  USING (auth.uid() = user_id AND status IN ('Menunggu', 'Menunggu Konfirmasi'));
 
 CREATE POLICY "bookings_admin"
   ON bookings FOR ALL

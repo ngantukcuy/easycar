@@ -323,7 +323,7 @@ CREATE POLICY "cars_admin"      ON cars FOR ALL     USING (EXISTS (SELECT 1 FROM
 
 CREATE POLICY "bookings_user_read"   ON bookings FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "bookings_user_insert" ON bookings FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "bookings_user_cancel" ON bookings FOR UPDATE USING (auth.uid() = user_id AND status = 'Menunggu');
+CREATE POLICY "bookings_user_cancel" ON bookings FOR UPDATE USING (auth.uid() = user_id AND status IN ('Menunggu', 'Menunggu Konfirmasi'));
 CREATE POLICY "bookings_admin"       ON bookings FOR ALL   USING (EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
 
 CREATE POLICY "promos_read"  ON promos FOR SELECT USING (status = 'aktif');

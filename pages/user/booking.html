@@ -1064,11 +1064,14 @@
       let buktiBayarUrl = null;
       try {
         buktiBayarUrl = await uploadBuktiBayar(buktiBayarFile, bookingId);
-        await supabase.from('bookings').update({
+        const { error: updateError } = await supabase.from('bookings').update({
           bukti_bayar_url:  buktiBayarUrl,
           status:           'Menunggu Konfirmasi',
           status_pembayaran:'Menunggu Konfirmasi',
         }).eq('id', bookingId);
+        if (updateError) {
+          console.warn('Gagal update booking dengan bukti bayar', updateError);
+        }
       } catch (e) {
         console.warn('Gagal upload bukti bayar', e);
       }
