@@ -36,10 +36,10 @@ const ADMIN_SIDEBAR_HTML = `
     <a href="/pages/admin/vehicles.html" class="sb-link" data-page="vehicles">
       <i class='bx bxs-car'></i><span>Kendaraan</span>
     </a>
-    <a href="/pages/admin/bookings.html" class="sb-link" data-page="bookings">
+    <a href="/pages/admin/book-view.html" class="sb-link" data-page="book-view">
       <i class='bx bxs-calendar-check'></i><span>Pemesanan</span>
     </a>
-    <a href="/pages/user/booking.html" class="sb-link" data-page="booking-baru" style="margin-left:0.5rem;">
+    <a href="/pages/admin/booking.html" class="sb-link" data-page="booking-baru" style="margin-left:0.5rem;">
       <i class='bx bx-plus-circle'></i><span>+ Buat Booking</span>
     </a>
     <a href="/pages/admin/users.html" class="sb-link" data-page="users">
