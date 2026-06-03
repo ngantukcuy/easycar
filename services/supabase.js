@@ -206,15 +206,19 @@ async function insertBookingAtomic(payload) {
 
 /**
  * getUnavailableDates(car_id)
- * Returns array of date-range objects [{start, end}] for disabling in calendar.
+ * Returns array of date-range objects [{from, to}] for disabling in calendar.
+ * PENTING: Pakai RPC get_unavailable_dates() yang SECURITY DEFINER
+ * agar bisa lihat booking SEMUA user, bukan hanya booking sendiri.
+ * Query langsung ke tabel bookings kena RLS → hanya lihat booking sendiri
+ * → tanggal booking user lain tidak ter-disable → double booking bisa terjadi!
  */
 async function getUnavailableDates(carId) {
-  const { data } = await supabase
-    .from("bookings")
-    .select("tanggal_mulai, tanggal_selesai")
-    .eq("car_id", carId)
-    .in("status", ["Menunggu", "Menunggu Konfirmasi", "Dikonfirmasi", "Aktif"])
-    .gte("tanggal_selesai", new Date().toISOString().split("T")[0]);
-
+  const { data, error } = await supabase.rpc("get_unavailable_dates", {
+    p_car_id: carId,
+  });
+  if (error) {
+    console.error("getUnavailableDates RPC error:", error);
+    return [];
+  }
   return (data || []).map(b => ({ from: b.tanggal_mulai, to: b.tanggal_selesai }));
 }
