@@ -236,14 +236,20 @@
     })();
 
     async function loadStats() {
-      const [res1, res2] = await Promise.all([
-        supabase.from("cars").select("id", { count: "exact", head: true }).eq("status", "Tersedia"),
-        supabase.from("bookings").select("id", { count: "exact", head: true }),
-      ]);
+      // Gunakan RPC get_public_stats() agar tidak kena RLS block
+      // (query langsung ke bookings dari halaman publik → HTTP 500)
+      const { data, error } = await supabase.rpc("get_public_stats");
       const su = document.getElementById("statUnits");
       const so = document.getElementById("statOrders");
-      if (su) su.textContent = res1.count ?? "—";
-      if (so) so.textContent = res2.count ?? "—";
+      if (!error && data) {
+        if (su) su.textContent = data.available_cars ?? "—";
+        if (so) so.textContent = data.total_bookings ?? "—";
+      } else {
+        // Fallback: hanya ambil cars (cars_read_all policy = public)
+        const res1 = await supabase.from("cars").select("id", { count: "exact", head: true }).eq("status", "Tersedia");
+        if (su) su.textContent = res1.count ?? "—";
+        if (so) so.textContent = "—";
+      }
     }
 
     async function loadCars() {
