@@ -38,12 +38,33 @@
     .doc-upload-box:hover { border-color:var(--color-accent);background:#fff7f3; }
     .doc-upload-box.has-file { border-color:#22c55e;background:#f0fdf4; }
     .doc-upload-box.required-doc { border-color:#fca5a5; }
+
+    /* Upload box after file selected — shows change/remove buttons */
+    .doc-upload-box.has-file .upload-actions { display:flex !important; }
+    .doc-upload-box .upload-actions { display:none; gap:0.375rem; margin-top:0.5rem; justify-content:center; }
+    .upload-btn-change { font-size:0.7rem;font-weight:600;padding:0.25rem 0.625rem;border-radius:6px;border:1.5px solid #22c55e;background:#fff;color:#16a34a;cursor:pointer;font-family:var(--font-body); }
+    .upload-btn-remove { font-size:0.7rem;font-weight:600;padding:0.25rem 0.625rem;border-radius:6px;border:1.5px solid #fca5a5;background:#fff;color:#dc2626;cursor:pointer;font-family:var(--font-body); }
+
     .jaminan-card { cursor:pointer;border:2px solid var(--color-border);border-radius:var(--radius-md);padding:1.25rem;transition:all 0.2s; }
     .jaminan-card:hover { border-color:var(--color-primary-mid); }
     .jaminan-card.selected { border-color:var(--color-accent);background:#fff7f3;box-shadow:0 0 0 3px rgba(232,93,4,0.12); }
     .biaya-row { display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0; }
     .biaya-row + .biaya-row { border-top:1px solid var(--color-border); }
     .biaya-total { border-top:2px solid var(--color-primary);margin-top:0.25rem;padding-top:0.75rem; }
+
+    /* ── GRID RESPONSIVE ── */
+    .grid-2col { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
+    .grid-3col { display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem; }
+    .grid-step6 { display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:800px; }
+
+    @media (max-width: 600px) {
+      .grid-2col  { grid-template-columns: 1fr !important; }
+      .grid-3col  { grid-template-columns: 1fr 1fr !important; }
+      .grid-step6 { grid-template-columns: 1fr !important; max-width:100% !important; }
+      .wizard-step .lbl { display:none; } /* on very small screens, hide step labels */
+      .wizard-step.active .lbl { display:block; } /* show only active */
+    }
+
     @media print {
       .no-print, .page-sidebar, .page-topbar, .btn, nav { display:none!important; }
       .print-invoice { display:block!important; }
@@ -119,7 +140,7 @@
           <h3 style="font-size:1.125rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">Pilih Tanggal Sewa</h3>
           <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Tentukan periode rental kendaraan</p>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div class="grid-2col" style="gap:1.5rem;">
           <div class="card" style="padding:1.5rem;">
             <div id="carPreview" style="display:flex;align-items:center;gap:0.875rem;background:var(--color-bg);border-radius:var(--radius-md);padding:0.875rem;margin-bottom:1.25rem;">
               <div id="carThumb" style="width:72px;height:52px;background:var(--color-border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
@@ -172,7 +193,7 @@
           <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Lengkapi data diri Anda</p>
         </div>
         <div class="card" style="padding:1.5rem;max-width:640px;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="grid-2col">
             <div style="grid-column:1/-1;">
               <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Nama Lengkap *</label>
               <input type="text" id="pNama" class="ec-input" placeholder="Sesuai KTP" />
@@ -234,7 +255,7 @@
           <!-- Wajib -->
           <div style="margin-bottom:1.5rem;">
             <h4 style="font-size:0.875rem;font-weight:700;color:var(--color-primary);margin:0 0 1rem;">📋 Dokumen Wajib</h4>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="grid-2col">
               <div>
                 <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.5rem;">KTP <span style="color:#dc2626;">*</span></label>
                 <div class="doc-upload-box required-doc" id="boxKTP" onclick="triggerUpload('fileKTP')">
@@ -267,7 +288,7 @@
               </div>
             </div>
             <p style="font-size:0.75rem;font-weight:600;color:var(--color-text-muted);margin:0.75rem 0 0.5rem;">Atau upload minimal 2 dari:</p>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;">
+            <div class="grid-3col">
               <div>
                 <label style="font-size:0.7rem;font-weight:600;color:var(--color-text);display:block;margin-bottom:0.375rem;">NPWP</label>
                 <div class="doc-upload-box" id="boxNPWP" onclick="triggerUpload('fileNPWP')">
@@ -340,7 +361,7 @@
           <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Pilih jenis jaminan untuk proses sewa</p>
         </div>
         <div class="card" style="padding:1.5rem;max-width:700px;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+          <div class="grid-2col" style="margin-bottom:1.5rem;">
             <div class="jaminan-card selected" id="jaminanKenCard" onclick="selectJaminan('kendaraan')">
               <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.5rem;">
                 <i class='bx bxs-car' style="font-size:1.5rem;color:var(--color-accent);"></i>
@@ -362,7 +383,7 @@
           <!-- Form kendaraan jaminan -->
           <div id="formKendaraanJaminan" style="border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:1.25rem;margin-bottom:1rem;">
             <h4 style="font-size:0.875rem;font-weight:700;color:var(--color-primary);margin:0 0 1rem;">Detail Kendaraan Jaminan</h4>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="grid-2col">
               <div>
                 <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Jenis Kendaraan *</label>
                 <select id="jkJenis" class="ec-input">
@@ -425,12 +446,12 @@
           <h3 style="font-size:1.125rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">Pembayaran DP & Deposit</h3>
           <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Scan QRIS dan upload bukti pembayaran</p>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:800px;">
+        <div class="grid-step6">
           <!-- QRIS -->
           <div class="card" style="padding:1.5rem;text-align:center;">
             <h4 style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin:0 0 1rem;">Scan QRIS untuk Bayar</h4>
             <div style="background:#f8fafc;border-radius:var(--radius-md);padding:1rem;margin-bottom:1rem;">
-              <img src="/assets/qris-gopay.jpeg" alt="QRIS GoPay" style="max-width:200px;width:100%;border-radius:8px;" onerror="this.parentElement.innerHTML='<div style=padding:2rem;color:var(--color-text-muted);text-align:center><i class=bx bx-qr style=font-size:4rem></i><p style=margin:0.5rem 0 0;font-size:0.75rem>Gambar QRIS belum tersedia<br>Letakkan qris-gopay.png di /assets/</p></div>'" />
+              <img src="/assets/qris-gopay.png" alt="QRIS GoPay" style="max-width:200px;width:100%;border-radius:8px;" onerror="this.parentElement.innerHTML='<div style=padding:2rem;color:var(--color-text-muted);text-align:center><i class=bx bx-qr style=font-size:4rem></i><p style=margin:0.5rem 0 0;font-size:0.75rem>Gambar QRIS belum tersedia<br>Letakkan qris-gopay.png di /assets/</p></div>'" />
             </div>
             <div id="nominalBayar" style="background:var(--color-accent);color:#fff;border-radius:var(--radius-md);padding:0.875rem;margin-bottom:0.75rem;">
               <p style="font-size:0.75rem;margin:0 0 0.25rem;opacity:0.85;">Total yang harus dibayar</p>
@@ -532,7 +553,7 @@
           </div>
 
           <div style="padding:1.5rem 2rem;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+            <div class="grid-2col" style="margin-bottom:1.5rem;">
               <div>
                 <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 0.5rem;">DATA PEMESAN</p>
                 <p id="invNama" style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin:0 0 0.2rem;"></p>
@@ -758,6 +779,38 @@
       box.classList.add('has-file');
       box.classList.remove('required-doc');
       label.textContent = '✅ ' + file.name;
+
+      // Show change/remove action buttons
+      let actions = box.querySelector('.upload-actions');
+      if (!actions) {
+        actions = document.createElement('div');
+        actions.className = 'upload-actions';
+        actions.innerHTML = `
+          <button class="upload-btn-change" onclick="event.stopPropagation();triggerUpload('${input.id}')">✏️ Ganti</button>
+          <button class="upload-btn-remove" onclick="event.stopPropagation();removeDoc('${tipe}','${boxId}','${labelId}','${input.id}')">✕ Hapus</button>
+        `;
+        box.appendChild(actions);
+      }
+      actions.style.display = 'flex';
+
+      // Disable click-to-upload on box itself when file selected (use buttons instead)
+      box.onclick = null;
+    }
+
+    function removeDoc(tipe, boxId, labelId, inputId) {
+      delete docFiles[tipe];
+      const box   = document.getElementById(boxId);
+      const label = document.getElementById(labelId);
+      const input = document.getElementById(inputId);
+      box.classList.remove('has-file');
+      // Restore required styling if needed
+      if (tipe === 'KTP' || tipe === 'SIM' || tipe === 'Selfie') box.classList.add('required-doc');
+      label.textContent = 'Klik untuk upload';
+      input.value = '';
+      const actions = box.querySelector('.upload-actions');
+      if (actions) actions.style.display = 'none';
+      // Restore click handler
+      box.onclick = function() { triggerUpload(inputId); };
     }
 
     function validateAndGoStep5() {
@@ -855,6 +908,20 @@
       box.classList.remove('required-doc');
       label.textContent = '✅ ' + buktiBayarFile.name;
 
+      // Show change/remove buttons
+      let actions = box.querySelector('.upload-actions');
+      if (!actions) {
+        actions = document.createElement('div');
+        actions.className = 'upload-actions';
+        actions.innerHTML = `
+          <button class="upload-btn-change" onclick="event.stopPropagation();triggerUpload('fileBuktiBayar')">✏️ Ganti</button>
+          <button class="upload-btn-remove" onclick="event.stopPropagation();removeBukti()">✕ Hapus</button>
+        `;
+        box.appendChild(actions);
+      }
+      actions.style.display = 'flex';
+      box.onclick = null;
+
       // Preview gambar
       if (buktiBayarFile.type.startsWith('image/')) {
         const reader = new FileReader();
@@ -866,6 +933,22 @@
       }
 
       document.getElementById('submitBtn').disabled = false;
+    }
+
+    function removeBukti() {
+      buktiBayarFile = null;
+      const box   = document.getElementById('boxBukti');
+      const label = document.getElementById('labelBukti');
+      const input = document.getElementById('fileBuktiBayar');
+      box.classList.remove('has-file');
+      box.classList.add('required-doc');
+      label.textContent = 'Klik untuk upload bukti transfer';
+      input.value = '';
+      document.getElementById('buktiPreview').style.display = 'none';
+      const actions = box.querySelector('.upload-actions');
+      if (actions) actions.style.display = 'none';
+      box.onclick = function() { triggerUpload('fileBuktiBayar'); };
+      document.getElementById('submitBtn').disabled = true;
     }
 
     // ── UPLOAD HELPERS ──

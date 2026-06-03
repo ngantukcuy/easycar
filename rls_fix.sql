@@ -74,6 +74,11 @@ CREATE POLICY "cars_admin"
 
 
 -- BOOKINGS
+-- NOTE: bookings_user_read hanya memperbolehkan user melihat booking miliknya sendiri.
+-- bookings_admin (FOR ALL) memperbolehkan admin SELECT semua booking.
+-- Supabase evaluates policies dengan OR — admin yang login akan match bookings_admin.
+-- Jika admin TIDAK bisa lihat booking, pastikan rls_fix.sql ini sudah dijalankan
+-- (bukan supabase_schema.sql yang lama yang punya recursive policy).
 CREATE POLICY "bookings_user_read"
   ON bookings FOR SELECT
   USING (auth.uid() = user_id);

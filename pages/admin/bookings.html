@@ -201,14 +201,14 @@
 
         return `
           <tr>
-            <td style="font-weight:600;font-size:0.8rem;font-family:monospace;color:var(--color-primary);">${kode}</td>
-            <td style="font-size:0.8125rem;">${nama}</td>
-            <td style="font-size:0.8125rem;">${b.cars?.nama || "—"}</td>
-            <td style="font-size:0.8rem;color:var(--color-text-muted);">${formatTanggalShort(b.tanggal_mulai)} — ${formatTanggalShort(b.tanggal_selesai)}</td>
-            <td style="font-weight:600;font-size:0.8125rem;">${formatRupiah(b.total_harga || 0)}</td>
-            <td><span class="badge ${statusBadgeClass(b.status)}">${b.status}</span></td>
-            <td><span class="badge-pay ${payBadgeClass(sp)}">${sp}</span></td>
-            <td>
+            <td data-label="Kode" style="font-weight:600;font-size:0.8rem;font-family:monospace;color:var(--color-primary);">${kode}</td>
+            <td data-label="Pemesan" style="font-size:0.8125rem;">${nama}</td>
+            <td data-label="Kendaraan" style="font-size:0.8125rem;">${b.cars?.nama || "—"}</td>
+            <td data-label="Tanggal" style="font-size:0.8rem;color:var(--color-text-muted);">${formatTanggalShort(b.tanggal_mulai)} — ${formatTanggalShort(b.tanggal_selesai)}</td>
+            <td data-label="Total" style="font-weight:600;font-size:0.8125rem;">${formatRupiah(b.total_harga || 0)}</td>
+            <td data-label="Status"><span class="badge ${statusBadgeClass(b.status)}">${b.status}</span></td>
+            <td data-label="Pembayaran"><span class="badge-pay ${payBadgeClass(sp)}">${sp}</span></td>
+            <td data-label="Bukti">
               ${hasBukti
                 ? `<button onclick="openBukti('${b.bukti_bayar_url}')" class="btn btn-ghost btn-sm"><i class='bx bx-image'></i> Lihat</button>`
                 : `<span style="font-size:0.75rem;color:var(--color-text-subtle);">—</span>`

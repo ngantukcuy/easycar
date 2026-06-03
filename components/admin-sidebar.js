@@ -39,6 +39,9 @@ const ADMIN_SIDEBAR_HTML = `
     <a href="/pages/admin/bookings.html" class="sb-link" data-page="bookings">
       <i class='bx bxs-calendar-check'></i><span>Pemesanan</span>
     </a>
+    <a href="/pages/user/booking.html" class="sb-link" data-page="booking-baru" style="margin-left:0.5rem;">
+      <i class='bx bx-plus-circle'></i><span>+ Buat Booking</span>
+    </a>
     <a href="/pages/admin/users.html" class="sb-link" data-page="users">
       <i class='bx bxs-user-account'></i><span>Pengguna</span>
     </a>
