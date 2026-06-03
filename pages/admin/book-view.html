@@ -342,14 +342,14 @@
           <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Update Status Booking</label>
           <select id="newStatus" class="ec-input" style="margin-bottom:0.75rem;">${opts}</select>
           <button onclick="updateStatus('${id}')" class="btn btn-primary btn-sm" style="width:100%;justify-content:center;">
+            <i class='bx bx-save'></i> Simpan Status
+          </button>
+        </div>
 
         <!-- Hapus booking -->
         <div style="border-top:1px solid var(--color-border);padding-top:1rem;margin-top:0.5rem;">
-          <button onclick="deleteBooking(`'${id}'`)" class="btn btn-sm" style="width:100%;justify-content:center;background:#dc2626;color:#fff;border-color:#dc2626;">
+          <button onclick="deleteBooking('${id}')" class="btn btn-sm" style="width:100%;justify-content:center;background:#dc2626;color:#fff;border-color:#dc2626;">
             <i class="bx bx-trash"></i> Hapus Booking Ini
-          </button>
-        </div>
-            <i class='bx bx-save'></i> Simpan Status
           </button>
         </div>
       `;
