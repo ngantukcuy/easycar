@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/assets/css/theme.css" />
   <style>
     body.ec-loading { visibility: hidden; }
+    .page-topbar { flex-wrap: wrap; gap: 0.5rem; }
   </style>
 </head>
 <body class="ec-loading">
@@ -20,9 +21,9 @@
         <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Manajemen Kendaraan</h2>
         <p id="carCount" style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">—</p>
       </div>
-      <div style="display:flex;align-items:center;gap:0.75rem;">
-        <input type="text" id="searchInput" oninput="filterCars()" placeholder="Cari kendaraan..." class="ec-input" style="width:190px;" />
-        <button onclick="openForm(null)" class="btn btn-accent btn-sm">
+      <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+        <input type="text" id="searchInput" oninput="filterCars()" placeholder="Cari kendaraan..." class="ec-input" style="width:170px;min-width:120px;" />
+        <button onclick="openForm(null)" class="btn btn-accent btn-sm" style="white-space:nowrap;">
           <i class='bx bx-plus'></i> Tambah
         </button>
       </div>

@@ -55,7 +55,7 @@
     /* ── GRID RESPONSIVE ── */
     .grid-2col { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
     .grid-3col { display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem; }
-    .grid-step6 { display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:800px; }
+    .grid-step6 { display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;max-width:720px; }
 
     @media (max-width: 600px) {
       .grid-2col  { grid-template-columns: 1fr !important; }
@@ -71,7 +71,8 @@
       body { background:white; }
       .page-content { padding:0; margin:0; }
       .page-wrapper { display:block; }
-      @page { margin:1.5cm; size:A4; }
+      #invoiceCard { border:none !important; max-width:100% !important; }
+      @page { margin:0.5cm; size:80mm auto; }
     }
     .print-invoice { display:none; }
   </style>
@@ -442,6 +443,7 @@
 
       <!-- ===== STEP 6: PEMBAYARAN ===== -->
       <div class="step" id="step6">
+        <div style="max-width:720px;">
         <div style="margin-bottom:1.25rem;">
           <h3 style="font-size:1.125rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">Pembayaran DP & Deposit</h3>
           <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Scan QRIS dan upload bukti pembayaran</p>
@@ -516,6 +518,7 @@
             </div>
           </div>
         </div>
+        </div><!-- end max-width wrapper -->
       </div>
 
       <!-- ===== STEP 7: SUKSES + INVOICE ===== -->
@@ -526,77 +529,77 @@
           </div>
           <h3 style="font-size:1.25rem;font-weight:800;color:var(--color-primary);margin:0 0 0.5rem;">Booking Berhasil Disubmit!</h3>
           <p style="font-size:0.875rem;color:var(--color-text-muted);margin:0 0 1.25rem;">Menunggu konfirmasi admin. Anda akan dihubungi via WA.</p>
-          <div style="display:flex;gap:0.75rem;justify-content:center;">
-            
+          <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+            <button onclick="window.print()" class="btn btn-ghost btn-sm"><i class='bx bx-printer'></i> Cetak Struk</button>
+            <a href="/pages/user/my-orders.html" class="btn btn-primary btn-sm"><i class='bx bxs-receipt'></i> Lihat Pesananku</a>
           </div>
         </div>
 
-        <!-- INVOICE (printable) -->
-        <div class="card" id="invoiceCard" style="max-width:680px;margin:0 auto;padding:0;">
-          <div style="padding:1.5rem 2rem;border-bottom:2px solid var(--color-border);">
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
-              <div style="display:flex;align-items:center;gap:0.625rem;">
-                <div style="width:36px;height:36px;background:#e85d04;border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                  <i class='bx bxs-car' style="color:#fff;font-size:1.125rem;"></i>
-                </div>
-                <div>
-                  <p style="font-weight:800;color:var(--color-primary);margin:0;font-size:1.125rem;">Easy<span style="color:#e85d04;">Car</span></p>
-                  <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0;">Rental Kendaraan</p>
-                </div>
+        <!-- STRUK (printable) — compact like indomaret receipt -->
+        <div id="invoiceCard" style="max-width:340px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;font-family:'Courier New',monospace;">
+          <!-- Header struk -->
+          <div style="background:#1e293b;padding:1rem;text-align:center;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:0.25rem;">
+              <div style="width:28px;height:28px;background:#e85d04;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <i class='bx bxs-car' style="color:#fff;font-size:0.875rem;"></i>
               </div>
-              <div style="text-align:right;">
-                <p style="font-size:0.75rem;font-weight:700;color:var(--color-text-muted);margin:0;">INVOICE / TANDA TERIMA BOOKING</p>
-                <p id="invKode" style="font-size:1rem;font-weight:800;color:var(--color-primary);font-family:monospace;margin:0;">—</p>
-              </div>
+              <span style="font-family:'Poppins',sans-serif;font-weight:800;color:#fff;font-size:1.125rem;">Easy<span style="color:#fb923c;">Car</span></span>
             </div>
+            <p style="font-size:0.65rem;color:rgba(255,255,255,0.6);margin:0;">Rental Kendaraan — Pekanbaru, Riau</p>
+            <p style="font-size:0.6rem;color:rgba(255,255,255,0.4);margin:0.25rem 0 0;" id="invFooterWA">WA: —</p>
           </div>
 
-          <div style="padding:1.5rem 2rem;">
-            <div class="grid-2col" style="margin-bottom:1.5rem;">
-              <div>
-                <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 0.5rem;">DATA PEMESAN</p>
-                <p id="invNama" style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin:0 0 0.2rem;"></p>
-                <p id="invKtp" style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.2rem;"></p>
-                <p id="invHp" style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.2rem;"></p>
-                <p id="invAlamat" style="font-size:0.75rem;color:var(--color-text-muted);margin:0;"></p>
-              </div>
-              <div>
-                <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 0.5rem;">DETAIL SEWA</p>
-                <p id="invMobil" style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin:0 0 0.2rem;"></p>
-                <p id="invTanggal" style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.2rem;"></p>
-                <p id="invDurasi" style="font-size:0.75rem;color:var(--color-text-muted);margin:0;"></p>
-                <p id="invCreated" style="font-size:0.7rem;color:var(--color-text-subtle);margin:0.25rem 0 0;"></p>
-              </div>
+          <div style="padding:0.875rem 1rem;">
+            <!-- Title -->
+            <p style="font-size:0.6rem;letter-spacing:0.1em;font-weight:700;color:#64748b;text-align:center;margin:0 0 0.5rem;text-transform:uppercase;">— Tanda Terima Booking —</p>
+            <p id="invKode" style="font-size:0.9rem;font-weight:800;color:#1e293b;text-align:center;margin:0 0 0.75rem;letter-spacing:0.05em;">—</p>
+
+            <!-- Separator -->
+            <div style="border-top:1px dashed #cbd5e1;margin-bottom:0.75rem;"></div>
+
+            <!-- Info pemesan -->
+            <div style="margin-bottom:0.75rem;">
+              <p style="font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;margin:0 0 0.35rem;letter-spacing:0.08em;">DATA PEMESAN</p>
+              <p id="invNama" style="font-size:0.75rem;font-weight:700;color:#1e293b;margin:0 0 0.1rem;"></p>
+              <p id="invKtp" style="font-size:0.65rem;color:#64748b;margin:0 0 0.1rem;"></p>
+              <p id="invHp" style="font-size:0.65rem;color:#64748b;margin:0 0 0.1rem;"></p>
+              <p id="invAlamat" style="font-size:0.65rem;color:#64748b;margin:0;"></p>
             </div>
 
-            <!-- Tabel biaya -->
-            <table style="width:100%;border-collapse:collapse;font-size:0.8125rem;margin-bottom:1.5rem;">
-              <thead>
-                <tr style="background:var(--color-bg);">
-                  <th style="text-align:left;padding:0.625rem 0.75rem;font-weight:600;color:var(--color-text-muted);border-bottom:2px solid var(--color-border);">Keterangan</th>
-                  <th style="text-align:right;padding:0.625rem 0.75rem;font-weight:600;color:var(--color-text-muted);border-bottom:2px solid var(--color-border);">Jumlah</th>
-                </tr>
-              </thead>
-              <tbody id="invTabelBiaya"></tbody>
-            </table>
+            <div style="border-top:1px dashed #cbd5e1;margin-bottom:0.75rem;"></div>
 
-            <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:var(--radius-md);padding:0.875rem 1rem;margin-bottom:1rem;">
-              <p style="font-size:0.75rem;font-weight:700;color:#9a3412;margin:0 0 0.25rem;">STATUS: <span id="invStatus">MENUNGGU KONFIRMASI ADMIN</span></p>
-              <p style="font-size:0.75rem;color:#c2410c;margin:0;">📌 Bawa invoice ini saat pengambilan kendaraan</p>
+            <!-- Detail sewa -->
+            <div style="margin-bottom:0.75rem;">
+              <p style="font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;margin:0 0 0.35rem;letter-spacing:0.08em;">DETAIL SEWA</p>
+              <p id="invMobil" style="font-size:0.75rem;font-weight:700;color:#1e293b;margin:0 0 0.1rem;"></p>
+              <p id="invTanggal" style="font-size:0.65rem;color:#64748b;margin:0 0 0.1rem;"></p>
+              <p id="invDurasi" style="font-size:0.65rem;color:#64748b;margin:0;"></p>
+              <p id="invCreated" style="font-size:0.6rem;color:#94a3b8;margin:0.2rem 0 0;"></p>
             </div>
 
-            <div style="border-top:1px solid var(--color-border);padding-top:1rem;font-size:0.7rem;color:var(--color-text-muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
-              <span>EasyCar — Pekanbaru, Riau</span>
-              <span id="invFooterWA">WA: —</span>
-              
+            <div style="border-top:1px dashed #cbd5e1;margin-bottom:0.75rem;"></div>
+
+            <!-- Tabel biaya struk style -->
+            <div style="margin-bottom:0.75rem;">
+              <p style="font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;margin:0 0 0.35rem;letter-spacing:0.08em;">RINCIAN BIAYA</p>
+              <table id="invTabelBiaya" style="width:100%;border-collapse:collapse;font-size:0.7rem;"></table>
             </div>
+
+            <div style="border-top:1px dashed #cbd5e1;margin-bottom:0.75rem;"></div>
+
+            <!-- Status -->
+            <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:0.5rem 0.625rem;margin-bottom:0.75rem;">
+              <p style="font-size:0.65rem;font-weight:700;color:#9a3412;margin:0 0 0.15rem;">STATUS: <span id="invStatus">MENUNGGU KONFIRMASI ADMIN</span></p>
+              <p style="font-size:0.6rem;color:#c2410c;margin:0;">📌 Bawa struk ini saat pengambilan kendaraan</p>
+            </div>
+
+            <!-- Footer -->
+            <p style="font-size:0.6rem;color:#94a3b8;text-align:center;margin:0;">Terima kasih telah mempercayai EasyCar</p>
+            <p style="font-size:0.6rem;color:#cbd5e1;text-align:center;margin:0.1rem 0 0;">★ ★ ★</p>
           </div>
         </div>
       </div>
-      <button onclick="window.print()" class="btn btn-ghost no-print"><i class='bx bx-printer'></i>invoice</button>
-            <a href="/pages/user/my-orders.html" class="btn btn-primary no-print"><i class='bx bxs-receipt'></i> Lihat Pesananku</a>
-
-    </main>
+          </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1097,9 +1100,9 @@
       ];
 
       document.getElementById('invTabelBiaya').innerHTML = rows.map(r => `
-        <tr style="${r.total?'background:var(--color-bg);font-weight:700;':''}">
-          <td style="padding:0.5rem 0.75rem;border-bottom:1px solid var(--color-border);${r.muted?'color:var(--color-text-muted);font-size:0.75rem;':''}${r.bold?'font-weight:600;':''}">${r.label}</td>
-          <td style="padding:0.5rem 0.75rem;border-bottom:1px solid var(--color-border);text-align:right;${r.accent?'color:var(--color-accent);':r.total?'color:var(--color-accent);font-size:1rem;':''}${r.muted?'color:var(--color-text-muted);font-size:0.75rem;':''}">${r.val}</td>
+        <tr>
+          <td style="padding:0.2rem 0;${r.muted?'color:#94a3b8;font-size:0.6rem;':'color:#475569;'}${r.total?'font-weight:700;color:#1e293b;border-top:1px dashed #cbd5e1;padding-top:0.4rem;':''}">${r.label}</td>
+          <td style="padding:0.2rem 0;text-align:right;white-space:nowrap;${r.muted?'color:#94a3b8;font-size:0.6rem;':''}${r.accent?'color:#e85d04;font-weight:700;':''}${r.total?'color:#e85d04;font-weight:800;font-size:0.8rem;border-top:1px dashed #cbd5e1;padding-top:0.4rem;':''}">${r.val}</td>
         </tr>
       `).join('');
     }
