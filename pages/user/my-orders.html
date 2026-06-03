@@ -217,7 +217,7 @@
       document.getElementById("cancelBtn").style.display = canCancel ? "flex" : "none";
 
       // WA button — always show so user can contact admin for any reason
-      const ADMIN_WA = "6281234567890"; // ganti dengan nomor WA admin
+      const ADMIN_WA = "6282270716024"; // ganti dengan nomor WA admin
       const kodeText = kode;
       const waMsg = encodeURIComponent(`Halo Admin EasyCar, saya ingin menanyakan pesanan saya:\nKode: ${kodeText}\nNama: ${o.nama_pemesan || ""}\nMobil: ${car.nama || ""}\nTanggal: ${o.tanggal_mulai} s/d ${o.tanggal_selesai}`);
       document.getElementById("waAdminBtn").href = `https://wa.me/${ADMIN_WA}?text=${waMsg}`;
