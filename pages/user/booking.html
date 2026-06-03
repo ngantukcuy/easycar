@@ -1037,27 +1037,18 @@
       const bookingId = atomicResult.booking_id;
 
       // 2. Upload semua dokumen
-      const uploadErrors = [];
       for (const [tipe, file] of Object.entries(docFiles)) {
         try {
           const url = await uploadDocToStorage(file, tipe, bookingId);
-          const { error: dbErr } = await supabase.from('booking_documents').insert({
+          await supabase.from('booking_documents').insert({
             booking_id: bookingId,
             tipe_doc:   tipe,
             file_url:   url,
             file_name:  file.name,
           });
-          if (dbErr) {
-            console.warn('Gagal simpan doc ke DB:', tipe, dbErr.message);
-            uploadErrors.push(tipe);
-          }
         } catch (e) {
-          console.warn('Gagal upload doc', tipe, e.message || e);
-          uploadErrors.push(tipe);
+          console.warn('Gagal upload doc', tipe, e);
         }
-      }
-      if (uploadErrors.length > 0) {
-        showToast('Dokumen berhasil dikirim, tapi beberapa gagal diupload: ' + uploadErrors.join(', ') + '. Admin akan menghubungi kamu.', 'warning');
       }
 
       // 3. Upload bukti bayar

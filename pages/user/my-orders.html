@@ -12,6 +12,17 @@
     body.ec-loading { visibility: hidden; }
     .order-card { transition: box-shadow 0.2s; }
     .order-card:hover { box-shadow: var(--shadow-md); }
+    .filter-chip { padding:0.4rem 1rem;border-radius:999px;border:1.5px solid var(--color-border);background:var(--color-surface);font-size:0.8125rem;font-weight:600;color:var(--color-text-muted);cursor:pointer;transition:all 0.15s;font-family:var(--font-body); }
+    .filter-chip:hover { border-color:var(--color-primary-mid);color:var(--color-primary-mid); }
+    .filter-chip.active { background:var(--color-primary-mid);border-color:var(--color-primary-mid);color:#fff; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* Invoice Print styles */
+    @media print {
+      body > *:not(#invoicePrint) { display: none !important; }
+      #invoicePrint { display: block !important; position: static !important; background: #fff !important; }
+      @page { size: 80mm auto; margin: 0.3cm; }
+    }
   </style>
 </head>
 <body class="ec-loading">
@@ -31,12 +42,13 @@
 
       <!-- Filter tabs -->
       <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem;">
-        <button class="filter-chip active" data-status="all"          onclick="setFilter(this,'all')">Semua</button>
-        <button class="filter-chip"        data-status="Menunggu Konfirmasi" onclick="setFilter(this,'Menunggu Konfirmasi')">Menunggu</button>
-        <button class="filter-chip"        data-status="Dikonfirmasi" onclick="setFilter(this,'Dikonfirmasi')">Dikonfirmasi</button>
-        <button class="filter-chip"        data-status="Aktif"        onclick="setFilter(this,'Aktif')">Aktif</button>
-        <button class="filter-chip"        data-status="Selesai"      onclick="setFilter(this,'Selesai')">Selesai</button>
-        <button class="filter-chip"        data-status="Dibatalkan"   onclick="setFilter(this,'Dibatalkan')">Dibatalkan</button>
+        <button class="filter-chip active" data-status="all"                  onclick="setFilter(this,'all')">Semua</button>
+        <button class="filter-chip"        data-status="Menunggu"             onclick="setFilter(this,'Menunggu')">Menunggu</button>
+        <button class="filter-chip"        data-status="Menunggu Konfirmasi"  onclick="setFilter(this,'Menunggu Konfirmasi')">Menunggu Konfirmasi</button>
+        <button class="filter-chip"        data-status="Dikonfirmasi"         onclick="setFilter(this,'Dikonfirmasi')">Dikonfirmasi</button>
+        <button class="filter-chip"        data-status="Aktif"                onclick="setFilter(this,'Aktif')">Aktif</button>
+        <button class="filter-chip"        data-status="Selesai"              onclick="setFilter(this,'Selesai')">Selesai</button>
+        <button class="filter-chip"        data-status="Dibatalkan"           onclick="setFilter(this,'Dibatalkan')">Dibatalkan</button>
       </div>
 
       <!-- Orders list -->
@@ -55,21 +67,36 @@
   <!-- Detail Modal -->
   <div id="detailOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem;">
     <div style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:480px;max-height:90vh;overflow-y:auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);position:sticky;top:0;background:#fff;z-index:1;border-radius:24px 24px 0 0;">
         <h3 style="font-family:var(--font-body);font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Detail Pesanan</h3>
         <button onclick="closeDetail()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--color-text-muted);">✕</button>
       </div>
       <div id="detailContent" style="padding:1.5rem;"></div>
       <div style="padding:0 1.5rem 1.5rem;display:flex;flex-direction:column;gap:0.625rem;">
+        <button id="printInvoiceBtn" onclick="printInvoice()" class="btn btn-sm" style="width:100%;justify-content:center;background:#1e293b;color:#fff;border-color:#1e293b;display:none;">
+          <i class='bx bx-printer'></i> Cetak Invoice
+        </button>
         <a id="waAdminBtn" href="#" target="_blank" class="btn btn-sm" style="width:100%;justify-content:center;background:#16a34a;color:#fff;border-color:#16a34a;display:none;">
           <i class='bx bxl-whatsapp'></i> Hubungi Admin via WhatsApp
         </a>
-        <button id="cetakBtn" onclick="cetakInvoice()" class="btn btn-ghost" style="width:100%;justify-content:center;display:none;">
-          <i class='bx bx-printer'></i> Cetak Invoice
-        </button>
-        <button id="cancelBtn" onclick="cancelBooking()" class="btn btn-danger" style="width:100%;justify-content:center;display:none;">
-          <i class='bx bx-x-circle'></i> Batalkan Pesanan
-        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Invoice Print Modal -->
+  <div id="invoiceOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:220;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#f1f5f9;border-radius:16px;max-width:400px;width:100%;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid #e2e8f0;background:#fff;border-radius:16px 16px 0 0;">
+        <h4 style="font-family:var(--font-body);font-weight:700;color:var(--color-primary);margin:0;">Cetak Invoice</h4>
+        <div style="display:flex;gap:0.5rem;">
+          <button onclick="doPrintInvoice()" class="btn btn-sm" style="background:#1e293b;color:#fff;border-color:#1e293b;"><i class='bx bx-printer'></i> Print</button>
+          <button onclick="closeInvoiceModal()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:#64748b;">✕</button>
+        </div>
+      </div>
+      <div style="padding:1.25rem;display:flex;justify-content:center;">
+        <div id="invoiceCard" style="width:280px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;font-family:'Courier New',monospace;">
+          <!-- Filled by JS -->
+        </div>
       </div>
     </div>
   </div>
@@ -83,16 +110,6 @@
     let allOrders   = [];
     let activeFilter = "all";
     let openBookingId = null;
-
-    // Filter chip style
-    document.head.insertAdjacentHTML("beforeend", `
-      <style>
-        .filter-chip { padding:0.4rem 1rem;border-radius:999px;border:1.5px solid var(--color-border);background:var(--color-surface);font-size:0.8125rem;font-weight:600;color:var(--color-text-muted);cursor:pointer;transition:all 0.15s;font-family:var(--font-body); }
-        .filter-chip:hover { border-color:var(--color-primary-mid);color:var(--color-primary-mid); }
-        .filter-chip.active { background:var(--color-primary-mid);border-color:var(--color-primary-mid);color:#fff; }
-        @keyframes spin { to { transform:rotate(360deg); } }
-      </style>
-    `);
 
     (async () => {
       const user = await requireLogin();
@@ -131,7 +148,7 @@
         list.innerHTML = `
           <div style="text-align:center;padding:4rem 1rem;">
             <i class='bx bxs-receipt' style="font-size:3rem;color:var(--color-text-subtle);"></i>
-            <p style="color:var(--color-text-muted);margin-top:0.75rem;font-weight:500;">Belum ada pesanan ${activeFilter === "all" ? "" : "dengan status " + activeFilter}</p>
+            <p style="color:var(--color-text-muted);margin-top:0.75rem;font-weight:500;">Belum ada pesanan ${activeFilter === "all" ? "" : "dengan status <strong>" + activeFilter + "</strong>"}</p>
             <a href="/pages/user/booking.html" class="btn btn-accent" style="display:inline-flex;margin-top:1rem;">
               <i class='bx bx-plus'></i> Buat Pesanan
             </a>
@@ -151,7 +168,6 @@
         ? `<img src="${car.foto_url}" style="width:80px;height:60px;object-fit:cover;border-radius:var(--radius-md);flex-shrink:0;" />`
         : `<div style="width:80px;height:60px;background:var(--color-bg);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class='bx bxs-car' style="font-size:1.5rem;color:var(--color-text-subtle);"></i></div>`;
       const kode  = o.kode_booking || ("BK" + o.id.slice(-6).toUpperCase());
-      const canCancel = ["Menunggu", "Menunggu Konfirmasi"].includes(o.status);
 
       return `
         <div class="card order-card" style="padding:1.25rem;cursor:pointer;" onclick="openDetail('${o.id}')">
@@ -191,7 +207,6 @@
       openBookingId = id;
       const car   = o.cars || {};
       const kode  = o.kode_booking || ("BK" + o.id.slice(-6).toUpperCase());
-      const canCancel = ["Menunggu", "Menunggu Konfirmasi"].includes(o.status);
 
       document.getElementById("detailContent").innerHTML = `
         <div style="display:flex;flex-direction:column;gap:0.875rem;">
@@ -210,20 +225,33 @@
           ${row("Nama Pemesan", o.nama_pemesan || "—")}
           ${row("No. HP", o.no_hp || "—")}
           ${o.catatan ? row("Catatan", o.catatan) : ""}
-          <div style="border-top:2px solid var(--color-border);padding-top:0.875rem;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-weight:700;color:var(--color-primary);">Total Harga</span>
-            <span style="font-size:1.25rem;font-weight:800;color:var(--color-accent);">${formatRupiah(o.total_harga || 0)}</span>
+          <div style="border-top:2px solid var(--color-border);padding-top:0.875rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+              <span style="font-size:0.8125rem;color:var(--color-text-muted);">Total Harga</span>
+              <span style="font-size:1.1rem;font-weight:800;color:var(--color-accent);">${formatRupiah(o.total_harga || 0)}</span>
+            </div>
+            ${o.dp_amount ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem;color:var(--color-text-muted);">DP (30%)</span>
+              <span style="font-size:0.75rem;font-weight:600;color:var(--color-text);">${formatRupiah(o.dp_amount)}</span>
+            </div>` : ""}
+            ${o.deposit_amount ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem;color:var(--color-text-muted);">Deposit Jaminan</span>
+              <span style="font-size:0.75rem;font-weight:600;color:var(--color-text);">${formatRupiah(o.deposit_amount)}</span>
+            </div>` : ""}
+            ${o.sisa_pelunasan ? `<div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:0.75rem;color:var(--color-text-muted);">Sisa Pelunasan</span>
+              <span style="font-size:0.75rem;font-weight:600;color:#dc2626;">${formatRupiah(o.sisa_pelunasan)}</span>
+            </div>` : ""}
           </div>
         </div>
       `;
 
-      document.getElementById("cancelBtn").style.display = canCancel ? "flex" : "none";
-      document.getElementById("cetakBtn").style.display = "flex";
+      // Show cetak invoice button
+      document.getElementById("printInvoiceBtn").style.display = "flex";
 
-      // WA button — always show so user can contact admin for any reason
-      const ADMIN_WA = "6282276100996"; // ganti dengan nomor WA admin
-      const kodeText = kode;
-      const waMsg = encodeURIComponent(`Halo Admin EasyCar, saya ingin menanyakan pesanan saya:\nKode: ${kodeText}\nNama: ${o.nama_pemesan || ""}\nMobil: ${car.nama || ""}\nTanggal: ${o.tanggal_mulai} s/d ${o.tanggal_selesai}`);
+      // WA button
+      const ADMIN_WA = "6282276100996";
+      const waMsg = encodeURIComponent(`Halo Admin EasyCar, saya ingin menanyakan pesanan saya:\nKode: ${kode}\nNama: ${o.nama_pemesan || ""}\nMobil: ${car.nama || ""}\nTanggal: ${o.tanggal_mulai} s/d ${o.tanggal_selesai}`);
       document.getElementById("waAdminBtn").href = `https://wa.me/${ADMIN_WA}?text=${waMsg}`;
       document.getElementById("waAdminBtn").style.display = "flex";
 
@@ -248,126 +276,93 @@
       if (e.target === e.currentTarget) closeDetail();
     });
 
-    function cetakInvoice() {
+    // ── CETAK INVOICE ──
+    function printInvoice() {
+      if (!openBookingId) return;
       const o = allOrders.find(x => x.id === openBookingId);
       if (!o) return;
-      const car = o.cars || {};
+      const car  = o.cars || {};
       const kode = o.kode_booking || ("BK" + o.id.slice(-6).toUpperCase());
-      const total = o.total_harga || 0;
-      const dp = o.dp_amount || 0;
-      const deposit = o.deposit_amount || 0;
-      const bayarNow = o.sudah_dibayar || (dp + deposit);
-      const sisa = o.sisa_pelunasan || (total - dp);
+      const total    = o.total_harga || 0;
+      const dp       = o.dp_amount || 0;
+      const deposit  = o.deposit_amount || 0;
+      const bayarNow = dp + deposit;
+      const sisa     = o.sisa_pelunasan || (total - dp);
 
-      const w = window.open('', '_blank', 'width=700,height=900');
-      w.document.write(`
-        <!DOCTYPE html><html><head>
-        <meta charset="UTF-8"/>
-        <title>Invoice ${kode}</title>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet"/>
-        <style>
-          body{font-family:'Poppins',sans-serif;background:#f1f5f9;margin:0;padding:2rem;}
-          .inv{max-width:620px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.1);}
-          .inv-header{padding:1.5rem 2rem;border-bottom:2px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
-          .brand{display:flex;align-items:center;gap:0.625rem;}
-          .brand-icon{width:36px;height:36px;background:#e85d04;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;}
-          .brand-name{font-weight:800;font-size:1.125rem;color:#0f2347;}
-          .brand-sub{font-size:0.7rem;color:#94a3b8;}
-          .inv-body{padding:1.5rem 2rem;}
-          .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
-          .label{font-size:0.65rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 0.5rem;}
-          table{width:100%;border-collapse:collapse;font-size:0.8125rem;margin-bottom:1.5rem;}
-          th{text-align:left;padding:0.625rem 0.75rem;font-weight:600;color:#94a3b8;border-bottom:2px solid #e2e8f0;}
-          td{padding:0.5rem 0.75rem;border-bottom:1px solid #f1f5f9;}
-          .badge-warn{background:#fff7ed;border:1.5px solid #fed7aa;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;}
-          .footer{border-top:1px solid #e2e8f0;padding-top:1rem;font-size:0.7rem;color:#94a3b8;display:flex;justify-content:space-between;}
-          @media print{body{background:white;padding:0;} @page{margin:1.5cm;size:A4;}}
-        </style>
-        </head><body>
-        <div class="inv">
-          <div class="inv-header">
-            <div class="brand">
-              <div class="brand-icon">🚗</div>
-              <div><div class="brand-name">Easy<span style="color:#e85d04">Car</span></div><div class="brand-sub">Rental Kendaraan</div></div>
+      const rows = [
+        { label: "Sewa (" + (o.durasi_hari||"?") + " hari)", val: formatRupiah(total) },
+        ...(dp > 0 ? [{ label: "DP dibayar (30%)", val: formatRupiah(dp), accent: true }] : []),
+        { label: "Deposit Jaminan", val: formatRupiah(deposit), accent: true },
+        { label: "Total dibayar", val: formatRupiah(bayarNow), total: true },
+        ...(sisa > 0 ? [{ label: "Sisa pelunasan", val: formatRupiah(sisa), muted: true }] : []),
+      ];
+
+      document.getElementById("invoiceCard").innerHTML = `
+        <div style="background:#1e293b;padding:0.875rem;text-align:center;">
+          <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:0.2rem;">
+            <div style="width:24px;height:24px;background:#e85d04;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class='bx bxs-car' style="color:#fff;font-size:0.75rem;"></i>
             </div>
-            <div style="text-align:right">
-              <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;">INVOICE / TANDA TERIMA BOOKING</div>
-              <div style="font-size:1rem;font-weight:800;color:#0f2347;font-family:monospace;">${kode}</div>
-            </div>
+            <span style="font-family:'Poppins',sans-serif;font-weight:800;color:#fff;font-size:1rem;">Easy<span style="color:#fb923c;">Car</span></span>
           </div>
-          <div class="inv-body">
-            <div class="grid2">
-              <div>
-                <div class="label">Data Pemesan</div>
-                <div style="font-weight:700;color:#0f2347;font-size:0.875rem;">${o.nama_pemesan || '—'}</div>
-                <div style="font-size:0.75rem;color:#64748b;">KTP: ${o.no_ktp || '—'}</div>
-                <div style="font-size:0.75rem;color:#64748b;">WA: ${o.no_hp || '—'}</div>
-                <div style="font-size:0.75rem;color:#64748b;">${o.alamat || ''}</div>
-              </div>
-              <div>
-                <div class="label">Detail Sewa</div>
-                <div style="font-weight:700;color:#0f2347;font-size:0.875rem;">${car.nama || '—'}</div>
-                <div style="font-size:0.75rem;color:#64748b;">${o.tanggal_mulai || '—'} s/d ${o.tanggal_selesai || '—'}</div>
-                <div style="font-size:0.75rem;color:#64748b;">${o.durasi_hari || '—'} hari</div>
-                <div style="font-size:0.7rem;color:#94a3b8;">Dibuat: ${new Date(o.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</div>
-              </div>
-            </div>
-            <table>
-              <thead><tr><th>Keterangan</th><th style="text-align:right">Jumlah</th></tr></thead>
-              <tbody>
-                <tr><td>Total Sewa (${o.durasi_hari||'—'} hari)</td><td style="text-align:right;font-weight:600">${new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(total)}</td></tr>
-                ${dp > 0 ? '<tr><td>DP Dibayar (30%)</td><td style="text-align:right;font-weight:600;color:#e85d04">'+new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(dp)+'</td></tr>' : ''}
-                <tr><td>Deposit</td><td style="text-align:right;font-weight:600;color:#e85d04">${new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(deposit)}</td></tr>
-                <tr style="background:#f8fafc;font-weight:700"><td>Total Dibayar Sekarang</td><td style="text-align:right;color:#e85d04;font-size:1rem">${new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(bayarNow)}</td></tr>
-                <tr><td style="color:#64748b;font-size:0.75rem">Sisa Pelunasan saat Pengambilan</td><td style="text-align:right;color:#64748b;font-size:0.75rem">${new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(sisa)}</td></tr>
-              </tbody>
-            </table>
-            <div class="badge-warn">
-              <div style="font-size:0.75rem;font-weight:700;color:#9a3412">STATUS: ${o.status || 'MENUNGGU KONFIRMASI'}</div>
-              <div style="font-size:0.75rem;color:#c2410c">📌 Bawa invoice ini saat pengambilan kendaraan</div>
-            </div>
-            <div class="footer">
-              <span>EasyCar — Pekanbaru, Riau</span>
-              <span>Dicetak: ${new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</span>
-            </div>
-          </div>
+          <p style="font-size:0.6rem;color:rgba(255,255,255,0.55);margin:0;">Rental Kendaraan — Pekanbaru, Riau</p>
         </div>
-        <div style="text-align:center;margin-top:1.5rem;">
-          <button onclick="window.print()" style="padding:0.625rem 1.5rem;background:#0f2347;color:#fff;border:none;border-radius:10px;font-family:'Poppins',sans-serif;font-weight:600;cursor:pointer;font-size:0.875rem;">🖨️ Cetak / Simpan PDF</button>
+        <div style="padding:0.875rem;border-bottom:1px dashed #e2e8f0;">
+          <p style="font-size:0.65rem;color:#94a3b8;margin:0 0 0.1rem;text-align:center;">INVOICE / KWITANSI</p>
+          <p style="font-size:0.8rem;font-weight:700;color:#1e293b;margin:0;text-align:center;font-family:'Poppins',sans-serif;">${kode}</p>
+          <p style="font-size:0.575rem;color:#94a3b8;margin:0.2rem 0 0;text-align:center;">Dicetak: ${new Date().toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})}</p>
         </div>
-        </body></html>
-      `);
-      w.document.close();
+        <div style="padding:0.75rem 0.875rem;border-bottom:1px dashed #e2e8f0;font-size:0.625rem;">
+          <p style="color:#475569;margin:0 0 0.15rem;"><strong>Pemesan:</strong> ${o.nama_pemesan||"—"}</p>
+          ${o.no_ktp ? `<p style="color:#475569;margin:0 0 0.15rem;">KTP: ${o.no_ktp}</p>` : ""}
+          ${o.no_hp ? `<p style="color:#475569;margin:0;">WA: ${o.no_hp}</p>` : ""}
+        </div>
+        <div style="padding:0.75rem 0.875rem;border-bottom:1px dashed #e2e8f0;font-size:0.625rem;">
+          <p style="color:#475569;margin:0 0 0.15rem;"><strong>Kendaraan:</strong> ${car.nama||"—"}</p>
+          <p style="color:#475569;margin:0 0 0.15rem;">Periode: ${formatTanggalShort(o.tanggal_mulai)} s/d ${formatTanggalShort(o.tanggal_selesai)}</p>
+          <p style="color:#475569;margin:0;">Durasi: ${o.durasi_hari||"—"} hari</p>
+        </div>
+        <div style="padding:0.75rem 0.875rem;border-bottom:1px dashed #e2e8f0;">
+          <table style="width:100%;font-size:0.6rem;border-collapse:collapse;">
+            ${rows.map(r => `
+              <tr>
+                <td style="padding:0.15rem 0;${r.muted?'color:#94a3b8;font-size:0.575rem;':'color:#475569;'}${r.total?'font-weight:700;color:#1e293b;border-top:1px dashed #cbd5e1;padding-top:0.3rem;':''}">${r.label}</td>
+                <td style="padding:0.15rem 0;text-align:right;white-space:nowrap;${r.muted?'color:#94a3b8;font-size:0.575rem;':''}${r.accent?'color:#e85d04;font-weight:700;':''}${r.total?'color:#e85d04;font-weight:800;border-top:1px dashed #cbd5e1;padding-top:0.3rem;':''}">${r.val}</td>
+              </tr>
+            `).join("")}
+          </table>
+        </div>
+        <div style="padding:0.75rem 0.875rem;text-align:center;">
+          <p style="font-size:0.575rem;color:#94a3b8;margin:0;">Status: <strong style="color:${o.status==='Selesai'?'#16a34a':o.status==='Aktif'?'#2563eb':'#f59e0b'}">${o.status}</strong></p>
+          <p style="font-size:0.55rem;color:#cbd5e1;margin:0.25rem 0 0;">Terima kasih telah menggunakan EasyCar</p>
+        </div>
+      `;
+
+      closeDetail();
+      document.getElementById("invoiceOverlay").style.display = "flex";
     }
 
-    async function cancelBooking() {
-      if (!openBookingId) return;
-      const confirmed = await showModal({
-        title: "Batalkan Pesanan?",
-        message: "Apakah Anda yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.",
-        confirmText: "Ya, Batalkan",
-        cancelText: "Tidak",
-        type: "danger"
-      });
-      if (!confirmed) return;
+    function closeInvoiceModal() {
+      document.getElementById("invoiceOverlay").style.display = "none";
+    }
 
-      showLoading("Membatalkan pesanan...");
-      const { error } = await supabase
-        .from("bookings")
-        .update({ status: "Dibatalkan" })
-        .eq("id", openBookingId);
-      hideLoading();
+    document.getElementById("invoiceOverlay").addEventListener("click", e => {
+      if (e.target === e.currentTarget) closeInvoiceModal();
+    });
 
-      if (error) {
-        showToast("Gagal membatalkan: " + error.message, "error"); return;
-      }
-
-      showToast("Pesanan berhasil dibatalkan.", "success");
-      closeDetail();
-
-      // Refresh
-      const user = await getCurrentUser();
-      if (user) await loadOrders(user.id);
+    function doPrintInvoice() {
+      const card = document.getElementById("invoiceCard");
+      const w = window.open("", "_blank", "width=400,height=700");
+      w.document.write(`<!DOCTYPE html><html><head>
+        <title>Invoice EasyCar</title>
+        <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+        <style>
+          @page { size: 80mm auto; margin: 0.3cm; }
+          body { margin:0; background:#fff; font-family:'Courier New',monospace; }
+          @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+        </style>
+      </head><body>${card.outerHTML}<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`);
+      w.document.close();
     }
   </script>
 </body>

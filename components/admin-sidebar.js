@@ -5,15 +5,16 @@
 // =====================================================
 
 const ADMIN_SIDEBAR_HTML = `
-<aside id="sidebar" class="ec-admin-sidebar" style="
+<aside id="sidebar" class="ec-sidebar" style="
   position:fixed;left:0;top:0;height:100vh;width:260px;
   background:linear-gradient(180deg,#0f2347 0%,#16213e 100%);
   display:flex;flex-direction:column;z-index:50;
-  box-shadow:4px 0 24px rgba(0,0,0,0.2);
+  box-shadow:4px 0 24px rgba(0,0,0,0.18);
   transition:transform 0.3s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;
 ">
   <!-- Brand -->
-  <div style="display:flex;align-items:center;gap:0.75rem;padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);">
+  <div style="display:flex;align-items:center;gap:0.75rem;padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
     <div style="width:38px;height:38px;background:#e85d04;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(232,93,4,0.4);">
       <i class='bx bxs-car' style="color:#fff;font-size:1.25rem;"></i>
     </div>
@@ -24,39 +25,39 @@ const ADMIN_SIDEBAR_HTML = `
   </div>
 
   <!-- Nav -->
-  <nav class="sidebar-scroll" style="flex:1;padding:1rem 0;overflow-y:auto;">
+  <nav style="flex:1;padding:1rem 0;overflow-y:auto;overflow-x:hidden;min-height:0;">
     <div style="padding:0 1rem 0.5rem;color:rgba(255,255,255,0.25);font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Dashboard</div>
 
-    <a href="/pages/admin/dashboard.html" class="asb-link" data-page="dashboard">
+    <a href="/pages/admin/dashboard.html" class="sb-link" data-page="dashboard">
       <i class='bx bxs-dashboard'></i><span>Dashboard</span>
     </a>
 
     <div style="padding:1rem 1rem 0.5rem;color:rgba(255,255,255,0.25);font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-top:0.5rem;">Manajemen</div>
 
-    <a href="/pages/admin/vehicles.html" class="asb-link" data-page="vehicles">
+    <a href="/pages/admin/vehicles.html" class="sb-link" data-page="vehicles">
       <i class='bx bxs-car'></i><span>Kendaraan</span>
     </a>
-    <a href="/pages/admin/book-view.html" class="asb-link" data-page="book-view">
+    <a href="/pages/admin/book-view.html" class="sb-link" data-page="book-view">
       <i class='bx bxs-calendar-check'></i><span>Pemesanan</span>
     </a>
-    <a href="/pages/admin/users.html" class="asb-link" data-page="users">
+    <a href="/pages/admin/users.html" class="sb-link" data-page="users">
       <i class='bx bxs-user-account'></i><span>Pengguna</span>
     </a>
-    <a href="/pages/admin/promos.html" class="asb-link" data-page="promos">
-      <i class='bx bxs-tag'></i><span>Promo & Diskon</span>
+    <a href="/pages/admin/promos.html" class="sb-link" data-page="promos">
+      <i class='bx bxs-tag'></i><span>Promo &amp; Diskon</span>
     </a>
-    <a href="/pages/admin/reports.html" class="asb-link" data-page="reports">
+    <a href="/pages/admin/reports.html" class="sb-link" data-page="reports">
       <i class='bx bxs-bar-chart-alt-2'></i><span>Laporan</span>
     </a>
 
     <div style="padding:1rem 1rem 0.5rem;color:rgba(255,255,255,0.25);font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-top:0.5rem;">Akun</div>
-    <a href="/pages/admin/settings.html" class="asb-link" data-page="settings">
+    <a href="/pages/admin/settings.html" class="sb-link" data-page="settings">
       <i class='bx bxs-cog'></i><span>Pengaturan</span>
     </a>
   </nav>
 
   <!-- User footer -->
-  <div style="padding:1rem;border-top:1px solid rgba(255,255,255,0.08);">
+  <div style="padding:1rem;border-top:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
     <div style="display:flex;align-items:center;gap:0.75rem;">
       <div id="sbAvatar" style="width:36px;height:36px;background:linear-gradient(135deg,#e85d04,#ff7733);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.9rem;flex-shrink:0;">A</div>
       <div style="flex:1;min-width:0;">
@@ -82,7 +83,7 @@ const ADMIN_SIDEBAR_HTML = `
 
 const ADMIN_SB_STYLE = `
   <style>
-    .asb-link {
+    .sb-link {
       display:flex;align-items:center;gap:0.75rem;
       padding:0.625rem 1rem;margin:0 0.5rem;
       border-radius:10px;
@@ -92,9 +93,9 @@ const ADMIN_SB_STYLE = `
       border-left:2px solid transparent;
       transition:all 0.18s;
     }
-    .asb-link:hover { color:#fff;background:rgba(255,255,255,0.07); }
-    .asb-link.active { color:#fff;background:rgba(232,93,4,0.15);border-left-color:#e85d04; }
-    .asb-link i { font-size:1.1rem;flex-shrink:0; }
+    .sb-link:hover { color:#fff;background:rgba(255,255,255,0.07); }
+    .sb-link.active { color:#fff;background:rgba(232,93,4,0.15);border-left-color:#e85d04; }
+    .sb-link i { font-size:1.1rem;flex-shrink:0; }
   </style>
 `;
 
@@ -106,7 +107,7 @@ function initAdminSidebar(activePage, user) {
   document.body.insertBefore(wrapper, document.body.firstChild);
 
   if (activePage) {
-    document.querySelectorAll(".asb-link").forEach(link => {
+    document.querySelectorAll(".sb-link").forEach(link => {
       if (link.dataset.page === activePage) link.classList.add("active");
     });
   }

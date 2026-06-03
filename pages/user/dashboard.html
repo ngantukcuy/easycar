@@ -10,262 +10,145 @@
   <link rel="stylesheet" href="/assets/css/theme.css" />
   <style>
     body.ec-loading { visibility: hidden; }
-
-    /* Hero */
-    .dash-hero {
-      background: linear-gradient(135deg, #0f2347 0%, #1a3c6e 60%, #2a5298 100%);
-      border-radius: var(--radius-xl);
-      padding: 2.25rem 2rem;
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 1.75rem;
-    }
-    .dash-hero-blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(50px);
-      pointer-events: none;
-    }
-
-    /* Car cards */
     .car-card {
-      background: var(--color-surface);
-      border-radius: var(--radius-xl);
+      background: #fff;
+      border-radius: 16px;
       overflow: hidden;
-      border: 1px solid var(--color-border);
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1.5px solid var(--color-border);
+      transition: all 0.2s;
       display: flex;
       flex-direction: column;
-      transition: transform 0.22s ease, box-shadow 0.22s ease;
     }
-    .car-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-
-    /* Filter chips */
-    .filter-chip {
-      padding: 0.4rem 1rem;
-      border-radius: 999px;
-      border: 1.5px solid var(--color-border);
-      background: var(--color-surface);
-      font-size: 0.8125rem;
+    .car-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+      border-color: var(--color-accent);
+    }
+    .car-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      background: var(--color-bg);
+      display: block;
+    }
+    .car-img-placeholder {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .spec-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      background: var(--color-bg);
+      font-size: 0.7rem;
       font-weight: 600;
       color: var(--color-text-muted);
-      cursor: pointer;
-      transition: all 0.15s;
-      font-family: var(--font-body);
     }
-    .filter-chip:hover  { border-color: var(--color-primary-mid); color: var(--color-primary-mid); }
-    .filter-chip.active { background: var(--color-primary-mid); border-color: var(--color-primary-mid); color: #fff; }
-
-    /* Skeleton */
-    .skeleton {
-      background: linear-gradient(90deg, #e8edf5 25%, #f3f6fb 50%, #e8edf5 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.4s infinite;
-      border-radius: 8px;
+    .hero-banner {
+      background: linear-gradient(135deg, var(--color-primary) 0%, #1a3c6e 60%, #e85d04 100%);
+      border-radius: 20px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 2rem;
     }
-    @keyframes shimmer { to { background-position: -200% 0; } }
-    @keyframes spin    { to { transform: rotate(360deg); } }
-
-    /* Stats strip inside hero */
-    .hero-stats {
-      display: flex;
-      gap: 1.5rem;
-      margin-top: 1.75rem;
-      flex-wrap: wrap;
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 200px;
+      height: 200px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
     }
-    .hero-stat {
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 12px;
-      padding: 0.625rem 1.125rem;
-      display: flex;
-      align-items: center;
-      gap: 0.625rem;
-      backdrop-filter: blur(8px);
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      right: 80px;
+      bottom: -60px;
+      width: 140px;
+      height: 140px;
+      background: rgba(232,93,4,0.2);
+      border-radius: 50%;
     }
-    .hero-stat-num  { font-size: 1.125rem; font-weight: 800; color: #fff; }
-    .hero-stat-label{ font-size: 0.7rem; color: rgba(255,255,255,0.55); font-weight: 500; }
-
-    /* Active booking banner */
-    .active-booking-bar {
-      background: linear-gradient(90deg, #dcfce7, #f0fdf4);
-      border: 1.5px solid #86efac;
-      border-radius: var(--radius-md);
-      padding: 0.875rem 1.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.75rem;
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .cars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
     }
-
-    /* Section header */
-    .section-header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-bottom: 1.25rem;
+    @media (max-width: 600px) {
+      .cars-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+      .car-img, .car-img-placeholder { height: 130px; }
+      .hero-banner { padding: 1.25rem; }
+    }
+    @media (max-width: 380px) {
+      .cars-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body class="ec-loading">
 
   <div class="page-wrapper">
-
-    <!-- TOPBAR -->
     <header class="page-topbar">
       <div style="padding-left:3rem;">
-        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Beranda</h2>
-        <p id="topbarDate" style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">—</p>
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;" id="topbarGreet">Selamat Datang</h2>
+        <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;" id="topbarDate">—</p>
       </div>
-      <div style="display:flex;align-items:center;gap:0.625rem;flex-wrap:wrap;">
-        <div style="position:relative;">
-          <i class='bx bx-search' style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--color-text-subtle);font-size:0.9rem;pointer-events:none;"></i>
-          <input type="text" id="searchInput" placeholder="Cari kendaraan..." oninput="filterCars()"
-            class="ec-input" style="padding-left:2.25rem;width:180px;font-size:0.8125rem;" />
-        </div>
-        <a href="/pages/user/booking.html" class="btn btn-accent btn-sm">
-          <i class='bx bx-plus'></i> Booking Baru
-        </a>
-      </div>
+      <a href="/pages/user/booking.html" class="btn btn-accent btn-sm">
+        <i class='bx bx-plus'></i> Booking Sekarang
+      </a>
     </header>
 
     <main class="page-content fade-in">
 
-      <!-- ═══ HERO ═══ -->
-      <div class="dash-hero">
-        <div class="dash-hero-blob" style="width:400px;height:400px;background:rgba(255,255,255,0.04);top:-150px;right:-80px;"></div>
-        <div class="dash-hero-blob" style="width:200px;height:200px;background:rgba(232,93,4,0.14);bottom:-80px;left:40%;"></div>
-
-        <div style="position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
-          <div>
-            <p style="color:rgba(255,255,255,0.55);font-size:0.8rem;margin:0 0 0.25rem;">Selamat datang kembali,</p>
-            <h2 id="welcomeName" style="color:#fff;font-size:1.625rem;font-weight:800;margin:0 0 0.4rem;line-height:1.2;">—</h2>
-            <p style="color:rgba(255,255,255,0.5);font-size:0.8125rem;margin:0;">Pilih kendaraan dan mulai perjalanan Anda hari ini</p>
-
-            <div class="hero-stats">
-              <div class="hero-stat">
-                <div>
-                  <div class="hero-stat-num" id="statTotal">—</div>
-                  <div class="hero-stat-label">Total Booking</div>
-                </div>
-              </div>
-              <div class="hero-stat">
-                <div>
-                  <div class="hero-stat-num" id="statActive">—</div>
-                  <div class="hero-stat-label">Aktif / Dikonfirmasi</div>
-                </div>
-              </div>
-              <div class="hero-stat">
-                <div>
-                  <div class="hero-stat-num" id="statDone">—</div>
-                  <div class="hero-stat-label">Selesai</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:0.5rem;align-self:flex-start;">
-            <a href="/pages/user/my-orders.html" class="btn btn-sm" style="background:rgba(255,255,255,0.12);color:#fff;border-color:rgba(255,255,255,0.2);white-space:nowrap;">
+      <!-- Hero Banner -->
+      <div class="hero-banner">
+        <div style="position:relative;z-index:1;">
+          <p style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin:0 0 0.3rem;">Halo, <span id="welcomeName" style="color:#fb923c;font-weight:700;">—</span> 👋</p>
+          <h2 style="color:#fff;font-size:1.5rem;font-weight:800;margin:0 0 0.5rem;line-height:1.2;">Mau pergi kemana hari ini?</h2>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.825rem;margin:0 0 1.25rem;">Pilih kendaraan impianmu dan nikmati perjalanan bersama EasyCar.</p>
+          <div style="display:flex;gap:0.625rem;flex-wrap:wrap;">
+            <a href="/pages/user/booking.html" class="btn btn-accent btn-sm">
+              <i class='bx bxs-calendar-plus'></i> Booking Sekarang
+            </a>
+            <a href="/pages/user/my-orders.html" class="btn btn-sm" style="background:rgba(255,255,255,0.12);color:#fff;border-color:rgba(255,255,255,0.2);">
               <i class='bx bxs-receipt'></i> Pesanan Saya
             </a>
-            <a href="/pages/user/profile.html" class="btn btn-sm" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.12);white-space:nowrap;">
-              <i class='bx bxs-user'></i> Profil Saya
-            </a>
           </div>
         </div>
       </div>
 
-      <!-- Active booking notice (hanya tampil jika ada) -->
-      <div id="activeBookingBar" style="display:none;" class="active-booking-bar">
-        <div style="display:flex;align-items:center;gap:0.75rem;">
-          <div style="width:36px;height:36px;background:#16a34a;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class='bx bxs-car' style="color:#fff;font-size:1.1rem;"></i>
-          </div>
-          <div>
-            <p style="font-weight:700;color:#15803d;font-size:0.875rem;margin:0 0 0.1rem;" id="activeBookingText">Anda memiliki booking aktif</p>
-            <p style="font-size:0.75rem;color:#16a34a;margin:0;" id="activeBookingDetail">—</p>
-          </div>
+      <!-- Search & Filter -->
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+        <h3 style="font-size:0.9375rem;font-weight:700;color:var(--color-primary);margin:0;flex:1;">Armada Tersedia</h3>
+        <div style="position:relative;">
+          <i class='bx bx-search' style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--color-text-muted);font-size:1rem;pointer-events:none;"></i>
+          <input type="text" id="searchCar" oninput="filterCars()" placeholder="Cari kendaraan..." class="ec-input" style="padding-left:2.25rem;width:200px;min-width:140px;" />
         </div>
-        <a href="/pages/user/my-orders.html" class="btn btn-sm" style="background:#16a34a;color:#fff;border-color:#16a34a;white-space:nowrap;flex-shrink:0;">
-          Lihat Detail →
-        </a>
+        <select id="filterTipe" onchange="filterCars()" class="ec-input" style="width:auto;min-width:110px;">
+          <option value="">Semua Tipe</option>
+          <option value="Minibus">Minibus</option>
+          <option value="SUV">SUV</option>
+          <option value="MPV">MPV</option>
+          <option value="Sedan">Sedan</option>
+          <option value="Pickup">Pickup</option>
+        </select>
       </div>
 
-      <!-- ═══ ARMADA KENDARAAN ═══ -->
-      <div>
-        <div class="section-header">
-          <div>
-            <h3 style="font-size:1.125rem;font-weight:800;color:var(--color-primary);margin:0 0 0.2rem;">Armada Tersedia</h3>
-            <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Pilih kendaraan yang sesuai kebutuhan perjalanan Anda</p>
-          </div>
-          <div id="carCount" style="font-size:0.8rem;color:var(--color-text-muted);font-weight:600;"></div>
-        </div>
-
-        <!-- Filter chips -->
-        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem;">
-          <button class="filter-chip active" onclick="setFilter(this,'all')">Semua</button>
-          <button class="filter-chip" onclick="setFilter(this,'MPV')">MPV</button>
-          <button class="filter-chip" onclick="setFilter(this,'SUV')">SUV</button>
-          <button class="filter-chip" onclick="setFilter(this,'Sedan')">Sedan</button>
-          <button class="filter-chip" onclick="setFilter(this,'Pickup')">Pickup</button>
-          <button class="filter-chip" onclick="setFilter(this,'Matic')">Matic</button>
-          <button class="filter-chip" onclick="setFilter(this,'Manual')">Manual</button>
-        </div>
-
-        <!-- Grid -->
-        <div id="carGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">
-          <!-- Skeletons -->
-          <div class="car-card"><div class="skeleton" style="height:170px;border-radius:0;"></div><div style="padding:1rem;"><div class="skeleton" style="height:16px;width:55%;margin-bottom:0.625rem;"></div><div class="skeleton" style="height:13px;width:38%;margin-bottom:0.875rem;"></div><div class="skeleton" style="height:34px;border-radius:10px;"></div></div></div>
-          <div class="car-card"><div class="skeleton" style="height:170px;border-radius:0;"></div><div style="padding:1rem;"><div class="skeleton" style="height:16px;width:55%;margin-bottom:0.625rem;"></div><div class="skeleton" style="height:13px;width:38%;margin-bottom:0.875rem;"></div><div class="skeleton" style="height:34px;border-radius:10px;"></div></div></div>
-          <div class="car-card"><div class="skeleton" style="height:170px;border-radius:0;"></div><div style="padding:1rem;"><div class="skeleton" style="height:16px;width:55%;margin-bottom:0.625rem;"></div><div class="skeleton" style="height:13px;width:38%;margin-bottom:0.875rem;"></div><div class="skeleton" style="height:34px;border-radius:10px;"></div></div></div>
-          <div class="car-card"><div class="skeleton" style="height:170px;border-radius:0;"></div><div style="padding:1rem;"><div class="skeleton" style="height:16px;width:55%;margin-bottom:0.625rem;"></div><div class="skeleton" style="height:13px;width:38%;margin-bottom:0.875rem;"></div><div class="skeleton" style="height:34px;border-radius:10px;"></div></div></div>
-        </div>
-
-        <div id="carEmpty" style="display:none;text-align:center;padding:4rem 1rem;">
-          <i class='bx bx-car' style="font-size:3rem;color:var(--color-text-subtle);display:block;margin-bottom:0.75rem;"></i>
-          <p style="color:var(--color-text-muted);font-weight:500;margin:0;">Tidak ada kendaraan yang sesuai filter</p>
-        </div>
-      </div>
-
-      <!-- ═══ CARA BOOKING ═══ -->
-      <div class="card" style="padding:2rem;margin-top:2rem;">
-        <div style="text-align:center;margin-bottom:1.75rem;">
-          <h3 style="font-size:1.125rem;font-weight:800;color:var(--color-primary);margin:0 0 0.3rem;">Cara Booking</h3>
-          <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">4 langkah mudah untuk memesan kendaraan</p>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1.5rem;">
-          <div style="text-align:center;">
-            <div style="width:52px;height:52px;background:#eff6ff;border:2px solid #bfdbfe;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 0.875rem;">
-              <i class='bx bxs-car' style="font-size:1.375rem;color:#3b82f6;"></i>
-            </div>
-            <div style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin-bottom:0.3rem;">Pilih Kendaraan</div>
-            <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Pilih armada yang cocok dari daftar di atas</div>
-          </div>
-          <div style="text-align:center;">
-            <div style="width:52px;height:52px;background:#fef3c7;border:2px solid #fde68a;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 0.875rem;">
-              <i class='bx bx-calendar' style="font-size:1.375rem;color:#f59e0b;"></i>
-            </div>
-            <div style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin-bottom:0.3rem;">Pilih Tanggal</div>
-            <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Tentukan periode sewa yang diinginkan</div>
-          </div>
-          <div style="text-align:center;">
-            <div style="width:52px;height:52px;background:#fef2f2;border:2px solid #fecaca;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 0.875rem;">
-              <i class='bx bx-id-card' style="font-size:1.375rem;color:#ef4444;"></i>
-            </div>
-            <div style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin-bottom:0.3rem;">Upload Dokumen</div>
-            <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Siapkan KTP, SIM, dan dokumen pendukung</div>
-          </div>
-          <div style="text-align:center;">
-            <div style="width:52px;height:52px;background:#dcfce7;border:2px solid #86efac;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 0.875rem;">
-              <i class='bx bxs-check-circle' style="font-size:1.375rem;color:#16a34a;"></i>
-            </div>
-            <div style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin-bottom:0.3rem;">Bayar & Konfirmasi</div>
-            <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Bayar DP via QRIS, tunggu konfirmasi admin</div>
-          </div>
+      <!-- Cars Grid -->
+      <div id="carsGrid" class="cars-grid">
+        <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--color-text-muted);">
+          <i class='bx bx-loader-alt' style="font-size:2.5rem;animation:spin 1s linear infinite;display:block;"></i>
+          <p style="margin-top:0.5rem;">Memuat kendaraan...</p>
         </div>
       </div>
 
@@ -274,180 +157,180 @@
     <footer style="text-align:center;color:var(--color-text-subtle);font-size:0.75rem;padding:1.25rem;">&copy; 2026 EasyCar</footer>
   </div>
 
+  <!-- Car Detail Modal -->
+  <div id="carModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:480px;max-height:90vh;overflow-y:auto;">
+      <div id="carModalContent"></div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/services/supabase.js"></script>
   <script src="/components/user-sidebar.js"></script>
   <script src="/utils/ui.js"></script>
 
   <script>
-    let allCars      = [];
-    let activeFilter = 'all';
-    let searchTerm   = '';
-    let currentUser  = null;
+    let allCars = [];
+    let filteredCars = [];
 
     (async () => {
-      currentUser = await requireLogin();
-      if (!currentUser) return;
+      const user = await requireLogin();
+      if (!user) return;
 
-      initUserSidebar('dashboard', currentUser);
+      initUserSidebar("dashboard", user);
 
-      // Topbar date
-      document.getElementById('topbarDate').textContent = new Date().toLocaleDateString('id-ID', {
-        weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
-      });
+      document.getElementById("welcomeName").textContent = (user.full_name || user.email || "").split(" ")[0] || "—";
+      document.getElementById("topbarGreet").textContent = getGreeting() + ", " + ((user.full_name || user.email || "").split(" ")[0] || "");
+      document.getElementById("topbarDate").textContent = new Date().toLocaleDateString("id-ID", { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
 
-      // Welcome name
-      document.getElementById('welcomeName').textContent = currentUser.full_name || currentUser.email || 'Pengguna';
-
-      // Load in parallel
-      await Promise.all([
-        loadMyStats(currentUser.id),
-        loadCars(),
-        loadActiveBooking(currentUser.id),
-      ]);
-
-      document.body.classList.add('ec-ready');
+      await loadCars();
+      document.body.classList.add("ec-ready");
     })();
 
-    // ── STATS ──
-    async function loadMyStats(userId) {
-      const { data } = await supabase.from('bookings').select('status').eq('user_id', userId);
-      if (!data) return;
-      document.getElementById('statTotal').textContent  = data.length;
-      document.getElementById('statActive').textContent = data.filter(b => ['Aktif','Dikonfirmasi','Menunggu Konfirmasi'].includes(b.status)).length;
-      document.getElementById('statDone').textContent   = data.filter(b => b.status === 'Selesai').length;
+    function getGreeting() {
+      const h = new Date().getHours();
+      if (h < 11) return "Selamat Pagi";
+      if (h < 15) return "Selamat Siang";
+      if (h < 18) return "Selamat Sore";
+      return "Selamat Malam";
     }
 
-    // ── ACTIVE BOOKING NOTICE ──
-    async function loadActiveBooking(userId) {
-      const { data } = await supabase
-        .from('bookings')
-        .select('*, cars(nama)')
-        .eq('user_id', userId)
-        .in('status', ['Aktif', 'Dikonfirmasi', 'Menunggu Konfirmasi'])
-        .order('tanggal_mulai', { ascending: true })
-        .limit(1);
-
-      if (!data || data.length === 0) return;
-
-      const b   = data[0];
-      const bar = document.getElementById('activeBookingBar');
-      const car = b.cars?.nama || 'Kendaraan';
-      const status = b.status;
-
-      document.getElementById('activeBookingText').textContent =
-        status === 'Aktif' ? `Sedang menyewa: ${car}` :
-        status === 'Dikonfirmasi' ? `Booking dikonfirmasi: ${car}` :
-        `Menunggu konfirmasi: ${car}`;
-
-      document.getElementById('activeBookingDetail').textContent =
-        `${formatTanggalShort(b.tanggal_mulai)} — ${formatTanggalShort(b.tanggal_selesai)} · ${b.durasi_hari} hari`;
-
-      bar.style.display = 'flex';
-    }
-
-    // ── KENDARAAN ──
     async function loadCars() {
-      const { data, error } = await supabase
-        .from('cars')
-        .select('*')
-        .eq('status', 'Tersedia')
-        .order('created_at', { ascending: false });
+      const { data } = await supabase
+        .from("cars")
+        .select("*")
+        .eq("status", "Tersedia")
+        .order("nama");
 
-      if (error || !data) {
-        document.getElementById('carGrid').innerHTML =
-          '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--color-text-muted);">' +
-          '<i class="bx bxs-error-circle" style="font-size:2.5rem;display:block;margin-bottom:0.5rem;color:var(--color-text-subtle);"></i>' +
-          'Gagal memuat kendaraan.</div>';
-        return;
-      }
-
-      allCars = data;
-      renderCars();
-    }
-
-    function renderCars() {
-      const grid  = document.getElementById('carGrid');
-      const empty = document.getElementById('carEmpty');
-      const count = document.getElementById('carCount');
-
-      const filtered = allCars.filter(c => {
-        const matchFilter = activeFilter === 'all' ||
-          c.tipe === activeFilter ||
-          c.transmisi === activeFilter;
-        const matchSearch = !searchTerm ||
-          c.nama.toLowerCase().includes(searchTerm) ||
-          (c.tipe || '').toLowerCase().includes(searchTerm);
-        return matchFilter && matchSearch;
-      });
-
-      count.textContent = filtered.length + ' kendaraan';
-
-      if (!filtered.length) {
-        grid.innerHTML = '';
-        empty.style.display = 'block';
-        return;
-      }
-
-      empty.style.display = 'none';
-      grid.innerHTML = filtered.map(c => carCardHTML(c)).join('');
-    }
-
-    function carCardHTML(car) {
-      const price = formatRupiah(car.harga_per_hari || 0);
-
-      const imgHTML = car.foto_url
-        ? `<img src="${car.foto_url}" alt="${car.nama}" style="width:100%;height:170px;object-fit:cover;" loading="lazy"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-           <div style="display:none;height:170px;background:linear-gradient(135deg,#e8edf5,#d0dae8);align-items:center;justify-content:center;">
-             <i class='bx bxs-car' style="font-size:3rem;color:#b0bdce;"></i></div>`
-        : `<div style="height:170px;background:linear-gradient(135deg,#e8edf5,#d0dae8);display:flex;align-items:center;justify-content:center;">
-             <i class='bx bxs-car' style="font-size:3rem;color:#b0bdce;"></i></div>`;
-
-      let chips = '';
-      if (car.tipe)      chips += `<span style="font-size:0.69rem;background:#eff6ff;color:#3b82f6;padding:0.18rem 0.5rem;border-radius:6px;font-weight:600;">${car.tipe}</span>`;
-      if (car.transmisi) chips += `<span style="font-size:0.69rem;background:#f0fdf4;color:#16a34a;padding:0.18rem 0.5rem;border-radius:6px;font-weight:600;">${car.transmisi}</span>`;
-      if (car.kapasitas) chips += `<span style="font-size:0.69rem;background:#fef3c7;color:#b45309;padding:0.18rem 0.5rem;border-radius:6px;font-weight:600;"><i class='bx bxs-user' style="vertical-align:middle;font-size:0.7rem;"></i> ${car.kapasitas}</span>`;
-
-      return `
-        <div class="car-card">
-          <div style="position:relative;">
-            ${imgHTML}
-            <span class="badge badge-success" style="position:absolute;top:10px;left:10px;">Tersedia</span>
-          </div>
-          <div style="padding:1.125rem;flex:1;display:flex;flex-direction:column;">
-            <div style="flex:1;">
-              <h4 style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0 0 0.35rem;">${car.nama}</h4>
-              <div style="display:flex;flex-wrap:wrap;gap:0.375rem;margin-bottom:0.875rem;">${chips}</div>
-              ${car.deskripsi ? `<p style="font-size:0.775rem;color:var(--color-text-muted);margin:0 0 0.875rem;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${car.deskripsi}</p>` : ''}
-              <p style="font-size:1rem;font-weight:800;color:var(--color-accent);margin:0;">
-                ${price}<span style="font-size:0.75rem;font-weight:500;color:var(--color-text-muted);">/hari</span>
-              </p>
-            </div>
-            <button onclick="bookCar('${car.id}')"
-              class="btn btn-primary" style="width:100%;margin-top:1rem;justify-content:center;">
-              <i class='bx bx-calendar-plus'></i> Pesan Sekarang
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
-    function setFilter(btn, filter) {
-      document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeFilter = filter;
+      allCars = data || [];
+      filteredCars = [...allCars];
       renderCars();
     }
 
     function filterCars() {
-      searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+      const q = document.getElementById("searchCar").value.toLowerCase().trim();
+      const tipe = document.getElementById("filterTipe").value;
+      filteredCars = allCars.filter(c => {
+        const matchQ = !q || (c.nama||"").toLowerCase().includes(q) || (c.tipe||"").toLowerCase().includes(q) || (c.merek||"").toLowerCase().includes(q);
+        const matchT = !tipe || c.tipe === tipe;
+        return matchQ && matchT;
+      });
       renderCars();
     }
 
-    function bookCar(carId) {
-      window.location.href = `/pages/user/booking.html?car_id=${carId}`;
+    function renderCars() {
+      const grid = document.getElementById("carsGrid");
+      if (!filteredCars.length) {
+        grid.innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:4rem 1rem;">
+            <i class='bx bxs-car' style="font-size:3rem;color:var(--color-text-subtle);display:block;"></i>
+            <p style="color:var(--color-text-muted);margin-top:0.75rem;font-weight:500;">Tidak ada kendaraan ditemukan</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filteredCars.map(car => `
+        <div class="car-card" onclick="openCarDetail('${car.id}')" style="cursor:pointer;">
+          ${car.foto_url
+            ? `<img src="${car.foto_url}" class="car-img" alt="${car.nama}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><div class="car-img-placeholder" style="display:none;"><i class='bx bxs-car' style="font-size:3rem;color:#93c5fd;"></i></div>`
+            : `<div class="car-img-placeholder"><i class='bx bxs-car' style="font-size:3rem;color:#93c5fd;"></i></div>`
+          }
+          <div style="padding:1rem;flex:1;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:start;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem;">
+              <div style="min-width:0;">
+                <p style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0 0 0.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${car.nama}</p>
+                <p style="font-size:0.725rem;color:var(--color-text-muted);margin:0;">${car.tipe||""} ${car.transmisi ? "· "+car.transmisi : ""}</p>
+              </div>
+              <span style="flex-shrink:0;background:#dcfce7;color:#166534;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:999px;">Tersedia</span>
+            </div>
+
+            <div style="display:flex;flex-wrap:wrap;gap:0.375rem;margin-bottom:0.875rem;">
+              ${car.kapasitas ? `<span class="spec-chip"><i class='bx bxs-user'></i>${car.kapasitas} orang</span>` : ""}
+              ${car.tahun ? `<span class="spec-chip"><i class='bx bx-calendar'></i>${car.tahun}</span>` : ""}
+              ${car.warna ? `<span class="spec-chip"><i class='bx bx-palette'></i>${car.warna}</span>` : ""}
+              ${car.bahan_bakar ? `<span class="spec-chip"><i class='bx bx-gas-pump'></i>${car.bahan_bakar}</span>` : ""}
+            </div>
+
+            <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
+              <div>
+                <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0 0 0.1rem;">Harga sewa</p>
+                <p style="font-size:1rem;font-weight:800;color:var(--color-accent);margin:0;">${formatRupiah(car.harga_per_hari||0)}<span style="font-size:0.65rem;font-weight:400;color:var(--color-text-muted)">/hari</span></p>
+              </div>
+              <a href="/pages/user/booking.html?car_id=${car.id}" onclick="event.stopPropagation();" class="btn btn-accent btn-sm" style="flex-shrink:0;">
+                Booking
+              </a>
+            </div>
+          </div>
+        </div>
+      `).join("");
     }
+
+    function openCarDetail(carId) {
+      const car = allCars.find(c => c.id === carId);
+      if (!car) return;
+
+      document.getElementById("carModalContent").innerHTML = `
+        ${car.foto_url
+          ? `<img src="${car.foto_url}" style="width:100%;height:220px;object-fit:cover;border-radius:24px 24px 0 0;display:block;" onerror="this.style.display='none'" />`
+          : `<div style="width:100%;height:160px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border-radius:24px 24px 0 0;display:flex;align-items:center;justify-content:center;"><i class='bx bxs-car' style="font-size:4rem;color:#93c5fd;"></i></div>`
+        }
+        <div style="padding:1.5rem;">
+          <div style="display:flex;align-items:start;justify-content:space-between;gap:0.5rem;margin-bottom:0.75rem;">
+            <div>
+              <h3 style="font-size:1.1rem;font-weight:800;color:var(--color-primary);margin:0 0 0.2rem;">${car.nama}</h3>
+              <p style="font-size:0.8rem;color:var(--color-text-muted);margin:0;">${car.tipe||""} ${car.transmisi ? "· "+car.transmisi : ""}</p>
+            </div>
+            <button onclick="closeCarModal()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--color-text-muted);flex-shrink:0;margin-top:-4px;">✕</button>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem;">
+            ${carSpec("Kapasitas", car.kapasitas ? car.kapasitas + " orang" : "—", "bxs-user")}
+            ${carSpec("Tahun", car.tahun || "—", "bx-calendar")}
+            ${carSpec("Bahan Bakar", car.bahan_bakar || "—", "bx-gas-pump")}
+            ${carSpec("Transmisi", car.transmisi || "—", "bx-cog")}
+            ${carSpec("Warna", car.warna || "—", "bx-palette")}
+            ${carSpec("Plat Nomor", car.no_plat || "—", "bx-id-card")}
+          </div>
+
+          ${car.deskripsi ? `<p style="font-size:0.825rem;color:var(--color-text-muted);line-height:1.6;margin-bottom:1.25rem;">${car.deskripsi}</p>` : ""}
+
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem;background:var(--color-bg);border-radius:var(--radius-md);margin-bottom:1.25rem;">
+            <div>
+              <p style="font-size:0.725rem;color:var(--color-text-muted);margin:0 0 0.1rem;">Harga sewa per hari</p>
+              <p style="font-size:1.375rem;font-weight:800;color:var(--color-accent);margin:0;">${formatRupiah(car.harga_per_hari||0)}</p>
+            </div>
+            <span style="background:#dcfce7;color:#166534;font-size:0.725rem;font-weight:700;padding:0.35rem 0.75rem;border-radius:999px;">Tersedia</span>
+          </div>
+
+          <a href="/pages/user/booking.html?car_id=${car.id}" class="btn btn-accent" style="width:100%;justify-content:center;font-size:0.9rem;">
+            <i class='bx bxs-calendar-plus'></i> Booking Kendaraan Ini
+          </a>
+        </div>
+      `;
+
+      document.getElementById("carModal").style.display = "flex";
+    }
+
+    function carSpec(label, val, icon) {
+      return `
+        <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:0.75rem;">
+          <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.2rem;">
+            <i class='bx ${icon}' style="font-size:0.85rem;color:var(--color-primary-mid);"></i>
+            <span style="font-size:0.675rem;color:var(--color-text-muted);font-weight:600;">${label}</span>
+          </div>
+          <p style="font-size:0.825rem;font-weight:700;color:var(--color-text);margin:0;">${val}</p>
+        </div>
+      `;
+    }
+
+    function closeCarModal() {
+      document.getElementById("carModal").style.display = "none";
+    }
+
+    document.getElementById("carModal").addEventListener("click", e => {
+      if (e.target === e.currentTarget) closeCarModal();
+    });
   </script>
 </body>
 </html>
