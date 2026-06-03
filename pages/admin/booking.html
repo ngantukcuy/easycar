@@ -601,7 +601,7 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
   <script src="/services/supabase.js"></script>
-  <script src="/components/user-sidebar.js"></script>
+  <script src="/components/admin-sidebar.js"></script>
   <script src="/utils/ui.js"></script>
 
   <script>
@@ -618,9 +618,9 @@
 
     // ── INIT ──
     (async () => {
-      currentUser = await requireLogin();
+      currentUser = await requireAdmin();
       if (!currentUser) return;
-      initUserSidebar("booking", currentUser);
+      initAdminSidebar("book-view", currentUser);
       await loadVehicles();
 
       // Pre-fill email dari profile

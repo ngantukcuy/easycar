@@ -5,7 +5,7 @@
 // =====================================================
 
 const ADMIN_SIDEBAR_HTML = `
-<aside id="sidebar" style="
+<aside id="sidebar" class="ec-admin-sidebar" style="
   position:fixed;left:0;top:0;height:100vh;width:260px;
   background:linear-gradient(180deg,#0f2347 0%,#16213e 100%);
   display:flex;flex-direction:column;z-index:50;
@@ -27,33 +27,30 @@ const ADMIN_SIDEBAR_HTML = `
   <nav class="sidebar-scroll" style="flex:1;padding:1rem 0;overflow-y:auto;">
     <div style="padding:0 1rem 0.5rem;color:rgba(255,255,255,0.25);font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Dashboard</div>
 
-    <a href="/pages/admin/dashboard.html" class="sb-link" data-page="dashboard">
+    <a href="/pages/admin/dashboard.html" class="asb-link" data-page="dashboard">
       <i class='bx bxs-dashboard'></i><span>Dashboard</span>
     </a>
 
     <div style="padding:1rem 1rem 0.5rem;color:rgba(255,255,255,0.25);font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-top:0.5rem;">Manajemen</div>
 
-    <a href="/pages/admin/vehicles.html" class="sb-link" data-page="vehicles">
+    <a href="/pages/admin/vehicles.html" class="asb-link" data-page="vehicles">
       <i class='bx bxs-car'></i><span>Kendaraan</span>
     </a>
-    <a href="/pages/admin/book-view.html" class="sb-link" data-page="book-view">
+    <a href="/pages/admin/book-view.html" class="asb-link" data-page="book-view">
       <i class='bx bxs-calendar-check'></i><span>Pemesanan</span>
     </a>
-    <a href="/pages/admin/booking.html" class="sb-link" data-page="booking-baru" style="margin-left:0.5rem;">
-      <i class='bx bx-plus-circle'></i><span>+ Buat Booking</span>
-    </a>
-    <a href="/pages/admin/users.html" class="sb-link" data-page="users">
+    <a href="/pages/admin/users.html" class="asb-link" data-page="users">
       <i class='bx bxs-user-account'></i><span>Pengguna</span>
     </a>
-    <a href="/pages/admin/promos.html" class="sb-link" data-page="promos">
+    <a href="/pages/admin/promos.html" class="asb-link" data-page="promos">
       <i class='bx bxs-tag'></i><span>Promo & Diskon</span>
     </a>
-    <a href="/pages/admin/reports.html" class="sb-link" data-page="reports">
+    <a href="/pages/admin/reports.html" class="asb-link" data-page="reports">
       <i class='bx bxs-bar-chart-alt-2'></i><span>Laporan</span>
     </a>
 
     <div style="padding:1rem 1rem 0.5rem;color:rgba(255,255,255,0.25);font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-top:0.5rem;">Akun</div>
-    <a href="/pages/admin/settings.html" class="sb-link" data-page="settings">
+    <a href="/pages/admin/settings.html" class="asb-link" data-page="settings">
       <i class='bx bxs-cog'></i><span>Pengaturan</span>
     </a>
   </nav>
@@ -85,7 +82,7 @@ const ADMIN_SIDEBAR_HTML = `
 
 const ADMIN_SB_STYLE = `
   <style>
-    .sb-link {
+    .asb-link {
       display:flex;align-items:center;gap:0.75rem;
       padding:0.625rem 1rem;margin:0 0.5rem;
       border-radius:10px;
@@ -95,9 +92,9 @@ const ADMIN_SB_STYLE = `
       border-left:2px solid transparent;
       transition:all 0.18s;
     }
-    .sb-link:hover { color:#fff;background:rgba(255,255,255,0.07); }
-    .sb-link.active { color:#fff;background:rgba(232,93,4,0.15);border-left-color:#e85d04; }
-    .sb-link i { font-size:1.1rem;flex-shrink:0; }
+    .asb-link:hover { color:#fff;background:rgba(255,255,255,0.07); }
+    .asb-link.active { color:#fff;background:rgba(232,93,4,0.15);border-left-color:#e85d04; }
+    .asb-link i { font-size:1.1rem;flex-shrink:0; }
   </style>
 `;
 
@@ -109,7 +106,7 @@ function initAdminSidebar(activePage, user) {
   document.body.insertBefore(wrapper, document.body.firstChild);
 
   if (activePage) {
-    document.querySelectorAll(".sb-link").forEach(link => {
+    document.querySelectorAll(".asb-link").forEach(link => {
       if (link.dataset.page === activePage) link.classList.add("active");
     });
   }

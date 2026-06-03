@@ -32,7 +32,7 @@
       <!-- Filter tabs -->
       <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem;">
         <button class="filter-chip active" data-status="all"          onclick="setFilter(this,'all')">Semua</button>
-        <button class="filter-chip"        data-status="Menunggu"     onclick="setFilter(this,'Menunggu')">Menunggu</button>
+        <button class="filter-chip"        data-status="Menunggu Konfirmasi" onclick="setFilter(this,'Menunggu Konfirmasi')">Menunggu</button>
         <button class="filter-chip"        data-status="Dikonfirmasi" onclick="setFilter(this,'Dikonfirmasi')">Dikonfirmasi</button>
         <button class="filter-chip"        data-status="Aktif"        onclick="setFilter(this,'Aktif')">Aktif</button>
         <button class="filter-chip"        data-status="Selesai"      onclick="setFilter(this,'Selesai')">Selesai</button>
@@ -64,6 +64,9 @@
         <a id="waAdminBtn" href="#" target="_blank" class="btn btn-sm" style="width:100%;justify-content:center;background:#16a34a;color:#fff;border-color:#16a34a;display:none;">
           <i class='bx bxl-whatsapp'></i> Hubungi Admin via WhatsApp
         </a>
+        <button id="cetakBtn" onclick="cetakInvoice()" class="btn btn-ghost" style="width:100%;justify-content:center;display:none;">
+          <i class='bx bx-printer'></i> Cetak Invoice
+        </button>
         <button id="cancelBtn" onclick="cancelBooking()" class="btn btn-danger" style="width:100%;justify-content:center;display:none;">
           <i class='bx bx-x-circle'></i> Batalkan Pesanan
         </button>
@@ -148,7 +151,7 @@
         ? `<img src="${car.foto_url}" style="width:80px;height:60px;object-fit:cover;border-radius:var(--radius-md);flex-shrink:0;" />`
         : `<div style="width:80px;height:60px;background:var(--color-bg);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class='bx bxs-car' style="font-size:1.5rem;color:var(--color-text-subtle);"></i></div>`;
       const kode  = o.kode_booking || ("BK" + o.id.slice(-6).toUpperCase());
-      const canCancel = ["Menunggu"].includes(o.status);
+      const canCancel = ["Menunggu", "Menunggu Konfirmasi"].includes(o.status);
 
       return `
         <div class="card order-card" style="padding:1.25rem;cursor:pointer;" onclick="openDetail('${o.id}')">
@@ -188,7 +191,7 @@
       openBookingId = id;
       const car   = o.cars || {};
       const kode  = o.kode_booking || ("BK" + o.id.slice(-6).toUpperCase());
-      const canCancel = ["Menunggu"].includes(o.status);
+      const canCancel = ["Menunggu", "Menunggu Konfirmasi"].includes(o.status);
 
       document.getElementById("detailContent").innerHTML = `
         <div style="display:flex;flex-direction:column;gap:0.875rem;">
@@ -215,6 +218,7 @@
       `;
 
       document.getElementById("cancelBtn").style.display = canCancel ? "flex" : "none";
+      document.getElementById("cetakBtn").style.display = "flex";
 
       // WA button — always show so user can contact admin for any reason
       const ADMIN_WA = "6282276100996"; // ganti dengan nomor WA admin
@@ -243,6 +247,98 @@
     document.getElementById("detailOverlay").addEventListener("click", e => {
       if (e.target === e.currentTarget) closeDetail();
     });
+
+    function cetakInvoice() {
+      const o = allOrders.find(x => x.id === openBookingId);
+      if (!o) return;
+      const car = o.cars || {};
+      const kode = o.kode_booking || ("BK" + o.id.slice(-6).toUpperCase());
+      const total = o.total_harga || 0;
+      const dp = o.dp_amount || 0;
+      const deposit = o.deposit_amount || 0;
+      const bayarNow = o.sudah_dibayar || (dp + deposit);
+      const sisa = o.sisa_pelunasan || (total - dp);
+
+      const w = window.open('', '_blank', 'width=700,height=900');
+      w.document.write(`
+        <!DOCTYPE html><html><head>
+        <meta charset="UTF-8"/>
+        <title>Invoice ${kode}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+        <style>
+          body{font-family:'Poppins',sans-serif;background:#f1f5f9;margin:0;padding:2rem;}
+          .inv{max-width:620px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.1);}
+          .inv-header{padding:1.5rem 2rem;border-bottom:2px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+          .brand{display:flex;align-items:center;gap:0.625rem;}
+          .brand-icon{width:36px;height:36px;background:#e85d04;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;}
+          .brand-name{font-weight:800;font-size:1.125rem;color:#0f2347;}
+          .brand-sub{font-size:0.7rem;color:#94a3b8;}
+          .inv-body{padding:1.5rem 2rem;}
+          .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+          .label{font-size:0.65rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 0.5rem;}
+          table{width:100%;border-collapse:collapse;font-size:0.8125rem;margin-bottom:1.5rem;}
+          th{text-align:left;padding:0.625rem 0.75rem;font-weight:600;color:#94a3b8;border-bottom:2px solid #e2e8f0;}
+          td{padding:0.5rem 0.75rem;border-bottom:1px solid #f1f5f9;}
+          .badge-warn{background:#fff7ed;border:1.5px solid #fed7aa;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;}
+          .footer{border-top:1px solid #e2e8f0;padding-top:1rem;font-size:0.7rem;color:#94a3b8;display:flex;justify-content:space-between;}
+          @media print{body{background:white;padding:0;} @page{margin:1.5cm;size:A4;}}
+        </style>
+        </head><body>
+        <div class="inv">
+          <div class="inv-header">
+            <div class="brand">
+              <div class="brand-icon">🚗</div>
+              <div><div class="brand-name">Easy<span style="color:#e85d04">Car</span></div><div class="brand-sub">Rental Kendaraan</div></div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;">INVOICE / TANDA TERIMA BOOKING</div>
+              <div style="font-size:1rem;font-weight:800;color:#0f2347;font-family:monospace;">${kode}</div>
+            </div>
+          </div>
+          <div class="inv-body">
+            <div class="grid2">
+              <div>
+                <div class="label">Data Pemesan</div>
+                <div style="font-weight:700;color:#0f2347;font-size:0.875rem;">${o.nama_pemesan || '—'}</div>
+                <div style="font-size:0.75rem;color:#64748b;">KTP: ${o.no_ktp || '—'}</div>
+                <div style="font-size:0.75rem;color:#64748b;">WA: ${o.no_hp || '—'}</div>
+                <div style="font-size:0.75rem;color:#64748b;">${o.alamat || ''}</div>
+              </div>
+              <div>
+                <div class="label">Detail Sewa</div>
+                <div style="font-weight:700;color:#0f2347;font-size:0.875rem;">${car.nama || '—'}</div>
+                <div style="font-size:0.75rem;color:#64748b;">${o.tanggal_mulai || '—'} s/d ${o.tanggal_selesai || '—'}</div>
+                <div style="font-size:0.75rem;color:#64748b;">${o.durasi_hari || '—'} hari</div>
+                <div style="font-size:0.7rem;color:#94a3b8;">Dibuat: ${new Date(o.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</div>
+              </div>
+            </div>
+            <table>
+              <thead><tr><th>Keterangan</th><th style="text-align:right">Jumlah</th></tr></thead>
+              <tbody>
+                <tr><td>Total Sewa (${o.durasi_hari||'—'} hari)</td><td style="text-align:right;font-weight:600">${new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(total)}</td></tr>
+                ${dp > 0 ? '<tr><td>DP Dibayar (30%)</td><td style="text-align:right;font-weight:600;color:#e85d04">'+new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(dp)+'</td></tr>' : ''}
+                <tr><td>Deposit</td><td style="text-align:right;font-weight:600;color:#e85d04">${new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(deposit)}</td></tr>
+                <tr style="background:#f8fafc;font-weight:700"><td>Total Dibayar Sekarang</td><td style="text-align:right;color:#e85d04;font-size:1rem">${new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(bayarNow)}</td></tr>
+                <tr><td style="color:#64748b;font-size:0.75rem">Sisa Pelunasan saat Pengambilan</td><td style="text-align:right;color:#64748b;font-size:0.75rem">${new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(sisa)}</td></tr>
+              </tbody>
+            </table>
+            <div class="badge-warn">
+              <div style="font-size:0.75rem;font-weight:700;color:#9a3412">STATUS: ${o.status || 'MENUNGGU KONFIRMASI'}</div>
+              <div style="font-size:0.75rem;color:#c2410c">📌 Bawa invoice ini saat pengambilan kendaraan</div>
+            </div>
+            <div class="footer">
+              <span>EasyCar — Pekanbaru, Riau</span>
+              <span>Dicetak: ${new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</span>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:1.5rem;">
+          <button onclick="window.print()" style="padding:0.625rem 1.5rem;background:#0f2347;color:#fff;border:none;border-radius:10px;font-family:'Poppins',sans-serif;font-weight:600;cursor:pointer;font-size:0.875rem;">🖨️ Cetak / Simpan PDF</button>
+        </div>
+        </body></html>
+      `);
+      w.document.close();
+    }
 
     async function cancelBooking() {
       if (!openBookingId) return;
