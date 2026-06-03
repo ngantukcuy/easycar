@@ -29,10 +29,10 @@ const ADMIN_SIDEBAR_HTML = `
     <a href="/pages/admin/dashboard.html" class="sb-link" data-page="dashboard">
       <i class='bx bxs-home'></i><span>Dashboard</span>
     </a>
-    <a href="/pages/admin/booking.html" class="sb-link" data-page="bookings">
+    <a href="/pages/admin/book-view.html" class="sb-link" data-page="book-views">
       <i class='bx bxs-calendar-check'></i><span>Manajemen Booking</span>
     </a>
-    <a href="/pages/admin/book-view.html" class="sb-link" data-page="book-view">
+    <a href="/pages/admin/booking.html" class="sb-link" data-page="booking">
       <i class='bx bxs-calendar-plus'></i><span>Buat Booking</span>
     </a>
 
