@@ -193,7 +193,7 @@
     (async () => {
       currentAdminUser = await requireAdmin();
       if (!currentAdminUser) return;
-      initAdminSidebar("bookings", currentAdminUser);
+      initAdminSidebar("book-views", currentAdminUser);
       await loadBookings();
       document.body.classList.add("ec-ready");
     })();
@@ -411,7 +411,9 @@
     async function updateStatus(id) {
       const newStatus = document.getElementById("newStatus").value;
       showLoading("Menyimpan...");
-      const { error } = await supabase.from("bookings").update({ status: newStatus }).eq("id", id);
+      const updateData = { status: newStatus };
+      if (newStatus === "Selesai") updateData.tanggal_selesai = new Date().toISOString().slice(0, 10);
+      const { error } = await supabase.from("bookings").update(updateData).eq("id", id);
       hideLoading();
       if (error) { showToast("Gagal: " + error.message, "error"); return; }
       showToast("Status diperbarui!", "success");

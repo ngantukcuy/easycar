@@ -622,7 +622,7 @@
     (async () => {
       currentUser = await requireAdmin();
       if (!currentUser) return;
-      initAdminSidebar("book-view", currentUser);
+      initAdminSidebar("booking", currentUser);
       await loadVehicles();
 
       // Pre-fill email dari profile

@@ -186,7 +186,7 @@
         .from("bookings")
         .select("*, profiles(full_name), cars(nama)")
         .eq("status","Selesai")
-        .order("tanggal_selesai", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(10);
 
       const tbody = document.getElementById("completedTable");
