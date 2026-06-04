@@ -1020,25 +1020,19 @@
     }
 
     async function uploadBuktiBayar(file, bookingId) {
-      const ext  = file.name.split('.').pop().toLowerCase();
-      const path = `${bookingId}/bukti-bayar-${Date.now()}.${ext}`;
+      const ext    = file.name.split('.').pop().toLowerCase();
+      const path   = `${bookingId}/bukti-bayar-${Date.now()}.${ext}`;
+      const bucket = 'booking-documents'; // bucket utama yang pasti ada
 
-      // Coba bucket 'payment-proofs' dulu, fallback ke 'booking-documents'
-      let publicUrl = null;
-      for (const bucket of ['payment-proofs', 'booking-documents']) {
-        const { data, error } = await supabase.storage
-          .from(bucket)
-          .upload(path, file, { upsert: true, contentType: file.type });
+      const { error } = await supabase.storage
+        .from(bucket)
+        .upload(path, file, { upsert: true, contentType: file.type });
 
-        if (!error) {
-          const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
-          publicUrl = urlData?.publicUrl || null;
-          break;
-        }
-        console.warn(`Upload ke bucket '${bucket}' gagal:`, error.message);
-      }
+      if (error) throw new Error(`Storage error (${bucket}): ${error.message}`);
 
-      if (!publicUrl) throw new Error("Gagal upload bukti bayar ke semua bucket.");
+      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+      const publicUrl = urlData?.publicUrl;
+      if (!publicUrl) throw new Error('Gagal mendapatkan URL publik file.');
       return publicUrl;
     }
 
@@ -1132,24 +1126,34 @@
       if (!isTunai && buktiBayarFile) {
         try {
           buktiBayarUrl = await uploadBuktiBayar(buktiBayarFile, bookingId);
-        } catch (e) {
-          console.error('Upload bukti bayar gagal:', e);
-          // Jangan hentikan proses — booking sudah masuk, user bisa upload ulang dari halaman pesanan
+        } catch (uploadErr) {
+          console.error('[EasyCar] Upload bukti bayar gagal:', uploadErr);
+          errEl.textContent = 'Upload bukti pembayaran gagal: ' + (uploadErr.message || 'Coba lagi.');
+          errEl.style.display = 'block';
+          setButtonLoading(btn, false);
+          return; // hentikan — jangan lanjut ke step 7 tanpa bukti
         }
-        const updatePayload = {
-          status:            'Menunggu Konfirmasi',
-          status_pembayaran: 'Menunggu Konfirmasi',
-          metode_pembayaran: 'qris',
-        };
-        if (buktiBayarUrl) updatePayload.bukti_bayar_url = buktiBayarUrl;
-        const { error: updErr } = await supabase.from('bookings').update(updatePayload).eq('id', bookingId);
-        if (updErr) console.error('Gagal update booking setelah upload bukti:', updErr.message);
+
+        const { error: updErr } = await supabase
+          .from('bookings')
+          .update({
+            bukti_bayar_url:   buktiBayarUrl,
+            status_pembayaran: 'Menunggu Konfirmasi',
+          })
+          .eq('id', bookingId);
+
+        if (updErr) {
+          console.error('[EasyCar] Gagal simpan bukti ke bookings:', updErr.message);
+          errEl.textContent = 'File terupload tapi gagal disimpan ke database: ' + updErr.message;
+          errEl.style.display = 'block';
+          setButtonLoading(btn, false);
+          return;
+        }
       } else if (isTunai) {
-        await supabase.from('bookings').update({
-          status:            'Menunggu Pembayaran',
-          status_pembayaran: 'Belum Bayar',
-          metode_pembayaran: 'tunai',
-        }).eq('id', bookingId);
+        await supabase
+          .from('bookings')
+          .update({ status_pembayaran: 'Belum Bayar' })
+          .eq('id', bookingId);
       }
 
       setButtonLoading(btn, false);

@@ -110,8 +110,14 @@ window.EasyCarRealtime = (function () {
   // ── SUBSCRIBE UNTUK USER ─────────────────────────────
   // Pantau perubahan booking milik user yang sedang login
   function subscribeUserBookings(userId, callbacks = {}) {
+    const channelName = "user-bookings-" + userId;
+
+    // Hindari duplikat channel
+    const existing = _channels.find(c => c.topic === channelName);
+    if (existing) { supabase.removeChannel(existing); _channels = _channels.filter(c => c !== existing); }
+
     const ch = supabase
-      .channel("user-bookings-" + userId)
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
@@ -164,11 +170,20 @@ window.EasyCarRealtime = (function () {
             if (callbacks.onUpdate) callbacks.onUpdate(payload);
           }
 
-          // Global callback agar halaman bisa re-render tanpa reload
           if (_onBookingUpdate) _onBookingUpdate(payload);
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === "SUBSCRIBED") {
+          console.log("[EasyCarRealtime] ✅ User channel terhubung:", channelName);
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[EasyCarRealtime] ❌ User channel error:", status, err);
+          // Retry sekali setelah 5 detik
+          setTimeout(() => subscribeUserBookings(userId, callbacks), 5000);
+        } else {
+          console.log("[EasyCarRealtime] User channel status:", status);
+        }
+      });
 
     _channels.push(ch);
     return ch;
@@ -177,8 +192,13 @@ window.EasyCarRealtime = (function () {
   // ── SUBSCRIBE UNTUK ADMIN ────────────────────────────
   // Pantau SEMUA booking baru untuk admin
   function subscribeAllBookings(callbacks = {}) {
+    const channelName = "admin-all-bookings";
+
+    const existing = _channels.find(c => c.topic === channelName);
+    if (existing) { supabase.removeChannel(existing); _channels = _channels.filter(c => c !== existing); }
+
     const ch = supabase
-      .channel("admin-all-bookings")
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
@@ -190,8 +210,7 @@ window.EasyCarRealtime = (function () {
           const booking = payload.new || {};
 
           if (payload.eventType === "INSERT") {
-            // Fetch nama pemesan & kendaraan
-            let carName    = booking.car_id   ? "—" : "—";
+            let carName    = "—";
             let personName = booking.nama_pemesan || "Pelanggan baru";
 
             try {
@@ -216,7 +235,16 @@ window.EasyCarRealtime = (function () {
           if (_onBookingUpdate) _onBookingUpdate(payload);
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === "SUBSCRIBED") {
+          console.log("[EasyCarRealtime] ✅ Admin channel terhubung:", channelName);
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[EasyCarRealtime] ❌ Admin channel error:", status, err);
+          setTimeout(() => subscribeAllBookings(callbacks), 5000);
+        } else {
+          console.log("[EasyCarRealtime] Admin channel status:", status);
+        }
+      });
 
     _channels.push(ch);
     return ch;
