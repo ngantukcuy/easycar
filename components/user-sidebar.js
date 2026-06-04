@@ -237,12 +237,13 @@ function initUserSidebar(activePage, user) {
   const overlay = document.getElementById("sbOverlay");
   const hamburger = document.getElementById("hamburgerBtn");
 
-  // Set active link
-  if (activePage) {
-    document.querySelectorAll(".sb-link").forEach(link => {
-      if (link.dataset.page === activePage) link.classList.add("active");
+  // Set active link + close sidebar on mobile click
+  document.querySelectorAll(".sb-link").forEach(link => {
+    if (activePage && link.dataset.page === activePage) link.classList.add("active");
+    link.addEventListener("click", () => {
+      if (window.innerWidth < 1024) closeSidebar();
     });
-  }
+  });
 
   // Fill user info
   if (user) {

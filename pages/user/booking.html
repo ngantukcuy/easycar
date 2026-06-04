@@ -60,7 +60,8 @@
     @media (max-width: 600px) {
       .grid-2col  { grid-template-columns: 1fr !important; }
       .grid-3col  { grid-template-columns: 1fr 1fr !important; }
-      .grid-step6 { grid-template-columns: 1fr !important; max-width:100% !important; }
+      .grid-step6 { grid-template-columns: 1fr !important; max-width:100% !important; gap:0.875rem !important; }
+      .grid-step6 .card { padding:1rem !important; }
       .wizard-step .lbl { display:none; } /* on very small screens, hide step labels */
       .wizard-step.active .lbl { display:block; } /* show only active */
     }
@@ -437,9 +438,23 @@
         <div style="max-width:720px;">
         <div style="margin-bottom:1.25rem;">
           <h3 style="font-size:1.125rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">Pembayaran DP & Deposit</h3>
-          <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Scan QRIS dan upload bukti pembayaran</p>
+          <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Pilih metode pembayaran</p>
         </div>
-        <div class="grid-step6">
+
+        <!-- Payment method selector -->
+        <div style="display:flex;gap:0.75rem;margin-bottom:1.25rem;">
+          <button id="payMethodQris" onclick="selectPayMethod('qris')"
+            class="btn" style="flex:1;justify-content:center;background:var(--color-accent);color:#fff;border-color:var(--color-accent);">
+            <i class='bx bx-qr'></i> QRIS / Transfer
+          </button>
+          <button id="payMethodTunai" onclick="selectPayMethod('tunai')"
+            class="btn btn-ghost" style="flex:1;justify-content:center;">
+            <i class='bx bx-money'></i> Bayar Tunai (saat ambil)
+          </button>
+        </div>
+
+        <!-- QRIS panel -->
+        <div id="payPanelQris" class="grid-step6">
           <!-- QRIS -->
           <div class="card" style="padding:1.5rem;text-align:center;">
             <h4 style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin:0 0 1rem;">Scan QRIS untuk Bayar</h4>
@@ -508,7 +523,36 @@
               </button>
             </div>
           </div>
-        </div>
+        </div><!-- end payPanelQris grid -->
+
+        <!-- Tunai panel -->
+        <div id="payPanelTunai" style="display:none;">
+          <div class="card" style="padding:1.5rem;">
+            <div style="text-align:center;padding:1rem 0 1.25rem;">
+              <i class='bx bx-money' style="font-size:3rem;color:var(--color-accent);"></i>
+              <h4 style="font-weight:700;color:var(--color-primary);font-size:1rem;margin:0.75rem 0 0.25rem;">Bayar Tunai saat Pengambilan</h4>
+              <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">DP dan deposit dibayar cash langsung ke admin saat mengambil kendaraan.</p>
+            </div>
+            <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:1rem;margin-bottom:1.25rem;font-size:0.8125rem;">
+              <div class="biaya-row" style="padding:0.3rem 0;border-bottom:1px solid var(--color-border);">
+                <span style="color:var(--color-text-muted);">Kendaraan</span>
+                <span id="payCarNameTunai" style="font-weight:600;">—</span>
+              </div>
+              <div class="biaya-row" style="padding:0.3rem 0;border-bottom:1px solid var(--color-border);">
+                <span style="color:var(--color-text-muted);">Total Bayar saat Ambil</span>
+                <span id="payTotalTunai" style="font-weight:800;color:var(--color-accent);">—</span>
+              </div>
+            </div>
+            <div id="payErrorTunai" style="display:none;background:#fef2f2;color:#dc2626;border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:0.875rem;font-weight:500;margin-bottom:0.75rem;"></div>
+            <div style="display:flex;gap:0.75rem;">
+              <button onclick="goStep(5)" class="btn btn-ghost"><i class='bx bx-arrow-back'></i> Kembali</button>
+              <button id="submitBtnTunai" onclick="submitBooking()" class="btn btn-accent" style="flex:1;justify-content:center;">
+                <i class='bx bxs-calendar-check'></i> Konfirmasi Booking
+              </button>
+            </div>
+          </div>
+        </div><!-- end payPanelTunai -->
+
         </div><!-- end max-width wrapper -->
       </div>
 
@@ -568,7 +612,8 @@
     let allCars     = [];
     let fpStart, fpEnd;
     let currentUser;
-    let selectedJaminan = 'kendaraan';
+    let selectedJaminan  = 'kendaraan';
+    let selectedPayMethod = 'qris'; // 'qris' | 'tunai'
 
     // Kumpulan file yang dipilih user
     const docFiles = {};
@@ -595,9 +640,11 @@
         if (car) { selectCar(car); goStep(2); }
       }
       document.body.classList.add("ec-ready");
-    })();
 
-    // ── VEHICLES ──
+      // Realtime: notifikasi user saat status booking-nya diupdate admin
+      EasyCarRealtime.subscribeUserBookings(currentUser.id, {
+        onUpdate: b => showToast(`🔔 Status booking ${b.kode_booking || ''} diupdate: ${b.status || ''}`, "info"),
+      });
     async function loadVehicles() {
       const { data } = await supabase.from("cars").select("*").eq("status", "Tersedia").order("nama");
       allCars = data || [];
@@ -823,6 +870,50 @@
       document.getElementById('biayaSisa').textContent         = formatRupiah(sisa);
     }
 
+    // ── PAYMENT METHOD SELECTOR ──
+    function selectPayMethod(method) {
+      selectedPayMethod = method;
+      const qrisBtn  = document.getElementById('payMethodQris');
+      const tunaiBtn = document.getElementById('payMethodTunai');
+      const qrisPanel  = document.getElementById('payPanelQris');
+      const tunaiPanel = document.getElementById('payPanelTunai');
+
+      if (method === 'qris') {
+        qrisBtn.style.background  = 'var(--color-accent)';
+        qrisBtn.style.color       = '#fff';
+        qrisBtn.style.borderColor = 'var(--color-accent)';
+        tunaiBtn.style.background = '';
+        tunaiBtn.style.color      = '';
+        tunaiBtn.style.borderColor = '';
+        qrisPanel.style.display  = '';
+        tunaiPanel.style.display = 'none';
+        // Bukti wajib untuk QRIS
+        document.getElementById('submitBtn').disabled = !buktiBayarFile;
+      } else {
+        tunaiBtn.style.background  = 'var(--color-accent)';
+        tunaiBtn.style.color       = '#fff';
+        tunaiBtn.style.borderColor = 'var(--color-accent)';
+        qrisBtn.style.background  = '';
+        qrisBtn.style.color       = '';
+        qrisBtn.style.borderColor = '';
+        qrisPanel.style.display  = 'none';
+        tunaiPanel.style.display = '';
+        // Tunai: isi ringkasan
+        if (selectedCar) {
+          document.getElementById('payCarNameTunai').textContent = selectedCar.nama;
+          const s = document.getElementById('startDate').value;
+          const e = document.getElementById('endDate').value;
+          if (s && e) {
+            const days    = Math.round((new Date(e) - new Date(s)) / 86400000);
+            const total   = (selectedCar.harga_per_hari || 0) * days;
+            const dp      = selectedJaminan === 'kendaraan' ? Math.round(total * 0.30) : 0;
+            const deposit = selectedJaminan === 'kendaraan' ? 500000 : 2000000;
+            document.getElementById('payTotalTunai').textContent = formatRupiah(dp + deposit);
+          }
+        }
+      }
+    }
+
     function validateAndGoStep6() {
       const errEl = document.getElementById('jaminanError');
       errEl.style.display = 'none';
@@ -852,6 +943,13 @@
       document.getElementById('payTotal').textContent   = formatRupiah(bayarNow);
       document.getElementById('nominalBayarText').textContent = formatRupiah(bayarNow);
       document.getElementById('nominalHint').textContent     = formatRupiah(bayarNow);
+
+      // Tunai panel
+      document.getElementById('payCarNameTunai').textContent = selectedCar.nama;
+      document.getElementById('payTotalTunai').textContent   = formatRupiah(bayarNow);
+
+      // Reset ke metode default (qris) setiap masuk step 6
+      selectPayMethod(selectedPayMethod || 'qris');
 
       goStep(6);
     }
@@ -890,7 +988,7 @@
         reader.readAsDataURL(buktiBayarFile);
       }
 
-      document.getElementById('submitBtn').disabled = false;
+      if (selectedPayMethod === 'qris') document.getElementById('submitBtn').disabled = false;
     }
 
     function removeBukti() {
@@ -944,11 +1042,20 @@
 
     // ── SUBMIT ──
     async function submitBooking() {
-      const btn   = document.getElementById("submitBtn");
-      const errEl = document.getElementById("payError");
+      const isTunai = selectedPayMethod === 'tunai';
+      const btn   = isTunai
+        ? document.getElementById("submitBtnTunai")
+        : document.getElementById("submitBtn");
+      const errEl = isTunai
+        ? document.getElementById("payErrorTunai")
+        : document.getElementById("payError");
       errEl.style.display = "none";
 
-      if (!buktiBayarFile) { errEl.textContent="Upload bukti pembayaran terlebih dahulu."; errEl.style.display="block"; return; }
+      if (!isTunai && !buktiBayarFile) {
+        errEl.textContent = "Upload bukti pembayaran terlebih dahulu.";
+        errEl.style.display = "block";
+        return;
+      }
 
       const s    = document.getElementById("startDate").value;
       const e    = document.getElementById("endDate").value;
@@ -987,8 +1094,9 @@
         jaminan_kendaraan_plat:  selectedJaminan==='kendaraan' ? document.getElementById('jkPlat').value.trim().toUpperCase() : null,
         dp_amount:        dp,
         deposit_amount:   deposit,
-        sudah_dibayar:    bayarNow,
-        sisa_pelunasan:   sisa,
+        sudah_dibayar:    isTunai ? 0 : bayarNow,
+        sisa_pelunasan:   isTunai ? bayarNow : sisa,
+        metode_pembayaran: isTunai ? 'tunai' : 'qris',
       });
 
       if (!atomicResult.success) {
@@ -1018,20 +1126,29 @@
         }
       }
 
-      // 3. Upload bukti bayar
+      // 3. Upload bukti bayar (hanya untuk QRIS)
       let buktiBayarUrl = null;
-      try {
-        buktiBayarUrl = await uploadBuktiBayar(buktiBayarFile, bookingId);
-        const { error: updateError } = await supabase.from('bookings').update({
-          bukti_bayar_url:  buktiBayarUrl,
-          status:           'Menunggu Konfirmasi',
-          status_pembayaran:'Menunggu Konfirmasi',
-        }).eq('id', bookingId);
-        if (updateError) {
-          console.warn('Gagal update booking dengan bukti bayar', updateError);
+      if (!isTunai && buktiBayarFile) {
+        try {
+          buktiBayarUrl = await uploadBuktiBayar(buktiBayarFile, bookingId);
+          const { error: updateError } = await supabase.from('bookings').update({
+            bukti_bayar_url:  buktiBayarUrl,
+            status:           'Menunggu Konfirmasi',
+            status_pembayaran:'Menunggu Konfirmasi',
+          }).eq('id', bookingId);
+          if (updateError) {
+            console.warn('Gagal update booking dengan bukti bayar', updateError);
+          }
+        } catch (e) {
+          console.warn('Gagal upload bukti bayar', e);
         }
-      } catch (e) {
-        console.warn('Gagal upload bukti bayar', e);
+      } else if (isTunai) {
+        // Tunai: set status menunggu bayar tunai
+        await supabase.from('bookings').update({
+          status:           'Menunggu Pembayaran',
+          status_pembayaran:'Belum Bayar',
+          metode_pembayaran: 'tunai',
+        }).eq('id', bookingId);
       }
 
       setButtonLoading(btn, false);

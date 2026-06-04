@@ -642,6 +642,12 @@
         if (car) { selectCar(car); goStep(2); }
       }
       document.body.classList.add("ec-ready");
+
+      // Realtime: notifikasi admin saat ada booking baru/update
+      EasyCarRealtime.subscribeAllBookings({
+        onNew:    b => showToast(`📋 Booking baru: ${b.kode_booking || b.id}`, "info"),
+        onUpdate: b => showToast(`🔄 Booking diupdate: ${b.kode_booking || b.id}`, "info"),
+      });
     })();
 
     // ── VEHICLES ──

@@ -332,13 +332,24 @@ window.EasyCarPrint = (function () {
 </body>
 </html>`;
 
-    const w = window.open("", "_blank");
+    // Mobile-safe print: gunakan Blob URL agar tidak diblokir popup blocker
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const blobUrl = URL.createObjectURL(blob);
+
+    const w = window.open(blobUrl, '_blank');
     if (!w) {
-      alert("Popup diblokir browser. Izinkan popup untuk mencetak.");
-      return;
+      // Fallback: buka via anchor click (iOS Safari & mobile Chrome)
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
-    w.document.write(html);
-    w.document.close();
+
+    // Bersihkan blob URL setelah jendela sempat membacanya
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
   }
 
   return { printInvoiceA4 };
