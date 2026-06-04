@@ -645,8 +645,8 @@
 
       // Realtime: notifikasi admin saat ada booking baru/update
       EasyCarRealtime.subscribeAllBookings({
-        onNew:    b => showToast(`📋 Booking baru: ${b.kode_booking || b.id}`, "info"),
-        onUpdate: b => showToast(`🔄 Booking diupdate: ${b.kode_booking || b.id}`, "info"),
+        onNew:    () => {}, // showNotif sudah dipanggil otomatis di dalam subscribeAllBookings
+        onUpdate: () => {},
       });
     })();
 

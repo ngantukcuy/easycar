@@ -332,25 +332,127 @@ window.EasyCarPrint = (function () {
 </body>
 </html>`;
 
-    // Mobile-safe print: gunakan Blob URL agar tidak diblokir popup blocker
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    // Buat blob URL dari HTML invoice
+    const blob    = new Blob([html], { type: 'text/html;charset=utf-8' });
     const blobUrl = URL.createObjectURL(blob);
 
-    const w = window.open(blobUrl, '_blank');
-    if (!w) {
-      // Fallback: buka via anchor click (iOS Safari & mobile Chrome)
+    // Tampilkan modal pilihan: Cetak langsung atau Simpan PDF
+    _showPrintDialog(blobUrl, kode);
+  }
+
+  // ── DIALOG PILIHAN CETAK / SAVE PDF ────────────────
+  function _showPrintDialog(blobUrl, kode) {
+    // Hapus dialog lama jika ada
+    const old = document.getElementById('_ecPrintDialog');
+    if (old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = '_ecPrintDialog';
+    overlay.style.cssText = `
+      position:fixed;inset:0;background:rgba(0,0,0,0.6);
+      backdrop-filter:blur(4px);z-index:99999;
+      display:flex;align-items:center;justify-content:center;padding:1rem;
+    `;
+
+    overlay.innerHTML = `
+      <div style="
+        background:#fff;border-radius:20px;
+        box-shadow:0 24px 64px rgba(0,0,0,0.25);
+        width:100%;max-width:400px;overflow:hidden;
+        animation:_ecFadeIn 0.2s ease;
+      ">
+        <style>@keyframes _ecFadeIn{from{opacity:0;transform:scale(0.94)}to{opacity:1;transform:scale(1)}}</style>
+        <div style="padding:1.5rem 1.5rem 1rem;">
+          <h3 style="font-size:1rem;font-weight:700;color:#1e2d4a;margin:0 0 0.375rem;">
+            <i class='bx bxs-file-pdf' style='color:#e85d04;margin-right:6px;'></i>Struk Invoice
+          </h3>
+          <p style="font-size:0.8125rem;color:#7a8fac;margin:0;">Kode: <strong>${kode}</strong> — Pilih aksi:</p>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:0.625rem;padding:0 1.5rem 1.5rem;">
+          <!-- Cetak langsung -->
+          <button id="_ecBtnPrint" style="
+            display:flex;align-items:center;gap:0.875rem;
+            padding:0.875rem 1.125rem;border-radius:12px;
+            background:#f0f5ff;border:1.5px solid #c7d8ff;
+            cursor:pointer;text-align:left;width:100%;
+            transition:background 0.15s;
+          ">
+            <span style="width:38px;height:38px;background:#1a3c6e;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class='bx bx-printer' style='color:#fff;font-size:1.25rem;'></i>
+            </span>
+            <div>
+              <div style="font-size:0.875rem;font-weight:700;color:#1e2d4a;">Cetak Sekarang</div>
+              <div style="font-size:0.75rem;color:#7a8fac;">Buka dialog print browser</div>
+            </div>
+          </button>
+
+          <!-- Simpan PDF -->
+          <button id="_ecBtnSavePdf" style="
+            display:flex;align-items:center;gap:0.875rem;
+            padding:0.875rem 1.125rem;border-radius:12px;
+            background:#fff5f0;border:1.5px solid #ffd0b5;
+            cursor:pointer;text-align:left;width:100%;
+            transition:background 0.15s;
+          ">
+            <span style="width:38px;height:38px;background:#e85d04;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class='bx bxs-download' style='color:#fff;font-size:1.25rem;'></i>
+            </span>
+            <div>
+              <div style="font-size:0.875rem;font-weight:700;color:#1e2d4a;">Simpan sebagai PDF</div>
+              <div style="font-size:0.75rem;color:#7a8fac;">Download file .html → simpan PDF dari browser</div>
+            </div>
+          </button>
+
+          <!-- Batal -->
+          <button id="_ecBtnCancel" style="
+            padding:0.625rem;border-radius:10px;border:none;
+            background:none;color:#7a8fac;font-size:0.8125rem;
+            cursor:pointer;font-weight:500;
+          ">Batal</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // Cetak: buka tab baru lalu trigger print
+    document.getElementById('_ecBtnPrint').onclick = () => {
+      overlay.remove();
+      const printUrl = blobUrl + '#autoprint';
+      const w = window.open(printUrl, '_blank');
+      if (!w) {
+        // iOS/Android fallback — anchor click
+        const a = document.createElement('a');
+        a.href = printUrl; a.target = '_blank'; a.rel = 'noopener';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      }
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    };
+
+    // Simpan PDF: download file HTML (user buka → Ctrl+P → Save as PDF)
+    document.getElementById('_ecBtnSavePdf').onclick = () => {
+      overlay.remove();
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
+      a.download = `invoice-${kode}.html`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    };
 
-    // Bersihkan blob URL setelah jendela sempat membacanya
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
-  }
+    document.getElementById('_ecBtnCancel').onclick = () => {
+      overlay.remove();
+      URL.revokeObjectURL(blobUrl);
+    };
+
+    // Klik di luar modal = tutup
+    overlay.onclick = e => {
+      if (e.target === overlay) {
+        overlay.remove();
+        URL.revokeObjectURL(blobUrl);
+      }
+    };
+  } // end _showPrintDialog
 
   return { printInvoiceA4 };
 

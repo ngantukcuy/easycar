@@ -643,7 +643,7 @@
 
       // Realtime: notifikasi user saat status booking-nya diupdate admin
       EasyCarRealtime.subscribeUserBookings(currentUser.id, {
-        onUpdate: b => showToast(`🔔 Status booking ${b.kode_booking || ''} diupdate: ${b.status || ''}`, "info"),
+        onUpdate: () => {}, // showNotif sudah dipanggil otomatis di dalam subscribeUserBookings
       });
     })();
 
@@ -1098,7 +1098,6 @@
         deposit_amount:   deposit,
         sudah_dibayar:    isTunai ? 0 : bayarNow,
         sisa_pelunasan:   isTunai ? bayarNow : sisa,
-        metode_pembayaran: isTunai ? 'tunai' : 'qris',
       });
 
       if (!atomicResult.success) {
@@ -1128,27 +1127,27 @@
         }
       }
 
-      // 3. Upload bukti bayar (hanya untuk QRIS)
+      // 3. Upload bukti bayar + update booking fields
       let buktiBayarUrl = null;
       if (!isTunai && buktiBayarFile) {
         try {
           buktiBayarUrl = await uploadBuktiBayar(buktiBayarFile, bookingId);
-          const { error: updateError } = await supabase.from('bookings').update({
-            bukti_bayar_url:  buktiBayarUrl,
-            status:           'Menunggu Konfirmasi',
-            status_pembayaran:'Menunggu Konfirmasi',
-          }).eq('id', bookingId);
-          if (updateError) {
-            console.warn('Gagal update booking dengan bukti bayar', updateError);
-          }
         } catch (e) {
-          console.warn('Gagal upload bukti bayar', e);
+          console.error('Upload bukti bayar gagal:', e);
+          // Jangan hentikan proses — booking sudah masuk, user bisa upload ulang dari halaman pesanan
         }
+        const updatePayload = {
+          status:            'Menunggu Konfirmasi',
+          status_pembayaran: 'Menunggu Konfirmasi',
+          metode_pembayaran: 'qris',
+        };
+        if (buktiBayarUrl) updatePayload.bukti_bayar_url = buktiBayarUrl;
+        const { error: updErr } = await supabase.from('bookings').update(updatePayload).eq('id', bookingId);
+        if (updErr) console.error('Gagal update booking setelah upload bukti:', updErr.message);
       } else if (isTunai) {
-        // Tunai: set status menunggu bayar tunai
         await supabase.from('bookings').update({
-          status:           'Menunggu Pembayaran',
-          status_pembayaran:'Belum Bayar',
+          status:            'Menunggu Pembayaran',
+          status_pembayaran: 'Belum Bayar',
           metode_pembayaran: 'tunai',
         }).eq('id', bookingId);
       }
