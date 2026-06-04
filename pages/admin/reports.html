@@ -10,7 +10,23 @@
   <link rel="stylesheet" href="/assets/css/theme.css" />
   <style>
     body.ec-loading { visibility: hidden; }
+    @media (max-width:1023px) { .page-topbar > div:first-child { padding-left: 3.5rem !important; } }
     .report-bar { height: 32px; background: var(--color-primary-mid); border-radius: 6px; transition: width 0.6s ease; }
+
+    /* Responsive grids laporan */
+    .report-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .report-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .report-two-col { grid-template-columns: 1fr !important; gap: 1rem; }
+    }
   </style>
 </head>
 <body class="ec-loading">
@@ -26,7 +42,7 @@
     <main class="page-content fade-in">
 
       <!-- Summary stats -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">
+      <div class="report-stats-grid">
         <div class="card" style="padding:1.25rem;">
           <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.25rem;">Total Pendapatan</p>
           <p id="rTotal" style="font-size:1.25rem;font-weight:800;color:var(--color-primary);margin:0;">—</p>
@@ -45,7 +61,7 @@
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+      <div class="report-two-col">
 
         <!-- Top vehicles -->
         <div class="card">

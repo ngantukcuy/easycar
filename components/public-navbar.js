@@ -27,7 +27,7 @@ const PUB_NAVBAR_HTML = `
 
     <!-- Not logged in -->
     <div id="navAuthArea">
-      <a href="/index.html?tab=login" class="btn btn-primary btn-sm" id="navLoginBtn">
+      <a href="/auth.html?tab=login" class="btn btn-primary btn-sm" id="navLoginBtn">
         <i class='bx bx-log-in'></i> Masuk
       </a>
     </div>
