@@ -73,11 +73,21 @@
         <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Admin Dashboard</h2>
         <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;" id="topbarDate">—</p>
       </div>
-      <div style="display:flex;align-items:center;gap:0.75rem;">
-        <button onclick="toggleNotif()" style="position:relative;width:38px;height:38px;background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+      <div style="display:flex;align-items:center;gap:0.75rem;position:relative;">
+        <button onclick="toggleNotif(event)" id="bellBtn" style="position:relative;width:38px;height:38px;background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;cursor:pointer;">
           <i class='bx bx-bell' style="font-size:1.125rem;color:var(--color-text-muted);"></i>
-          <span id="notifBadge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:var(--color-accent);border-radius:999px;font-size:0.65rem;font-weight:700;color:#fff;display:none;align-items:center;justify-content:center;padding:0 4px;line-height:1;border:2px solid var(--color-bg);"></span>
+          <span id="notifBadge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:var(--color-accent);border-radius:999px;font-size:0.65rem;font-weight:700;color:#fff;align-items:center;justify-content:center;padding:0 4px;line-height:1;border:2px solid var(--color-bg);"></span>
         </button>
+        <div id="notifPanel" style="display:none;position:absolute;top:46px;right:0;width:320px;background:#fff;border:1px solid var(--color-border);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.15);z-index:500;overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1rem;border-bottom:1px solid var(--color-border);background:var(--color-surface);">
+            <span style="font-size:0.875rem;font-weight:700;color:var(--color-primary);">🔔 Riwayat Notifikasi</span>
+            <button onclick="clearNotifHistory()" style="background:none;border:none;font-size:0.7rem;color:var(--color-text-muted);cursor:pointer;font-weight:600;">Hapus semua</button>
+          </div>
+          <div id="notifList" style="max-height:320px;overflow-y:auto;"></div>
+          <div style="padding:0.625rem 1rem;border-top:1px solid var(--color-border);text-align:center;">
+            <a href="/pages/admin/book-view.html" style="font-size:0.75rem;color:var(--color-primary-mid);font-weight:600;text-decoration:none;">Lihat semua pemesanan →</a>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -229,10 +239,25 @@
 
       // ── REALTIME: update stats & pending list saat ada booking baru ──
       EasyCarRealtime.subscribeAllBookings({
-        onNew: async () => {
+        onNew: async (payload) => {
+          const b = payload.new || {};
+          const nama = b.nama_pemesan || "Pelanggan baru";
+          addNotifToHistory(
+            "🔔 Booking Baru",
+            `${nama} — ${b.kode_booking || ""}`,
+            "#f59e0b"
+          );
           await Promise.all([loadStats(), loadRecentBookings(), loadPending()]);
         },
-        onUpdate: async () => {
+        onUpdate: async (payload) => {
+          const b = payload.new || {};
+          if (b.status) {
+            addNotifToHistory(
+              "📋 Status Diperbarui",
+              `${b.kode_booking || ""} → ${b.status}`,
+              "#3b82f6"
+            );
+          }
           await Promise.all([loadStats(), loadRecentBookings(), loadPending()]);
         },
       });
@@ -284,13 +309,13 @@
       const { data } = await supabase
         .from("bookings")
         .select("*, profiles!bookings_user_id_fkey(full_name), cars(nama)")
-        .eq("status", " Menunggu Konfirmasi")
+        .in("status", ["Menunggu", "Menunggu Konfirmasi"])
         .order("created_at", { ascending: true })
         .limit(10);
 
       const list = document.getElementById("pendingList");
       if (!data?.length) {
-        list.innerHTML = `<div style="text-align:center;padding:2rem;color:#16a34a;font-weight:600;font-size:0.875rem;"><i class='bx bxs-check-circle' style="display:block;font-size:2rem;margin-bottom:0.5rem;"></i>Tidak ada yang menunggu konfirmasi</div>`;
+        list.innerHTML = `<div style="text-align:center;padding:2rem;color:#16a34a;font-weight:600;font-size:0.875rem;"><i class='bx bxs-check-circle' style="display:block;font-size:2rem;margin-bottom:0.5rem;"></i>Tidak ada yang menunggu</div>`;
         return;
       }
 
@@ -315,19 +340,61 @@
       }
     }
 
-    // Lonceng bisa dibuka untuk lihat detail notif
-    let notifOpen = false;
-    function toggleNotif() {
-      const pending = document.querySelectorAll("#pendingList > div[style*='f59e0b']").length ||
-                      document.querySelectorAll("#pendingList > div").length;
-      // Reset badge saat diklik
-      const badge = document.getElementById("notifBadge");
-      badge.style.display = "none";
-      EasyCarRealtime.resetBadge();
-      // Scroll ke tabel pending
-      document.getElementById("pendingList").scrollIntoView({ behavior: "smooth", block: "center" });
-      showToast(`${pending} pesanan menunggu konfirmasi — lihat di bawah`, "warning");
+    // ─── NOTIF PANEL ───
+    let _notifHistory = JSON.parse(sessionStorage.getItem("ecNotifHistory") || "[]");
+
+    function renderNotifList() {
+      const el = document.getElementById("notifList");
+      if (!_notifHistory.length) {
+        el.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--color-text-muted);font-size:0.8rem;">Belum ada notifikasi</div>`;
+        return;
+      }
+      el.innerHTML = _notifHistory.slice().reverse().map(n => `
+        <div style="padding:0.75rem 1rem;border-bottom:1px solid var(--color-border);display:flex;gap:0.625rem;align-items:flex-start;">
+          <div style="width:8px;height:8px;background:${n.color};border-radius:50%;flex-shrink:0;margin-top:5px;"></div>
+          <div style="flex:1;min-width:0;">
+            <p style="font-size:0.8125rem;font-weight:600;color:var(--color-primary);margin:0 0 0.1rem;">${n.title}</p>
+            <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.2rem;">${n.msg}</p>
+            <p style="font-size:0.65rem;color:var(--color-text-subtle);margin:0;">${n.time}</p>
+          </div>
+          <a href="/pages/admin/book-view.html" style="font-size:0.7rem;color:var(--color-primary-mid);font-weight:600;text-decoration:none;white-space:nowrap;flex-shrink:0;">Review →</a>
+        </div>`).join("");
     }
+
+    function addNotifToHistory(title, msg, color = "#f59e0b") {
+      _notifHistory.push({ title, msg, color,
+        time: new Date().toLocaleTimeString("id-ID", { hour:"2-digit", minute:"2-digit" }) + " · " +
+              new Date().toLocaleDateString("id-ID", { day:"2-digit", month:"short" })
+      });
+      if (_notifHistory.length > 30) _notifHistory.shift();
+      sessionStorage.setItem("ecNotifHistory", JSON.stringify(_notifHistory));
+    }
+
+    function clearNotifHistory() {
+      _notifHistory = [];
+      sessionStorage.removeItem("ecNotifHistory");
+      renderNotifList();
+    }
+
+    let _panelOpen = false;
+    function toggleNotif(e) {
+      e && e.stopPropagation();
+      const panel = document.getElementById("notifPanel");
+      const badge = document.getElementById("notifBadge");
+      _panelOpen = !_panelOpen;
+      panel.style.display = _panelOpen ? "block" : "none";
+      if (_panelOpen) {
+        renderNotifList();
+        badge.style.display = "none";
+        EasyCarRealtime.resetBadge();
+      }
+    }
+    document.addEventListener("click", e => {
+      if (_panelOpen && !e.target.closest("#notifPanel") && !e.target.closest("#bellBtn")) {
+        _panelOpen = false;
+        document.getElementById("notifPanel").style.display = "none";
+      }
+    });
   </script>
 </body>
 </html>
