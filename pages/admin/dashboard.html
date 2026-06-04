@@ -284,13 +284,13 @@
       const { data } = await supabase
         .from("bookings")
         .select("*, profiles!bookings_user_id_fkey(full_name), cars(nama)")
-        .eq("status", "Menunggu")
+        .eq("status", " Menunggu Konfirmasi")
         .order("created_at", { ascending: true })
         .limit(10);
 
       const list = document.getElementById("pendingList");
       if (!data?.length) {
-        list.innerHTML = `<div style="text-align:center;padding:2rem;color:#16a34a;font-weight:600;font-size:0.875rem;"><i class='bx bxs-check-circle' style="display:block;font-size:2rem;margin-bottom:0.5rem;"></i>Tidak ada yang menunggu</div>`;
+        list.innerHTML = `<div style="text-align:center;padding:2rem;color:#16a34a;font-weight:600;font-size:0.875rem;"><i class='bx bxs-check-circle' style="display:block;font-size:2rem;margin-bottom:0.5rem;"></i>Tidak ada yang menunggu konfirmasi</div>`;
         return;
       }
 
