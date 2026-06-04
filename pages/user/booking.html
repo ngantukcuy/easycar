@@ -55,7 +55,7 @@
     /* ── GRID RESPONSIVE ── */
     .grid-2col { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
     .grid-3col { display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem; }
-    .grid-step6 { display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;max-width:720px; }
+    .grid-step6 { display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;max-width:100%; }
 
     @media (max-width: 600px) {
       .grid-2col  { grid-template-columns: 1fr !important; }
@@ -449,7 +449,7 @@
           </button>
           <button id="payMethodTunai" onclick="selectPayMethod('tunai')"
             class="btn btn-ghost" style="flex:1;justify-content:center;">
-            <i class='bx bx-money'></i> Bayar Tunai (saat ambil)
+            <i class='bx bx-money'></i>COD
           </button>
         </div>
 

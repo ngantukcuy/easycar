@@ -76,7 +76,7 @@
       <div style="display:flex;align-items:center;gap:0.75rem;">
         <button onclick="toggleNotif()" style="position:relative;width:38px;height:38px;background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;cursor:pointer;">
           <i class='bx bx-bell' style="font-size:1.125rem;color:var(--color-text-muted);"></i>
-          <span id="notifDot" style="display:none;position:absolute;top:8px;right:8px;width:7px;height:7px;background:var(--color-accent);border-radius:50%;"></span>
+          <span id="notifBadge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:var(--color-accent);border-radius:999px;font-size:0.65rem;font-weight:700;color:#fff;display:none;align-items:center;justify-content:center;padding:0 4px;line-height:1;border:2px solid var(--color-bg);"></span>
         </button>
       </div>
     </header>
@@ -221,6 +221,9 @@
       document.getElementById("welcomeName").textContent = user.full_name || user.email || "Admin";
       document.getElementById("topbarDate").textContent  = new Date().toLocaleDateString("id-ID", { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
 
+      // Hubungkan badge lonceng ke sistem realtime
+      EasyCarRealtime.setBadge(document.getElementById("notifBadge"));
+
       await Promise.all([loadStats(), loadRecentBookings(), loadPending()]);
       document.body.classList.add("ec-ready");
 
@@ -258,7 +261,7 @@
     async function loadRecentBookings() {
       const { data } = await supabase
         .from("bookings")
-        .select("*, profiles(full_name), cars(nama)")
+        .select("*, profiles!bookings_user_id_fkey(full_name), cars(nama)")
         .order("created_at", { ascending: false })
         .limit(8);
 
@@ -280,7 +283,7 @@
     async function loadPending() {
       const { data } = await supabase
         .from("bookings")
-        .select("*, profiles(full_name), cars(nama)")
+        .select("*, profiles!bookings_user_id_fkey(full_name), cars(nama)")
         .eq("status", "Menunggu")
         .order("created_at", { ascending: true })
         .limit(10);
@@ -302,12 +305,28 @@
         </div>
       `).join("");
 
-      // Show notif dot
-      if (data.length > 0) document.getElementById("notifDot").style.display = "block";
+      // Show notif badge dengan jumlah pending
+      const badge = document.getElementById("notifBadge");
+      if (data.length > 0) {
+        badge.textContent = data.length > 9 ? "9+" : data.length;
+        badge.style.display = "flex";
+      } else {
+        badge.style.display = "none";
+      }
     }
 
+    // Lonceng bisa dibuka untuk lihat detail notif
+    let notifOpen = false;
     function toggleNotif() {
-      showToast(`${document.querySelectorAll("#pendingList [style*='f59e0b']").length} pesanan menunggu konfirmasi`, "warning");
+      const pending = document.querySelectorAll("#pendingList > div[style*='f59e0b']").length ||
+                      document.querySelectorAll("#pendingList > div").length;
+      // Reset badge saat diklik
+      const badge = document.getElementById("notifBadge");
+      badge.style.display = "none";
+      EasyCarRealtime.resetBadge();
+      // Scroll ke tabel pending
+      document.getElementById("pendingList").scrollIntoView({ behavior: "smooth", block: "center" });
+      showToast(`${pending} pesanan menunggu konfirmasi — lihat di bawah`, "warning");
     }
   </script>
 </body>

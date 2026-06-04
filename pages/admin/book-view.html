@@ -43,7 +43,6 @@
       <!-- Filter tabs -->
       <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem;">
         <button class="filter-chip active" data-s="all"                   onclick="setFilter(this,'all')">Semua</button>
-        <button class="filter-chip"        data-s="Menunggu"              onclick="setFilter(this,'Menunggu')">Menunggu</button>
         <button class="filter-chip"        data-s="Menunggu Konfirmasi"   onclick="setFilter(this,'Menunggu Konfirmasi')">Menunggu Konfirmasi</button>
         <button class="filter-chip"        data-s="Dikonfirmasi"          onclick="setFilter(this,'Dikonfirmasi')">Dikonfirmasi</button>
         <button class="filter-chip"        data-s="Aktif"                 onclick="setFilter(this,'Aktif')">Aktif</button>
@@ -210,7 +209,7 @@
     async function loadBookings() {
       const { data, error } = await supabase
         .from("bookings")
-        .select("*, profiles(full_name, email), cars(nama)")
+        .select("*, profiles!bookings_user_id_fkey(full_name, email), cars(nama)")
         .order("created_at", { ascending: false });
       if (error) {
         console.error("loadBookings error:", error);
