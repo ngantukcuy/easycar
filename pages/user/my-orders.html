@@ -16,13 +16,24 @@
     .filter-chip:hover { border-color:var(--color-primary-mid);color:var(--color-primary-mid); }
     .filter-chip.active { background:var(--color-primary-mid);border-color:var(--color-primary-mid);color:#fff; }
     @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes pulseIn { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }
+    .order-card { animation: pulseIn 0.3s ease; }
 
-    /* Invoice Print styles */
-    @media print {
-      body > *:not(#invoicePrint) { display: none !important; }
-      #invoicePrint { display: block !important; position: static !important; background: #fff !important; }
-      @page { size: 80mm auto; margin: 0.3cm; }
+    /* Alasan tolak banner */
+    .tolak-banner {
+      background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px;
+      padding: 0.75rem 1rem; margin-top: 0.625rem;
+      display: flex; gap: 0.5rem; align-items: flex-start;
     }
+    .tolak-banner i { color: #dc2626; font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+    .tolak-banner .tolak-title { font-size: 0.75rem; font-weight: 700; color: #dc2626; }
+    .tolak-banner .tolak-alasan { font-size: 0.8125rem; color: #7f1d1d; margin-top: 1px; }
+
+    /* Payment breakdown */
+    .pay-breakdown { background: var(--color-bg); border-radius: 10px; padding: 0.875rem; }
+    .pay-row { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; }
+    .pay-row + .pay-row { border-top: 1px solid var(--color-border); }
+    .pay-row.pay-total { border-top: 2px solid var(--color-primary); margin-top: 0.25rem; padding-top: 0.625rem; }
   </style>
 </head>
 <body class="ec-loading">
@@ -39,16 +50,23 @@
     </header>
 
     <main class="page-content fade-in">
+      <!-- Realtime indicator -->
+      <div id="realtimeIndicator" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:0.5rem 0.875rem;margin-bottom:1rem;font-size:0.78rem;color:#15803d;font-weight:500;display:flex;align-items:center;gap:0.5rem;">
+        <span style="width:7px;height:7px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0;"></span>
+        Terhubung realtime — status update otomatis
+      </div>
+      <style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}</style>
 
       <!-- Filter tabs -->
       <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem;">
-        <button class="filter-chip active" data-status="all"                  onclick="setFilter(this,'all')">Semua</button>
-        <button class="filter-chip"        data-status="Menunggu"             onclick="setFilter(this,'Menunggu')">Menunggu</button>
-        <button class="filter-chip"        data-status="Menunggu Konfirmasi"  onclick="setFilter(this,'Menunggu Konfirmasi')">Menunggu Konfirmasi</button>
-        <button class="filter-chip"        data-status="Dikonfirmasi"         onclick="setFilter(this,'Dikonfirmasi')">Dikonfirmasi</button>
-        <button class="filter-chip"        data-status="Aktif"                onclick="setFilter(this,'Aktif')">Aktif</button>
-        <button class="filter-chip"        data-status="Selesai"              onclick="setFilter(this,'Selesai')">Selesai</button>
-        <button class="filter-chip"        data-status="Dibatalkan"           onclick="setFilter(this,'Dibatalkan')">Dibatalkan</button>
+        <button class="filter-chip active" onclick="setFilter(this,'all')">Semua</button>
+        <button class="filter-chip" onclick="setFilter(this,'Menunggu')">Menunggu</button>
+        <button class="filter-chip" onclick="setFilter(this,'Menunggu Konfirmasi')">Menunggu Konfirmasi</button>
+        <button class="filter-chip" onclick="setFilter(this,'Dikonfirmasi')">Dikonfirmasi</button>
+        <button class="filter-chip" onclick="setFilter(this,'Aktif')">Aktif</button>
+        <button class="filter-chip" onclick="setFilter(this,'Selesai')">Selesai</button>
+        <button class="filter-chip" onclick="setFilter(this,'Ditolak')">Ditolak</button>
+        <button class="filter-chip" onclick="setFilter(this,'Dibatalkan')">Dibatalkan</button>
       </div>
 
       <!-- Orders list -->
@@ -58,75 +76,71 @@
           <p style="margin-top:0.5rem;">Memuat pesanan...</p>
         </div>
       </div>
-
     </main>
-
     <footer style="text-align:center;color:var(--color-text-subtle);font-size:0.75rem;padding:1.25rem;">&copy; 2026 EasyCar</footer>
   </div>
 
   <!-- Detail Modal -->
   <div id="detailOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem;">
-    <div style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:480px;max-height:90vh;overflow-y:auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);position:sticky;top:0;background:#fff;z-index:1;border-radius:24px 24px 0 0;">
+    <div style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:500px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.125rem 1.5rem;border-bottom:1px solid var(--color-border);position:sticky;top:0;background:#fff;z-index:1;border-radius:24px 24px 0 0;">
         <h3 style="font-family:var(--font-body);font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Detail Pesanan</h3>
         <button onclick="closeDetail()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--color-text-muted);">✕</button>
       </div>
       <div id="detailContent" style="padding:1.5rem;"></div>
-      <div style="padding:0 1.5rem 1.5rem;display:flex;flex-direction:column;gap:0.625rem;">
-        <button id="printInvoiceBtn" onclick="printInvoice()" class="btn btn-sm" style="width:100%;justify-content:center;background:#1e293b;color:#fff;border-color:#1e293b;display:none;">
-          <i class='bx bx-printer'></i> Cetak Invoice
-        </button>
-        <a id="waAdminBtn" href="#" target="_blank" class="btn btn-sm" style="width:100%;justify-content:center;background:#16a34a;color:#fff;border-color:#16a34a;display:none;">
-          <i class='bx bxl-whatsapp'></i> Hubungi Admin via WhatsApp
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Invoice Print Modal -->
-  <div id="invoiceOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:220;align-items:center;justify-content:center;padding:1rem;">
-    <div style="background:#f1f5f9;border-radius:16px;max-width:400px;width:100%;max-height:90vh;overflow-y:auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid #e2e8f0;background:#fff;border-radius:16px 16px 0 0;">
-        <h4 style="font-family:var(--font-body);font-weight:700;color:var(--color-primary);margin:0;">Cetak Invoice</h4>
-        <div style="display:flex;gap:0.5rem;">
-          <button onclick="doPrintInvoice()" class="btn btn-sm" style="background:#1e293b;color:#fff;border-color:#1e293b;"><i class='bx bx-printer'></i> Print</button>
-          <button onclick="closeInvoiceModal()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:#64748b;">✕</button>
-        </div>
-      </div>
-      <div style="padding:1.25rem;display:flex;justify-content:center;">
-        <div id="invoiceCard" style="width:280px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;font-family:'Courier New',monospace;">
-          <!-- Filled by JS -->
-        </div>
-      </div>
+      <div style="padding:0 1.5rem 1.5rem;display:flex;flex-direction:column;gap:0.625rem;" id="detailActions"></div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/services/supabase.js"></script>
+  <script src="/services/realtime.js"></script>
+  <script src="/services/print.js"></script>
   <script src="/components/user-sidebar.js"></script>
   <script src="/utils/ui.js"></script>
 
   <script>
-    let allOrders   = [];
+    let allOrders    = [];
     let activeFilter = "all";
     let openBookingId = null;
+    let currentUser   = null;
 
     (async () => {
-      const user = await requireLogin();
-      if (!user) return;
+      currentUser = await requireLogin();
+      if (!currentUser) return;
 
-      initUserSidebar("my-orders", user);
-      await loadOrders(user.id);
+      initUserSidebar("my-orders", currentUser);
+      await loadOrders();
       document.body.classList.add("ec-ready");
+
+      // ── REALTIME ────────────────────────────────────
+      EasyCarRealtime.subscribeUserBookings(currentUser.id, {
+        onInsert: async () => { await loadOrders(); },
+        onUpdate: async (payload) => {
+          // Update data lokal tanpa full reload
+          const updated = payload.new;
+          const idx = allOrders.findIndex(o => o.id === updated.id);
+          if (idx !== -1) {
+            allOrders[idx] = { ...allOrders[idx], ...updated };
+            renderOrders();
+            // Jika detail modal sedang buka untuk booking ini, refresh
+            if (openBookingId === updated.id) openDetail(updated.id);
+          } else {
+            await loadOrders(); // fallback
+          }
+        },
+      });
+
+      // Show realtime indicator
+      document.getElementById("realtimeIndicator").style.display = "flex";
     })();
 
-    async function loadOrders(userId) {
+    async function loadOrders() {
       const { data } = await supabase
         .from("bookings")
-        .select("*, cars(nama, foto_url, tipe, transmisi)")
-        .eq("user_id", userId)
+        .select("*, cars(id, nama, foto_url, tipe, transmisi, harga_per_hari)")
+        .eq("user_id", currentUser.id)
         .order("created_at", { ascending: false });
-
       allOrders = data || [];
       renderOrders();
     }
@@ -140,10 +154,7 @@
 
     function renderOrders() {
       const list = document.getElementById("ordersList");
-      const filtered = activeFilter === "all"
-        ? allOrders
-        : allOrders.filter(o => o.status === activeFilter);
-
+      const filtered = activeFilter === "all" ? allOrders : allOrders.filter(o => o.status === activeFilter);
       if (!filtered.length) {
         list.innerHTML = `
           <div style="text-align:center;padding:4rem 1rem;">
@@ -152,22 +163,26 @@
             <a href="/pages/user/booking.html" class="btn btn-accent" style="display:inline-flex;margin-top:1rem;">
               <i class='bx bx-plus'></i> Buat Pesanan
             </a>
-          </div>
-        `;
+          </div>`;
         return;
       }
-
-      list.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;">` +
-        filtered.map(o => orderCardHTML(o)).join("") +
-        `</div>`;
+      list.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;">${filtered.map(orderCardHTML).join("")}</div>`;
     }
 
     function orderCardHTML(o) {
-      const car   = o.cars || {};
-      const img   = car.foto_url
+      const car  = o.cars || {};
+      const img  = car.foto_url
         ? `<img src="${car.foto_url}" style="width:80px;height:60px;object-fit:cover;border-radius:var(--radius-md);flex-shrink:0;" />`
         : `<div style="width:80px;height:60px;background:var(--color-bg);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class='bx bxs-car' style="font-size:1.5rem;color:var(--color-text-subtle);"></i></div>`;
-      const kode  = o.kode_booking || ("BK" + o.id.slice(-6).toUpperCase());
+      const kode = o.kode_booking || ("EC" + o.id.slice(-6).toUpperCase());
+      const dp      = o.dp_amount || 0;
+      const deposit = o.deposit_amount || 0;
+      const bayarNow = dp + deposit;
+
+      let extraBanner = "";
+      if (o.status === "Ditolak" && o.alasan_tolak) {
+        extraBanner = `<div class="tolak-banner"><i class='bx bxs-error-circle'></i><div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${o.alasan_tolak}</div></div></div>`;
+      }
 
       return `
         <div class="card order-card" style="padding:1.25rem;cursor:pointer;" onclick="openDetail('${o.id}')">
@@ -191,179 +206,115 @@
                   <p style="font-size:0.8125rem;font-weight:600;color:var(--color-text);margin:0;">${o.durasi_hari || "—"} hari</p>
                 </div>
                 <div>
-                  <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0 0 0.1rem;">Total</p>
-                  <p style="font-size:0.8125rem;font-weight:700;color:var(--color-accent);margin:0;">${formatRupiah(o.total_harga || 0)}</p>
+                  <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0 0 0.1rem;">Total Bayar Awal</p>
+                  <p style="font-size:0.8125rem;font-weight:700;color:var(--color-accent);margin:0;">${formatRupiah(bayarNow)}</p>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      `;
+          ${extraBanner}
+        </div>`;
     }
 
     function openDetail(id) {
       const o = allOrders.find(x => x.id === id);
       if (!o) return;
       openBookingId = id;
-      const car   = o.cars || {};
-      const kode  = o.kode_booking || ("BK" + o.id.slice(-6).toUpperCase());
+      const car  = o.cars || {};
+      const kode = o.kode_booking || ("EC" + o.id.slice(-6).toUpperCase());
+      const dp      = o.dp_amount || 0;
+      const deposit = o.deposit_amount || 0;
+      const bayarNow = dp + deposit;
+      const sisa     = o.sisa_pelunasan || (o.total_harga - dp);
 
       document.getElementById("detailContent").innerHTML = `
         <div style="display:flex;flex-direction:column;gap:0.875rem;">
-          <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:1rem;display:flex;align-items:center;gap:0.875rem;margin-bottom:0.5rem;">
-            ${car.foto_url ? `<img src="${car.foto_url}" style="width:72px;height:52px;object-fit:cover;border-radius:var(--radius-md);flex-shrink:0;" />` : ""}
-            <div>
-              <p style="font-weight:700;color:var(--color-primary);margin:0 0 0.15rem;">${car.nama || "—"}</p>
-              <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">${car.tipe || ""} ${car.transmisi ? "· " + car.transmisi : ""}</p>
+          ${car.foto_url ? `<img src="${car.foto_url}" style="width:100%;height:160px;object-fit:cover;border-radius:var(--radius-md);" />` : ""}
+          <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:1rem;">
+            <p style="font-weight:700;color:var(--color-primary);margin:0 0 0.15rem;">${car.nama || "—"}</p>
+            <p style="font-size:0.8rem;color:var(--color-text-muted);margin:0;">${car.tipe || ""} ${car.transmisi ? "· " + car.transmisi : ""}</p>
+          </div>
+          ${infoRow("Kode Booking", `<code style="font-family:monospace;font-weight:700;">${kode}</code>`)}
+          ${infoRow("Status", `<span class="badge ${statusBadgeClass(o.status)}">${o.status}</span>`)}
+          ${infoRow("Tanggal Mulai", formatTanggal(o.tanggal_mulai))}
+          ${infoRow("Tanggal Selesai", formatTanggal(o.tanggal_selesai))}
+          ${infoRow("Durasi", (o.durasi_hari || "—") + " hari")}
+          ${infoRow("Nama Pemesan", o.nama_pemesan || "—")}
+          ${infoRow("No. HP", o.no_hp || "—")}
+          ${infoRow("Jenis Jaminan", o.jenis_jaminan === "kendaraan" ? "Jaminan Kendaraan" : "Jaminan Non-Kendaraan")}
+
+          ${o.alasan_tolak ? `
+            <div class="tolak-banner" style="margin-top:0;">
+              <i class='bx bxs-error-circle'></i>
+              <div>
+                <div class="tolak-title">Alasan Penolakan Admin</div>
+                <div class="tolak-alasan">${o.alasan_tolak}</div>
+              </div>
+            </div>` : ""}
+
+          <!-- Breakdown Pembayaran -->
+          <div>
+            <p style="font-size:0.75rem;font-weight:700;color:var(--color-primary);margin:0 0 0.625rem;text-transform:uppercase;letter-spacing:0.05em;">Rincian Pembayaran</p>
+            <div class="pay-breakdown">
+              <div class="pay-row">
+                <span style="font-size:0.8125rem;color:var(--color-text-muted);">Harga Sewa (${o.durasi_hari || "?"} hari)</span>
+                <span style="font-size:0.8125rem;font-weight:600;">${formatRupiah(o.total_harga || 0)}</span>
+              </div>
+              <div class="pay-row">
+                <span style="font-size:0.8125rem;color:var(--color-text-muted);">DP Booking${dp > 0 ? " (30%)" : ""}</span>
+                <span style="font-size:0.8125rem;font-weight:600;color:var(--color-accent);">${dp > 0 ? formatRupiah(dp) : "Tidak ada"}</span>
+              </div>
+              <div class="pay-row">
+                <span style="font-size:0.8125rem;color:var(--color-text-muted);">Deposit Jaminan</span>
+                <span style="font-size:0.8125rem;font-weight:600;color:var(--color-accent);">${formatRupiah(deposit)}</span>
+              </div>
+              <div class="pay-row pay-total">
+                <span style="font-size:0.875rem;font-weight:700;color:var(--color-primary);">Total Dibayar Awal</span>
+                <span style="font-size:1rem;font-weight:800;color:var(--color-accent);">${formatRupiah(bayarNow)}</span>
+              </div>
+              ${sisa > 0 ? `<div class="pay-row" style="border-top:none;"><span style="font-size:0.75rem;color:var(--color-text-muted);font-style:italic;">Sisa pelunasan saat pengambilan</span><span style="font-size:0.75rem;font-weight:700;color:#dc2626;">${formatRupiah(sisa)}</span></div>` : ""}
             </div>
           </div>
-          ${row("Kode Booking", `<code style="font-family:monospace;font-weight:700;">${kode}</code>`)}
-          ${row("Status", `<span class="badge ${statusBadgeClass(o.status)}">${o.status}</span>`)}
-          ${row("Tanggal Mulai", formatTanggal(o.tanggal_mulai))}
-          ${row("Tanggal Selesai", formatTanggal(o.tanggal_selesai))}
-          ${row("Durasi", (o.durasi_hari || "—") + " hari")}
-          ${row("Nama Pemesan", o.nama_pemesan || "—")}
-          ${row("No. HP", o.no_hp || "—")}
-          ${o.catatan ? row("Catatan", o.catatan) : ""}
-          <div style="border-top:2px solid var(--color-border);padding-top:0.875rem;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-              <span style="font-size:0.8125rem;color:var(--color-text-muted);">Total Harga</span>
-              <span style="font-size:1.1rem;font-weight:800;color:var(--color-accent);">${formatRupiah(o.total_harga || 0)}</span>
-            </div>
-            ${o.dp_amount ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
-              <span style="font-size:0.75rem;color:var(--color-text-muted);">DP (30%)</span>
-              <span style="font-size:0.75rem;font-weight:600;color:var(--color-text);">${formatRupiah(o.dp_amount)}</span>
-            </div>` : ""}
-            ${o.deposit_amount ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
-              <span style="font-size:0.75rem;color:var(--color-text-muted);">Deposit Jaminan</span>
-              <span style="font-size:0.75rem;font-weight:600;color:var(--color-text);">${formatRupiah(o.deposit_amount)}</span>
-            </div>` : ""}
-            ${o.sisa_pelunasan ? `<div style="display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:0.75rem;color:var(--color-text-muted);">Sisa Pelunasan</span>
-              <span style="font-size:0.75rem;font-weight:600;color:#dc2626;">${formatRupiah(o.sisa_pelunasan)}</span>
-            </div>` : ""}
-          </div>
-        </div>
-      `;
+        </div>`;
 
-      // Show cetak invoice button
-      document.getElementById("printInvoiceBtn").style.display = "flex";
+      // Action buttons
+      const actionsEl = document.getElementById("detailActions");
+      let actionsHTML = "";
 
-      // WA button
-      const ADMIN_WA = "6282276100996";
-      const waMsg = encodeURIComponent(`Halo Admin EasyCar, saya ingin menanyakan pesanan saya:\nKode: ${kode}\nNama: ${o.nama_pemesan || ""}\nMobil: ${car.nama || ""}\nTanggal: ${o.tanggal_mulai} s/d ${o.tanggal_selesai}`);
-      document.getElementById("waAdminBtn").href = `https://wa.me/${ADMIN_WA}?text=${waMsg}`;
-      document.getElementById("waAdminBtn").style.display = "flex";
+      // Cetak invoice (semua status)
+      actionsHTML += `<button onclick="doPrintA4('${id}')" class="btn btn-sm" style="width:100%;justify-content:center;background:#1e293b;color:#fff;border-color:#1e293b;"><i class='bx bx-printer'></i> Cetak Invoice A4</button>`;
 
+      // WA admin
+      const waLink = EasyCarRealtime.buildWALink(o, car);
+      actionsHTML += `<a href="${waLink}" target="_blank" class="btn btn-sm" style="width:100%;justify-content:center;background:#16a34a;color:#fff;border-color:#16a34a;"><i class='bx bxl-whatsapp'></i> Hubungi Admin via WhatsApp</a>`;
+
+      // Booking ulang jika ditolak
+      if (o.status === "Ditolak" || o.status === "Dibatalkan") {
+        const carIdForRebook = car.id || (o.cars && o.cars.id) || "";
+        actionsHTML += `<a href="/pages/user/booking.html${carIdForRebook ? '?car_id=' + carIdForRebook : ''}" class="btn btn-accent btn-sm" style="width:100%;justify-content:center;"><i class='bx bx-refresh'></i> Booking Ulang</a>`;
+      }
+
+      actionsEl.innerHTML = actionsHTML;
       document.getElementById("detailOverlay").style.display = "flex";
     }
 
-    function row(label, val) {
-      return `
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;">
-          <span style="font-size:0.8125rem;color:var(--color-text-muted);">${label}</span>
-          <span style="font-size:0.8125rem;font-weight:600;color:var(--color-text);text-align:right;">${val}</span>
-        </div>
-      `;
+    function doPrintA4(bookingId) {
+      const o = allOrders.find(x => x.id === bookingId);
+      if (!o) return;
+      EasyCarPrint.printInvoiceA4(o, o.cars);
+    }
+
+    function infoRow(label, val) {
+      return `<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--color-border);"><span style="font-size:0.8125rem;color:var(--color-text-muted);">${label}</span><span style="font-size:0.8125rem;font-weight:600;color:var(--color-text);text-align:right;">${val}</span></div>`;
     }
 
     function closeDetail() {
       document.getElementById("detailOverlay").style.display = "none";
       openBookingId = null;
     }
-
     document.getElementById("detailOverlay").addEventListener("click", e => {
       if (e.target === e.currentTarget) closeDetail();
     });
-
-    // ── CETAK INVOICE ──
-    function printInvoice() {
-      if (!openBookingId) return;
-      const o = allOrders.find(x => x.id === openBookingId);
-      if (!o) return;
-      const car  = o.cars || {};
-      const kode = o.kode_booking || ("BK" + o.id.slice(-6).toUpperCase());
-      const total    = o.total_harga || 0;
-      const dp       = o.dp_amount || 0;
-      const deposit  = o.deposit_amount || 0;
-      const bayarNow = dp + deposit;
-      const sisa     = o.sisa_pelunasan || (total - dp);
-
-      const rows = [
-        { label: "Sewa (" + (o.durasi_hari||"?") + " hari)", val: formatRupiah(total) },
-        ...(dp > 0 ? [{ label: "DP dibayar (30%)", val: formatRupiah(dp), accent: true }] : []),
-        { label: "Deposit Jaminan", val: formatRupiah(deposit), accent: true },
-        { label: "Total dibayar", val: formatRupiah(bayarNow), total: true },
-        ...(sisa > 0 ? [{ label: "Sisa pelunasan", val: formatRupiah(sisa), muted: true }] : []),
-      ];
-
-      document.getElementById("invoiceCard").innerHTML = `
-        <div style="background:#1e293b;padding:0.875rem;text-align:center;">
-          <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:0.2rem;">
-            <div style="width:24px;height:24px;background:#e85d04;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class='bx bxs-car' style="color:#fff;font-size:0.75rem;"></i>
-            </div>
-            <span style="font-family:'Poppins',sans-serif;font-weight:800;color:#fff;font-size:1rem;">Easy<span style="color:#fb923c;">Car</span></span>
-          </div>
-          <p style="font-size:0.6rem;color:rgba(255,255,255,0.55);margin:0;">Rental Kendaraan — Pekanbaru, Riau</p>
-        </div>
-        <div style="padding:0.875rem;border-bottom:1px dashed #e2e8f0;">
-          <p style="font-size:0.65rem;color:#94a3b8;margin:0 0 0.1rem;text-align:center;">INVOICE / KWITANSI</p>
-          <p style="font-size:0.8rem;font-weight:700;color:#1e293b;margin:0;text-align:center;font-family:'Poppins',sans-serif;">${kode}</p>
-          <p style="font-size:0.575rem;color:#94a3b8;margin:0.2rem 0 0;text-align:center;">Dicetak: ${new Date().toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})}</p>
-        </div>
-        <div style="padding:0.75rem 0.875rem;border-bottom:1px dashed #e2e8f0;font-size:0.625rem;">
-          <p style="color:#475569;margin:0 0 0.15rem;"><strong>Pemesan:</strong> ${o.nama_pemesan||"—"}</p>
-          ${o.no_ktp ? `<p style="color:#475569;margin:0 0 0.15rem;">KTP: ${o.no_ktp}</p>` : ""}
-          ${o.no_hp ? `<p style="color:#475569;margin:0;">WA: ${o.no_hp}</p>` : ""}
-        </div>
-        <div style="padding:0.75rem 0.875rem;border-bottom:1px dashed #e2e8f0;font-size:0.625rem;">
-          <p style="color:#475569;margin:0 0 0.15rem;"><strong>Kendaraan:</strong> ${car.nama||"—"}</p>
-          <p style="color:#475569;margin:0 0 0.15rem;">Periode: ${formatTanggalShort(o.tanggal_mulai)} s/d ${formatTanggalShort(o.tanggal_selesai)}</p>
-          <p style="color:#475569;margin:0;">Durasi: ${o.durasi_hari||"—"} hari</p>
-        </div>
-        <div style="padding:0.75rem 0.875rem;border-bottom:1px dashed #e2e8f0;">
-          <table style="width:100%;font-size:0.6rem;border-collapse:collapse;">
-            ${rows.map(r => `
-              <tr>
-                <td style="padding:0.15rem 0;${r.muted?'color:#94a3b8;font-size:0.575rem;':'color:#475569;'}${r.total?'font-weight:700;color:#1e293b;border-top:1px dashed #cbd5e1;padding-top:0.3rem;':''}">${r.label}</td>
-                <td style="padding:0.15rem 0;text-align:right;white-space:nowrap;${r.muted?'color:#94a3b8;font-size:0.575rem;':''}${r.accent?'color:#e85d04;font-weight:700;':''}${r.total?'color:#e85d04;font-weight:800;border-top:1px dashed #cbd5e1;padding-top:0.3rem;':''}">${r.val}</td>
-              </tr>
-            `).join("")}
-          </table>
-        </div>
-        <div style="padding:0.75rem 0.875rem;text-align:center;">
-          <p style="font-size:0.575rem;color:#94a3b8;margin:0;">Status: <strong style="color:${o.status==='Selesai'?'#16a34a':o.status==='Aktif'?'#2563eb':'#f59e0b'}">${o.status}</strong></p>
-          <p style="font-size:0.55rem;color:#cbd5e1;margin:0.25rem 0 0;">Terima kasih telah menggunakan EasyCar</p>
-        </div>
-      `;
-
-      closeDetail();
-      document.getElementById("invoiceOverlay").style.display = "flex";
-    }
-
-    function closeInvoiceModal() {
-      document.getElementById("invoiceOverlay").style.display = "none";
-    }
-
-    document.getElementById("invoiceOverlay").addEventListener("click", e => {
-      if (e.target === e.currentTarget) closeInvoiceModal();
-    });
-
-    function doPrintInvoice() {
-      const card = document.getElementById("invoiceCard");
-      const w = window.open("", "_blank", "width=400,height=700");
-      w.document.write(`<!DOCTYPE html><html><head>
-        <title>Invoice EasyCar</title>
-        <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-        <style>
-          @page { size: 80mm auto; margin: 0.3cm; }
-          body { margin:0; background:#fff; font-family:'Courier New',monospace; }
-          @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
-        </style>
-      </head><body>${card.outerHTML}<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`);
-      w.document.close();
-    }
   </script>
 </body>
 </html>

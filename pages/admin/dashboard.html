@@ -155,6 +155,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/services/supabase.js"></script>
+  <script src="/services/realtime.js"></script>
+  <script src="/services/print.js"></script>
   <script src="/components/admin-sidebar.js"></script>
   <script src="/utils/ui.js"></script>
 
@@ -170,6 +172,16 @@
 
       await Promise.all([loadStats(), loadRecentBookings(), loadPending()]);
       document.body.classList.add("ec-ready");
+
+      // ── REALTIME: update stats & pending list saat ada booking baru ──
+      EasyCarRealtime.subscribeAllBookings({
+        onNew: async () => {
+          await Promise.all([loadStats(), loadRecentBookings(), loadPending()]);
+        },
+        onUpdate: async () => {
+          await Promise.all([loadStats(), loadRecentBookings(), loadPending()]);
+        },
+      });
     })();
 
     async function loadStats() {

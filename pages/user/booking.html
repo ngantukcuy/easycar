@@ -512,109 +512,53 @@
         </div><!-- end max-width wrapper -->
       </div>
 
-      <!-- ===== STEP 7: SUKSES + INVOICE ===== -->
+      <!-- ===== STEP 7: SUKSES ===== -->
       <div class="step" id="step7">
-        <div class="no-print" style="text-align:center;margin-bottom:1.5rem;">
-          <div style="width:72px;height:72px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-            <i class='bx bxs-check-circle' style="font-size:2.5rem;color:#16a34a;"></i>
-          </div>
-          <h3 style="font-size:1.25rem;font-weight:800;color:var(--color-primary);margin:0 0 0.5rem;">Booking Berhasil Disubmit!</h3>
-          <p style="font-size:0.875rem;color:var(--color-text-muted);margin:0 0 1.25rem;">Menunggu konfirmasi admin. Anda akan dihubungi via WA.</p>
-          <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
-            <button onclick="openPrintModal()" class="btn btn-ghost btn-sm"><i class='bx bx-printer'></i> Cetak Struk</button>
-            <a href="/pages/user/my-orders.html" class="btn btn-primary btn-sm"><i class='bx bxs-receipt'></i> Lihat Pesananku</a>
-          </div>
-        </div>
-
-        <!-- STRUK (printable) — compact like indomaret receipt -->
-        <div id="invoiceCard" style="max-width:340px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;font-family:'Courier New',monospace;">
-          <!-- Header struk -->
-          <div style="background:#1e293b;padding:1rem;text-align:center;">
-            <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:0.25rem;">
-              <div style="width:28px;height:28px;background:#e85d04;border-radius:8px;display:flex;align-items:center;justify-content:center;">
-                <i class='bx bxs-car' style="color:#fff;font-size:0.875rem;"></i>
-              </div>
-              <span style="font-family:'Poppins',sans-serif;font-weight:800;color:#fff;font-size:1.125rem;">Easy<span style="color:#fb923c;">Car</span></span>
+        <div style="max-width:520px;margin:0 auto;">
+          <!-- Success header -->
+          <div style="text-align:center;margin-bottom:1.75rem;">
+            <div style="width:76px;height:76px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 0 0 8px rgba(34,197,94,0.08);">
+              <i class='bx bxs-check-circle' style="font-size:2.75rem;color:#16a34a;"></i>
             </div>
-            <p style="font-size:0.65rem;color:rgba(255,255,255,0.6);margin:0;">Rental Kendaraan — Pekanbaru, Riau</p>
-            <p style="font-size:0.6rem;color:rgba(255,255,255,0.4);margin:0.25rem 0 0;" id="invFooterWA">WA: —</p>
+            <h3 style="font-size:1.25rem;font-weight:800;color:var(--color-primary);margin:0 0 0.5rem;">🎉 Booking Berhasil Disubmit!</h3>
+            <p style="font-size:0.875rem;color:var(--color-text-muted);margin:0;">Menunggu konfirmasi admin. Notifikasi akan masuk otomatis.</p>
           </div>
 
-          <div style="padding:0.875rem 1rem;">
-            <!-- Title -->
-            <p style="font-size:0.6rem;letter-spacing:0.1em;font-weight:700;color:#64748b;text-align:center;margin:0 0 0.5rem;text-transform:uppercase;">— Tanda Terima Booking —</p>
-            <p id="invKode" style="font-size:0.9rem;font-weight:800;color:#1e293b;text-align:center;margin:0 0 0.75rem;letter-spacing:0.05em;">—</p>
+          <!-- Booking summary card -->
+          <div class="card" style="padding:1.25rem;margin-bottom:1rem;">
+            <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 0.875rem;">Ringkasan Pesanan</p>
+            <div id="step7Summary" style="display:flex;flex-direction:column;gap:0.35rem;font-size:0.8125rem;"></div>
+          </div>
 
-            <!-- Separator -->
-            <div style="border-top:1px dashed #cbd5e1;margin-bottom:0.75rem;"></div>
+          <!-- Payment breakdown card -->
+          <div class="card" style="padding:1.25rem;margin-bottom:1rem;">
+            <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 0.875rem;">Rincian Pembayaran</p>
+            <div id="step7Payment" style="display:flex;flex-direction:column;gap:0;"></div>
+          </div>
 
-            <!-- Info pemesan -->
-            <div style="margin-bottom:0.75rem;">
-              <p style="font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;margin:0 0 0.35rem;letter-spacing:0.08em;">DATA PEMESAN</p>
-              <p id="invNama" style="font-size:0.75rem;font-weight:700;color:#1e293b;margin:0 0 0.1rem;"></p>
-              <p id="invKtp" style="font-size:0.65rem;color:#64748b;margin:0 0 0.1rem;"></p>
-              <p id="invHp" style="font-size:0.65rem;color:#64748b;margin:0 0 0.1rem;"></p>
-              <p id="invAlamat" style="font-size:0.65rem;color:#64748b;margin:0;"></p>
-            </div>
-
-            <div style="border-top:1px dashed #cbd5e1;margin-bottom:0.75rem;"></div>
-
-            <!-- Detail sewa -->
-            <div style="margin-bottom:0.75rem;">
-              <p style="font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;margin:0 0 0.35rem;letter-spacing:0.08em;">DETAIL SEWA</p>
-              <p id="invMobil" style="font-size:0.75rem;font-weight:700;color:#1e293b;margin:0 0 0.1rem;"></p>
-              <p id="invTanggal" style="font-size:0.65rem;color:#64748b;margin:0 0 0.1rem;"></p>
-              <p id="invDurasi" style="font-size:0.65rem;color:#64748b;margin:0;"></p>
-              <p id="invCreated" style="font-size:0.6rem;color:#94a3b8;margin:0.2rem 0 0;"></p>
-            </div>
-
-            <div style="border-top:1px dashed #cbd5e1;margin-bottom:0.75rem;"></div>
-
-            <!-- Tabel biaya struk style -->
-            <div style="margin-bottom:0.75rem;">
-              <p style="font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;margin:0 0 0.35rem;letter-spacing:0.08em;">RINCIAN BIAYA</p>
-              <table id="invTabelBiaya" style="width:100%;border-collapse:collapse;font-size:0.7rem;"></table>
-            </div>
-
-            <div style="border-top:1px dashed #cbd5e1;margin-bottom:0.75rem;"></div>
-
-            <!-- Status -->
-            <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:0.5rem 0.625rem;margin-bottom:0.75rem;">
-              <p style="font-size:0.65rem;font-weight:700;color:#9a3412;margin:0 0 0.15rem;">STATUS: <span id="invStatus">MENUNGGU KONFIRMASI ADMIN</span></p>
-              <p style="font-size:0.6rem;color:#c2410c;margin:0;">📌 Bawa struk ini saat pengambilan kendaraan</p>
-            </div>
-
-            <!-- Footer -->
-            <p style="font-size:0.6rem;color:#94a3b8;text-align:center;margin:0;">Terima kasih telah mempercayai EasyCar</p>
-            <p style="font-size:0.6rem;color:#cbd5e1;text-align:center;margin:0.1rem 0 0;">★ ★ ★</p>
+          <!-- Action buttons -->
+          <div style="display:flex;flex-direction:column;gap:0.625rem;">
+            <button onclick="doPrintA4Final()" class="btn" style="width:100%;justify-content:center;background:#1e293b;color:#fff;border-color:#1e293b;">
+              <i class='bx bx-printer'></i> Cetak Invoice A4
+            </button>
+            <a id="waAdminFinalBtn" href="#" target="_blank" class="btn" style="width:100%;justify-content:center;background:#16a34a;color:#fff;border-color:#16a34a;text-decoration:none;">
+              <i class='bx bxl-whatsapp'></i> Hubungi Admin via WhatsApp
+            </a>
+            <a href="/pages/user/my-orders.html" class="btn btn-primary" style="width:100%;justify-content:center;text-decoration:none;">
+              <i class='bx bxs-receipt'></i> Lihat Pesananku
+            </a>
           </div>
         </div>
       </div>
           </main>
   </div>
 
-  <!-- Invoice Print Modal (sama seperti my-orders) -->
-  <div id="invoiceOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:220;align-items:center;justify-content:center;padding:1rem;">
-    <div style="background:#f1f5f9;border-radius:16px;max-width:400px;width:100%;max-height:90vh;overflow-y:auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid #e2e8f0;background:#fff;border-radius:16px 16px 0 0;">
-        <h4 style="font-family:var(--font-body);font-weight:700;color:var(--color-primary);margin:0;">Cetak Struk</h4>
-        <div style="display:flex;gap:0.5rem;">
-          <button onclick="doPrintInvoice()" class="btn btn-sm" style="background:#1e293b;color:#fff;border-color:#1e293b;"><i class='bx bx-printer'></i> Print</button>
-          <button onclick="closeInvoiceModal()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:#64748b;">✕</button>
-        </div>
-      </div>
-      <div style="padding:1.25rem;display:flex;justify-content:center;">
-        <div id="invoiceCardModal" style="width:280px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;font-family:'Courier New',monospace;">
-          <!-- Filled by JS -->
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
   <script src="/services/supabase.js"></script>
+  <script src="/services/realtime.js"></script>
+  <script src="/services/print.js"></script>
   <script src="/components/user-sidebar.js"></script>
   <script src="/utils/ui.js"></script>
 
@@ -976,11 +920,25 @@
     }
 
     async function uploadBuktiBayar(file, bookingId) {
-      const ext  = file.name.split('.').pop();
-      const path = `${bookingId}/bukti-${Date.now()}.${ext}`;
-      const { data, error } = await supabase.storage.from('payment-proofs').upload(path, file, { upsert: true });
-      if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage.from('payment-proofs').getPublicUrl(path);
+      const ext  = file.name.split('.').pop().toLowerCase();
+      const path = `${bookingId}/bukti-bayar-${Date.now()}.${ext}`;
+
+      // Coba bucket 'payment-proofs' dulu, fallback ke 'booking-documents'
+      let publicUrl = null;
+      for (const bucket of ['payment-proofs', 'booking-documents']) {
+        const { data, error } = await supabase.storage
+          .from(bucket)
+          .upload(path, file, { upsert: true, contentType: file.type });
+
+        if (!error) {
+          const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+          publicUrl = urlData?.publicUrl || null;
+          break;
+        }
+        console.warn(`Upload ke bucket '${bucket}' gagal:`, error.message);
+      }
+
+      if (!publicUrl) throw new Error("Gagal upload bukti bayar ke semua bucket.");
       return publicUrl;
     }
 
@@ -1078,12 +1036,15 @@
 
       setButtonLoading(btn, false);
 
-      // 4. Tampilkan invoice (step 7)
-      buildInvoice(kode, { id: bookingId });
+      // 4. Tampilkan step 7
+      buildStep7(kode, bookingId);
       goStep(7);
     }
 
-    function buildInvoice(kode, booking) {
+    // ── Step 7 builder (baru) ──
+    let _finalBookingData = null; // simpan untuk print A4
+
+    function buildStep7(kode, bookingId) {
       const s    = document.getElementById("startDate").value;
       const e    = document.getElementById("endDate").value;
       const days  = Math.round((new Date(e) - new Date(s)) / 86400000);
@@ -1093,30 +1054,70 @@
       const bayarNow = dp + deposit;
       const sisa     = total - dp;
 
-      document.getElementById('invKode').textContent  = kode;
-      document.getElementById('invNama').textContent  = document.getElementById('pNama').value.trim();
-      document.getElementById('invKtp').textContent   = 'KTP: ' + document.getElementById('pKtp').value.trim();
-      document.getElementById('invHp').textContent    = 'WA: ' + document.getElementById('pPhone').value.trim();
-      document.getElementById('invAlamat').textContent= document.getElementById('pAlamat').value.trim();
-      document.getElementById('invMobil').textContent = selectedCar.nama;
-      document.getElementById('invTanggal').textContent = formatTanggalShort(s) + ' s/d ' + formatTanggalShort(e);
-      document.getElementById('invDurasi').textContent  = days + ' hari';
-      document.getElementById('invCreated').textContent = 'Dibuat: ' + new Date().toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      // Summary
+      const summaryEl = document.getElementById("step7Summary");
+      if (summaryEl) {
+        summaryEl.innerHTML = [
+          ["Kode Booking", `<code style="font-family:monospace;font-weight:700;">${kode}</code>`],
+          ["Kendaraan", selectedCar.nama],
+          ["Periode", `${formatTanggalShort(s)} — ${formatTanggalShort(e)}`],
+          ["Durasi", `${days} hari`],
+          ["Nama Pemesan", document.getElementById("pNama").value.trim()],
+        ].map(([l,v]) => `<div style="display:flex;justify-content:space-between;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--color-border);"><span style="color:var(--color-text-muted);">${l}</span><span style="font-weight:600;">${v}</span></div>`).join("");
+      }
 
-      const rows = [
-        { label: `Sewa ${selectedCar.nama} (${formatRupiah(selectedCar.harga_per_hari||0)} × ${days} hari)`, val: formatRupiah(total) },
-        ...(dp > 0 ? [{ label: 'DP dibayar (30%)', val: formatRupiah(dp), bold: true, accent: true }] : []),
-        { label: `Deposit (${selectedJaminan==='kendaraan'?'jaminan kendaraan':'non-kendaraan'})`, val: formatRupiah(deposit), bold: true, accent: true },
-        { label: 'Total dibayar saat booking', val: formatRupiah(bayarNow), total: true },
-        { label: 'Sisa pelunasan saat pengambilan', val: formatRupiah(sisa), muted: true },
-      ];
+      // Payment breakdown
+      const payEl = document.getElementById("step7Payment");
+      if (payEl) {
+        const rows = [
+          { l: `Harga Sewa (${days} hari)`, v: formatRupiah(total), muted: true },
+          { l: dp > 0 ? "DP Booking (30%)" : "DP Booking", v: dp > 0 ? formatRupiah(dp) : "Tidak ada", accent: dp > 0 },
+          { l: `Deposit Jaminan`, v: formatRupiah(deposit), accent: true },
+          { l: "Total Dibayar Awal", v: formatRupiah(bayarNow), total: true },
+          ...(sisa > 0 ? [{ l: "Sisa pelunasan saat pengambilan", v: formatRupiah(sisa), small: true }] : []),
+        ];
+        payEl.innerHTML = rows.map(r => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:${r.total?'0.625rem 0':'0.35rem 0'};${r.total?'border-top:2px solid var(--color-primary);margin-top:0.25rem;':'border-bottom:1px solid var(--color-border);'}">
+            <span style="font-size:${r.small?'0.75':'0.8125'}rem;color:${r.total?'var(--color-primary)':'var(--color-text-muted)'};">${r.l}</span>
+            <span style="font-size:${r.total?'1rem':r.small?'0.75':'0.8125'}rem;font-weight:${r.total?'800':'600'};color:${r.total?'var(--color-accent)':r.accent?'var(--color-accent)':r.small?'#dc2626':'var(--color-text)'};">${r.v}</span>
+          </div>`).join("");
+      }
 
-      document.getElementById('invTabelBiaya').innerHTML = rows.map(r => `
-        <tr>
-          <td style="padding:0.2rem 0;${r.muted?'color:#94a3b8;font-size:0.6rem;':'color:#475569;'}${r.total?'font-weight:700;color:#1e293b;border-top:1px dashed #cbd5e1;padding-top:0.4rem;':''}">${r.label}</td>
-          <td style="padding:0.2rem 0;text-align:right;white-space:nowrap;${r.muted?'color:#94a3b8;font-size:0.6rem;':''}${r.accent?'color:#e85d04;font-weight:700;':''}${r.total?'color:#e85d04;font-weight:800;font-size:0.8rem;border-top:1px dashed #cbd5e1;padding-top:0.4rem;':''}">${r.val}</td>
-        </tr>
-      `).join('');
+      // WA button
+      const waBtn = document.getElementById("waAdminFinalBtn");
+      if (waBtn) {
+        const fakeBooking = {
+          kode_booking: kode, id: bookingId,
+          nama_pemesan: document.getElementById("pNama").value.trim(),
+          tanggal_mulai: s, tanggal_selesai: e,
+        };
+        waBtn.href = EasyCarRealtime.buildWALink(fakeBooking, selectedCar);
+      }
+
+      // Save for print A4
+      _finalBookingData = {
+        id: bookingId, kode_booking: kode,
+        nama_pemesan:  document.getElementById("pNama").value.trim(),
+        no_ktp:        document.getElementById("pKtp").value.trim(),
+        no_hp:         document.getElementById("pPhone").value.trim(),
+        email_pemesan: document.getElementById("pEmail").value.trim(),
+        alamat:        document.getElementById("pAlamat").value.trim(),
+        tujuan_sewa:   document.getElementById("pTujuan").value,
+        tanggal_mulai: s, tanggal_selesai: e, durasi_hari: days,
+        total_harga: total, dp_amount: dp, deposit_amount: deposit,
+        sudah_dibayar: bayarNow, sisa_pelunasan: sisa,
+        jenis_jaminan: selectedJaminan, status: "Menunggu Konfirmasi",
+        created_at: new Date().toISOString(),
+        jaminan_kendaraan_jenis: selectedJaminan==='kendaraan' ? document.getElementById('jkJenis')?.value : null,
+        jaminan_kendaraan_merek: selectedJaminan==='kendaraan' ? document.getElementById('jkMerek')?.value.trim() : null,
+        jaminan_kendaraan_tahun: selectedJaminan==='kendaraan' ? document.getElementById('jkTahun')?.value : null,
+        jaminan_kendaraan_plat:  selectedJaminan==='kendaraan' ? document.getElementById('jkPlat')?.value.trim().toUpperCase() : null,
+      };
+    }
+
+    function doPrintA4Final() {
+      if (!_finalBookingData) return;
+      EasyCarPrint.printInvoiceA4(_finalBookingData, selectedCar);
     }
 
     // ── STEP NAVIGATION ──
@@ -1152,105 +1153,7 @@
       if (n === 2) initDatePickers();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-
-    // ── CETAK STRUK (sama seperti my-orders) ──
-    function openPrintModal() {
-      // Ambil data dari invoiceCard yang sudah terisi di step7
-      const kode     = document.getElementById("invKode")?.textContent   || "—";
-      const nama     = document.getElementById("invNama")?.textContent    || "—";
-      const ktp      = document.getElementById("invKtp")?.textContent     || "";
-      const hp       = document.getElementById("invHp")?.textContent      || "";
-      const mobil    = document.getElementById("invMobil")?.textContent   || "—";
-      const tanggal  = document.getElementById("invTanggal")?.textContent || "—";
-      const durasi   = document.getElementById("invDurasi")?.textContent  || "—";
-      const status   = document.getElementById("invStatus")?.textContent  || "MENUNGGU KONFIRMASI";
-      const tabelBiaya = document.getElementById("invTabelBiaya")?.outerHTML || "";
-
-      // Hitung ulang data biaya dari state booking
-      const _s    = document.getElementById("startDate").value;
-      const _e    = document.getElementById("endDate").value;
-      const _days = Math.round((new Date(_e) - new Date(_s)) / 86400000);
-      const _tot  = (selectedCar?.harga_per_hari || 0) * _days;
-      const _dp   = selectedJaminan === "kendaraan" ? Math.round(_tot * 0.30) : 0;
-      const _dep  = selectedJaminan === "kendaraan" ? 500000 : 2000000;
-      const _now  = _dp + _dep;
-      const _sisa = _tot - _dp;
-
-      const _rows = [
-        { label: "Sewa (" + _days + " hari)", val: formatRupiah(_tot) },
-        ...(_dp > 0 ? [{ label: "DP dibayar (30%)", val: formatRupiah(_dp), accent: true }] : []),
-        { label: "Deposit Jaminan", val: formatRupiah(_dep), accent: true },
-        { label: "Total dibayar", val: formatRupiah(_now), total: true },
-        ...(_sisa > 0 ? [{ label: "Sisa pelunasan", val: formatRupiah(_sisa), muted: true }] : []),
-      ];
-
-      document.getElementById("invoiceCardModal").innerHTML = `
-        <div style="background:#1e293b;padding:0.875rem;text-align:center;">
-          <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:0.2rem;">
-            <div style="width:24px;height:24px;background:#e85d04;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class='bx bxs-car' style="color:#fff;font-size:0.75rem;"></i>
-            </div>
-            <span style="font-family:'Poppins',sans-serif;font-weight:800;color:#fff;font-size:1rem;">Easy<span style="color:#fb923c;">Car</span></span>
-          </div>
-          <p style="font-size:0.6rem;color:rgba(255,255,255,0.55);margin:0;">Rental Kendaraan — Pekanbaru, Riau</p>
-        </div>
-        <div style="padding:0.875rem;border-bottom:1px dashed #e2e8f0;">
-          <p style="font-size:0.65rem;color:#94a3b8;margin:0 0 0.1rem;text-align:center;">INVOICE / KWITANSI</p>
-          <p style="font-size:0.8rem;font-weight:700;color:#1e293b;margin:0;text-align:center;font-family:'Poppins',sans-serif;">${kode}</p>
-          <p style="font-size:0.575rem;color:#94a3b8;margin:0.2rem 0 0;text-align:center;">Dicetak: ${new Date().toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})}</p>
-        </div>
-        <div style="padding:0.75rem 0.875rem;border-bottom:1px dashed #e2e8f0;font-size:0.625rem;">
-          <p style="color:#475569;margin:0 0 0.15rem;"><strong>Pemesan:</strong> ${nama}</p>
-          ${ktp ? `<p style="color:#475569;margin:0 0 0.15rem;">${ktp}</p>` : ""}
-          ${hp  ? `<p style="color:#475569;margin:0;">${hp}</p>`  : ""}
-        </div>
-        <div style="padding:0.75rem 0.875rem;border-bottom:1px dashed #e2e8f0;font-size:0.625rem;">
-          <p style="color:#475569;margin:0 0 0.15rem;"><strong>Kendaraan:</strong> ${mobil}</p>
-          <p style="color:#475569;margin:0 0 0.15rem;">${tanggal}</p>
-          <p style="color:#475569;margin:0;">${durasi}</p>
-        </div>
-        <div style="padding:0.75rem 0.875rem;border-bottom:1px dashed #e2e8f0;">
-          <table style="width:100%;font-size:0.6rem;border-collapse:collapse;">
-            ${_rows.map(r => `
-              <tr>
-                <td style="padding:0.15rem 0;${r.muted?"color:#94a3b8;font-size:0.575rem;":"color:#475569;"}${r.total?"font-weight:700;color:#1e293b;border-top:1px dashed #cbd5e1;padding-top:0.3rem;":""}">${r.label}</td>
-                <td style="padding:0.15rem 0;text-align:right;white-space:nowrap;${r.muted?"color:#94a3b8;font-size:0.575rem;":""}${r.accent?"color:#e85d04;font-weight:700;":""}${r.total?"color:#e85d04;font-weight:800;border-top:1px dashed #cbd5e1;padding-top:0.3rem;":""}">${r.val}</td>
-              </tr>
-            `).join("")}
-          </table>
-        </div>
-        <div style="padding:0.75rem 0.875rem;text-align:center;">
-          <p style="font-size:0.575rem;color:#94a3b8;margin:0;">Status: <strong style="color:#f59e0b;">MENUNGGU KONFIRMASI</strong></p>
-          <p style="font-size:0.55rem;color:#cbd5e1;margin:0.25rem 0 0;">Terima kasih telah menggunakan EasyCar</p>
-        </div>
-      `;
-
-      document.getElementById("invoiceOverlay").style.display = "flex";
-    }
-
-    function closeInvoiceModal() {
-      document.getElementById("invoiceOverlay").style.display = "none";
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const ov = document.getElementById("invoiceOverlay");
-      if (ov) ov.addEventListener("click", e => { if (e.target === e.currentTarget) closeInvoiceModal(); });
-    });
-
-    function doPrintInvoice() {
-      const card = document.getElementById("invoiceCardModal");
-      const w = window.open("", "_blank", "width=400,height=700");
-      w.document.write(`<!DOCTYPE html><html><head>
-        <title>Struk EasyCar</title>
-        <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-        <style>
-          @page { size: 80mm auto; margin: 0.3cm; }
-          body { margin:0; background:#fff; font-family:'Courier New',monospace; }
-          @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
-        </style>
-      </head><body>${card.outerHTML}<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`);
-      w.document.close();
-    }
   </script>
 </body>
+
 </html>

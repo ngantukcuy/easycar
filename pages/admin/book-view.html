@@ -180,6 +180,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/services/supabase.js"></script>
+  <script src="/services/realtime.js"></script>
+  <script src="/services/print.js"></script>
   <script src="/components/admin-sidebar.js"></script>
   <script src="/utils/ui.js"></script>
 
@@ -196,6 +198,12 @@
       initAdminSidebar("book-views", currentAdminUser);
       await loadBookings();
       document.body.classList.add("ec-ready");
+
+      // ── REALTIME: pantau semua booking baru / update ──
+      EasyCarRealtime.subscribeAllBookings({
+        onNew: async () => { await loadBookings(); },
+        onUpdate: async () => { await loadBookings(); },
+      });
     })();
 
     async function loadBookings() {
@@ -313,7 +321,7 @@
           ${detailRow("Jaminan", b.jenis_jaminan || "—")}
           ${b.jenis_jaminan==='kendaraan' && b.jaminan_kendaraan_merek ? detailRow("Kendaraan Jaminan", `${b.jaminan_kendaraan_merek} (${b.jaminan_kendaraan_tahun}) — ${b.jaminan_kendaraan_plat}`) : ""}
           ${detailRow("Status Bayar", `<span class="badge-pay ${payBadgeClass(sp)}">${sp}</span>`)}
-          ${b.alasan_penolakan ? detailRow("Alasan Tolak", `<span style="color:#dc2626;">${b.alasan_penolakan}</span>`) : ""}
+          ${b.alasan_tolak ? detailRow("Alasan Tolak", `<span style="color:#dc2626;">${b.alasan_tolak}</span>`) : ""}
           ${b.tujuan_sewa ? detailRow("Tujuan Sewa", b.tujuan_sewa) : ""}
         </div>
 
@@ -334,7 +342,7 @@
             <i class='bx bx-file'></i> Lihat Dokumen
           </button>
           ${b.bukti_bayar_url ? `<button onclick="openBukti('${b.bukti_bayar_url}')" class="btn btn-ghost btn-sm"><i class='bx bx-image'></i> Bukti Bayar</button>` : ""}
-          <button onclick="cetakStruk('${id}')" class="btn btn-sm" style="background:#1e293b;color:#fff;border-color:#1e293b;"><i class='bx bx-printer'></i> Cetak Struk</button>
+          <button onclick="doPrintA4('${id}')" class="btn btn-sm" style="background:#1e293b;color:#fff;border-color:#1e293b;"><i class='bx bx-printer'></i> Cetak Invoice A4</button>
         </div>
 
         <!-- Update status manual -->
@@ -395,9 +403,9 @@
       if (!alasan) { showToast("Isi alasan penolakan.", "warning"); return; }
       showLoading("Menolak...");
       const { error } = await supabase.from("bookings").update({
-        status:            "Pembayaran Ditolak",
+        status:            "Ditolak",
         status_pembayaran: "Ditolak",
-        alasan_penolakan:  alasan,
+        alasan_tolak:  alasan,
       }).eq("id", pendingTolakId);
       hideLoading();
       if (error) { showToast("Gagal: " + error.message, "error"); return; }
@@ -526,6 +534,28 @@
         </style>
       </head><body>${card.outerHTML}<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`);
       w.document.close();
+    }
+
+    // ─── PRINT INVOICE A4 (admin) ───
+    function doPrintA4(id) {
+      const b = allBookings.find(x => x.id === id);
+      if (!b) return;
+      EasyCarPrint.printInvoiceA4(b, b.cars);
+    }
+
+    // ─── BUKTI BAYAR — fix: coba kolom alternatif + show di tabel ───
+    function openBukti(url) {
+      if (!url) { alert("URL bukti bayar tidak tersedia."); return; }
+      const isPdf = url.toLowerCase().endsWith(".pdf");
+      document.getElementById("buktiContent").innerHTML = isPdf
+        ? `<a href="${url}" target="_blank" class="btn btn-primary" style="margin:1rem auto;display:inline-flex;"><i class='bx bx-file-pdf'></i> Buka PDF Bukti Bayar</a>`
+        : `<img src="${url}" alt="Bukti bayar" style="max-width:100%;border-radius:var(--radius-md);"
+             onerror="this.style.display='none';document.getElementById('buktiErr').style.display='block';" />
+           <div id="buktiErr" style="display:none;padding:1rem;background:#fef2f2;border-radius:8px;color:#dc2626;font-size:0.875rem;">
+             Gagal memuat gambar. <a href="${url}" target="_blank" style="color:#dc2626;font-weight:700;">Buka di tab baru</a>
+           </div>
+           <p style="margin-top:0.75rem;"><a href="${url}" target="_blank" class="btn btn-ghost btn-sm"><i class='bx bx-link-external'></i> Buka di tab baru</a></p>`;
+      document.getElementById("buktiOverlay").style.display = "flex";
     }
 
     // ─── HAPUS BOOKING ───

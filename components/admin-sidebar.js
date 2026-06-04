@@ -5,7 +5,7 @@
 
 const ADMIN_SIDEBAR_HTML = `
 <aside id="sidebar" class="ec-sidebar" style="
-  position:fixed;left:0;top:0;height:100%;width:260px;
+  position:fixed;left:0;top:0;height:100vh;width:260px;
   background:linear-gradient(180deg,#0f2347 0%,#1a3060 100%);
   display:flex;flex-direction:column;z-index:50;
   box-shadow:4px 0 20px rgba(0,0,0,0.18);
@@ -123,13 +123,6 @@ function initAdminSidebar(activePage, user) {
       if (link.dataset.page === activePage) link.classList.add("active");
     });
   }
-
-  // Close sidebar after navigation on mobile
-  document.querySelectorAll(".sb-link").forEach(link => {
-    link.addEventListener("click", () => {
-      if (window.innerWidth < 1024) closeSidebar();
-    });
-  });
 
   // Fill user info
   if (user) {
