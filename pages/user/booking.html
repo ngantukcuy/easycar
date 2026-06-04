@@ -645,6 +645,8 @@
       EasyCarRealtime.subscribeUserBookings(currentUser.id, {
         onUpdate: b => showToast(`🔔 Status booking ${b.kode_booking || ''} diupdate: ${b.status || ''}`, "info"),
       });
+    })();
+
     async function loadVehicles() {
       const { data } = await supabase.from("cars").select("*").eq("status", "Tersedia").order("nama");
       allCars = data || [];
@@ -1272,5 +1274,4 @@
     }
   </script>
 </body>
-
 </html>
