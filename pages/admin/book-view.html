@@ -337,7 +337,7 @@
                 <span class="bk-meta"><i class='bx bx-time-five'></i><strong>${b.durasi_hari || "—"} hari</strong></span>
                 <span class="bk-meta"><i class='bx bx-credit-card'></i><strong>${sp}</strong></span>
               </div>
-              ${b.alasan_penolakan ? `<div class="tolak-banner" style="margin-top:0.625rem;"><i class='bx bxs-error-circle'></i><div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${b.alasan_penolakan}</div></div></div>` : ""}
+              ${b.alasan_tolak ? `<div class="tolak-banner" style="margin-top:0.625rem;"><i class='bx bxs-error-circle'></i><div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${b.alasan_tolak}</div></div></div>` : ""}
             </div>
             <div class="booking-card-footer">
               <button onclick="event.stopPropagation();openEdit('${b.id}')" class="btn btn-ghost btn-sm" style="font-size:0.73rem;">
@@ -474,9 +474,9 @@
             </div>
           </div>
 
-          ${b.alasan_penolakan ? `
+          ${b.alasan_tolak ? `
           <div class="tolak-banner"><i class='bx bxs-error-circle'></i>
-            <div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${b.alasan_penolakan}</div></div>
+            <div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${b.alasan_tolak}</div></div>
           </div>` : ""}
 
           <!-- Riwayat Status -->
@@ -537,10 +537,8 @@
     async function konfirmasiPembayaran(id) {
       showLoading("Mengkonfirmasi...");
       const { error } = await supabase.from("bookings").update({
-        status:           "Dikonfirmasi",
-        status_pembayaran:"Dikonfirmasi",
-        confirmed_at:     new Date().toISOString(),
-        confirmed_by:     currentAdminUser.id,
+        status:            "Dikonfirmasi",
+        status_pembayaran: "Dikonfirmasi",
       }).eq("id", id);
       hideLoading();
       if (error) { showToast("Gagal: " + error.message, "error"); return; }
@@ -561,11 +559,22 @@
       const alasan = document.getElementById("alasanTolak").value.trim();
       if (!alasan) { showToast("Isi alasan penolakan.", "warning"); return; }
       showLoading("Menolak...");
-      const { error } = await supabase.from("bookings").update({
+
+      // Coba update dengan alasan_tolak dulu
+      let { error } = await supabase.from("bookings").update({
         status:            "Ditolak",
         status_pembayaran: "Ditolak",
-        alasan_penolakan:  alasan,
+        alasan_tolak:      alasan,
       }).eq("id", pendingTolakId);
+
+      // Jika kolom alasan_tolak belum ada, fallback tanpa kolom itu
+      if (error && error.message && error.message.includes("alasan_tolak")) {
+        ({ error } = await supabase.from("bookings").update({
+          status:            "Ditolak",
+          status_pembayaran: "Ditolak",
+        }).eq("id", pendingTolakId));
+      }
+
       hideLoading();
       if (error) { showToast("Gagal: " + error.message, "error"); return; }
       showToast("Pembayaran ditolak.", "success");
