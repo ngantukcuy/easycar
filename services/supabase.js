@@ -130,7 +130,6 @@ function formatTanggalShort(dateStr) {
 
 function statusBadgeClass(status) {
   const map = {
-    "Menunggu":     "badge-warning",
     "Dikonfirmasi": "badge-info",
     "Aktif":        "badge-success",
     "Selesai":      "badge-secondary",
