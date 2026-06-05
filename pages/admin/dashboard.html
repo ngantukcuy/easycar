@@ -228,6 +228,7 @@
       if (!user) return;
 
       initAdminSidebar("dashboard", user);
+      injectTopbarNotifBell();
       document.getElementById("welcomeName").textContent = user.full_name || user.email || "Admin";
       document.getElementById("topbarDate").textContent  = new Date().toLocaleDateString("id-ID", { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
 

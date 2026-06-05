@@ -10,30 +10,90 @@
   <link rel="stylesheet" href="/assets/css/theme.css" />
   <style>
     body.ec-loading { visibility: hidden; }
-    .order-card { transition: box-shadow 0.2s; }
-    .order-card:hover { box-shadow: var(--shadow-md); }
     .filter-chip { padding:0.4rem 1rem;border-radius:999px;border:1.5px solid var(--color-border);background:var(--color-surface);font-size:0.8125rem;font-weight:600;color:var(--color-text-muted);cursor:pointer;transition:all 0.15s;font-family:var(--font-body); }
     .filter-chip:hover { border-color:var(--color-primary-mid);color:var(--color-primary-mid); }
     .filter-chip.active { background:var(--color-primary-mid);border-color:var(--color-primary-mid);color:#fff; }
     @keyframes spin { to { transform:rotate(360deg); } }
-    @keyframes pulseIn { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }
-    .order-card { animation: pulseIn 0.3s ease; }
+    @keyframes pulseIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── ORDER CARD — style myorder.jpeg ── */
+    .order-card {
+      background:#fff;
+      border-radius:16px;
+      border:1.5px solid var(--color-border);
+      overflow:hidden;
+      cursor:pointer;
+      transition:box-shadow 0.2s, transform 0.15s;
+      animation: pulseIn 0.3s ease;
+    }
+    .order-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
+    .order-card-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0.875rem 1.125rem 0.75rem;
+      border-bottom:1px solid var(--color-border);
+    }
+    .order-card-body { padding:1rem 1.125rem; }
+    .order-card-footer {
+      display:flex; align-items:center; gap:0.625rem;
+      padding:0.75rem 1.125rem;
+      border-top:1px solid var(--color-border);
+      background:var(--color-bg);
+    }
+    .order-meta-row { display:flex; flex-wrap:wrap; gap:0.5rem 1.25rem; margin-top:0.625rem; }
+    .order-meta-item { display:flex; align-items:center; gap:0.3rem; font-size:0.75rem; color:var(--color-text-muted); }
+    .order-meta-item i { font-size:0.875rem; color:var(--color-primary-mid); }
+    .order-meta-item strong { font-weight:600; color:var(--color-text); }
+    .order-total { text-align:right; }
+    .order-total .label { font-size:0.7rem; color:var(--color-text-muted); }
+    .order-total .amount { font-size:1rem; font-weight:800; color:var(--color-accent); }
+    .order-total .dp-note { font-size:0.7rem; color:var(--color-text-muted); }
 
     /* Alasan tolak banner */
     .tolak-banner {
       background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px;
-      padding: 0.75rem 1rem; margin-top: 0.625rem;
+      padding: 0.625rem 0.875rem; margin-top: 0.75rem;
       display: flex; gap: 0.5rem; align-items: flex-start;
     }
-    .tolak-banner i { color: #dc2626; font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
-    .tolak-banner .tolak-title { font-size: 0.75rem; font-weight: 700; color: #dc2626; }
-    .tolak-banner .tolak-alasan { font-size: 0.8125rem; color: #7f1d1d; margin-top: 1px; }
+    .tolak-banner i { color: #dc2626; font-size: 0.9rem; flex-shrink: 0; margin-top: 2px; }
+    .tolak-banner .tolak-title { font-size: 0.7rem; font-weight: 700; color: #dc2626; }
+    .tolak-banner .tolak-alasan { font-size: 0.78rem; color: #7f1d1d; margin-top: 1px; }
 
-    /* Payment breakdown */
+    /* ── DETAIL MODAL — style detail.jpeg ── */
+    .detail-header-band {
+      background: linear-gradient(135deg, #0f2347 0%, #1a3c6e 100%);
+      padding: 1.25rem 1.5rem;
+      border-radius: 24px 24px 0 0;
+      position: sticky; top: 0; z-index: 2;
+    }
+    .detail-info-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem;
+    }
+    .detail-info-box {
+      background: var(--color-bg); border-radius: 10px; padding: 0.75rem;
+    }
+    .detail-info-box .lbl { font-size: 0.7rem; color: var(--color-text-muted); margin: 0 0 0.2rem; }
+    .detail-info-box .val { font-size: 0.875rem; font-weight: 700; color: var(--color-text); margin: 0; }
+
+    /* Pay breakdown */
     .pay-breakdown { background: var(--color-bg); border-radius: 10px; padding: 0.875rem; }
     .pay-row { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; }
     .pay-row + .pay-row { border-top: 1px solid var(--color-border); }
     .pay-row.pay-total { border-top: 2px solid var(--color-primary); margin-top: 0.25rem; padding-top: 0.625rem; }
+
+    /* Status timeline */
+    .status-timeline { display:flex; flex-direction:column; gap:0; }
+    .timeline-item { display:flex; gap:0.875rem; position:relative; }
+    .timeline-item:not(:last-child) .tl-line { position:absolute; left:11px; top:24px; width:2px; bottom:-4px; background:var(--color-border); }
+    .tl-dot { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; z-index:1; }
+    .tl-dot.done { background:#dcfce7; }
+    .tl-dot.done i { color:#16a34a; font-size:0.75rem; }
+    .tl-dot.current { background:#fff7ed; border:2px solid #e85d04; }
+    .tl-dot.current i { color:#e85d04; font-size:0.75rem; }
+    .tl-dot.pending { background:#f1f5f9; }
+    .tl-dot.pending i { color:#cbd5e1; font-size:0.75rem; }
+    .tl-content { flex:1; padding-bottom:0.875rem; }
+    .tl-content .tl-label { font-size:0.8125rem; font-weight:600; color:var(--color-text); }
+    .tl-content .tl-sub { font-size:0.72rem; color:var(--color-text-muted); margin-top:1px; }
   </style>
 </head>
 <body class="ec-loading">
@@ -82,12 +142,17 @@
   <!-- Detail Modal -->
   <div id="detailOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem;">
     <div style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:500px;max-height:90vh;overflow-y:auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.125rem 1.5rem;border-bottom:1px solid var(--color-border);position:sticky;top:0;background:#fff;z-index:1;border-radius:24px 24px 0 0;">
-        <h3 style="font-family:var(--font-body);font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Detail Pesanan</h3>
-        <button onclick="closeDetail()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--color-text-muted);">✕</button>
+      <div class="detail-header-band">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div id="detailHeaderKode" style="color:#fff;">
+            <p style="font-size:1.1rem;font-weight:800;margin:0;letter-spacing:0.02em;">Detail Pesanan</p>
+            <p style="font-size:0.75rem;opacity:0.65;margin:0.15rem 0 0;">EasyCar Rental Kendaraan</p>
+          </div>
+          <button onclick="closeDetail()" style="background:rgba(255,255,255,0.15);border:none;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;">✕</button>
+        </div>
       </div>
-      <div id="detailContent" style="padding:1.5rem;"></div>
-      <div style="padding:0 1.5rem 1.5rem;display:flex;flex-direction:column;gap:0.625rem;" id="detailActions"></div>
+      <div id="detailContent" style="padding:1.25rem;"></div>
+      <div style="padding:0 1.25rem 1.25rem;display:flex;flex-direction:column;gap:0.625rem;" id="detailActions"></div>
     </div>
   </div>
 
@@ -109,6 +174,7 @@
       if (!currentUser) return;
 
       initUserSidebar("my-orders", currentUser);
+      injectTopbarNotifBell();
       await loadOrders();
       document.body.classList.add("ec-ready");
 
@@ -170,49 +236,55 @@
 
     function orderCardHTML(o) {
       const car  = o.cars || {};
-      const img  = car.foto_url
-        ? `<img src="${car.foto_url}" style="width:80px;height:60px;object-fit:cover;border-radius:var(--radius-md);flex-shrink:0;" />`
-        : `<div style="width:80px;height:60px;background:var(--color-bg);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class='bx bxs-car' style="font-size:1.5rem;color:var(--color-text-subtle);"></i></div>`;
       const kode = o.kode_booking || ("EC" + o.id.slice(-6).toUpperCase());
       const dp      = o.dp_amount || 0;
       const deposit = o.deposit_amount || 0;
       const bayarNow = dp + deposit;
+      const statusPay = o.status_pembayaran || (dp > 0 ? "DP" : "Belum Bayar");
 
-      let extraBanner = "";
-      if (o.status === "Ditolak" && o.alasan_tolak) {
-        extraBanner = `<div class="tolak-banner"><i class='bx bxs-error-circle'></i><div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${o.alasan_tolak}</div></div></div>`;
+      let tolakBanner = "";
+      if ((o.status === "Ditolak" || o.status === "Pembayaran Ditolak") && o.alasan_tolak) {
+        tolakBanner = `<div class="tolak-banner"><i class='bx bxs-error-circle'></i><div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${o.alasan_tolak}</div></div></div>`;
       }
 
       return `
-        <div class="card order-card" style="padding:1.25rem;cursor:pointer;" onclick="openDetail('${o.id}')">
-          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-            ${img}
-            <div style="flex:1;min-width:0;">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
-                <div>
-                  <p style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0 0 0.2rem;">${car.nama || "Kendaraan"}</p>
-                  <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;font-family:monospace;font-weight:600;">${kode}</p>
-                </div>
-                <span class="badge ${statusBadgeClass(o.status)}">${o.status}</span>
-              </div>
-              <div style="display:flex;flex-wrap:wrap;gap:1rem;margin-top:0.75rem;">
-                <div>
-                  <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0 0 0.1rem;">Tanggal</p>
-                  <p style="font-size:0.8125rem;font-weight:600;color:var(--color-text);margin:0;">${formatTanggalShort(o.tanggal_mulai)} — ${formatTanggalShort(o.tanggal_selesai)}</p>
-                </div>
-                <div>
-                  <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0 0 0.1rem;">Durasi</p>
-                  <p style="font-size:0.8125rem;font-weight:600;color:var(--color-text);margin:0;">${o.durasi_hari || "—"} hari</p>
-                </div>
-                <div>
-                  <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0 0 0.1rem;">Total Bayar Awal</p>
-                  <p style="font-size:0.8125rem;font-weight:700;color:var(--color-accent);margin:0;">${formatRupiah(bayarNow)}</p>
-                </div>
+        <div class="order-card" onclick="openDetail('${o.id}')">
+          <div class="order-card-header">
+            <div>
+              <p style="font-weight:800;color:var(--color-primary);font-size:0.9375rem;margin:0 0 0.1rem;">${kode}</p>
+              <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">Dipesan: ${formatTanggalShort(o.created_at || o.tanggal_mulai)}</p>
+            </div>
+            <span class="badge ${statusBadgeClass(o.status)}">${o.status}</span>
+          </div>
+          <div class="order-card-body">
+            <p style="font-weight:700;color:var(--color-text);font-size:0.9375rem;margin:0 0 0.5rem;">${car.nama || "Kendaraan"}</p>
+            <div class="order-meta-row">
+              <span class="order-meta-item"><i class='bx bx-calendar'></i><strong>${formatTanggalShort(o.tanggal_mulai)} → ${formatTanggalShort(o.tanggal_selesai)}</strong></span>
+              <span class="order-meta-item"><i class='bx bx-time-five'></i><strong>${o.durasi_hari || "—"} hari</strong></span>
+              <span class="order-meta-item"><i class='bx bx-credit-card'></i><strong>${statusPay}</strong></span>
+            </div>
+            ${car.harga_per_hari ? `<div class="order-meta-row" style="margin-top:0.4rem;"><span class="order-meta-item"><i class='bx bx-camera'></i><strong>${formatRupiah(car.harga_per_hari)}/hari</strong></span></div>` : ""}
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:0.875rem;flex-wrap:wrap;gap:0.5rem;">
+              <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;"><i class='bx bx-map-pin' style="font-size:0.8rem;"></i> Kantor EasyCar</p>
+              <div class="order-total">
+                <div class="label">Total Sewa</div>
+                <div class="amount">${formatRupiah(o.total_harga || 0)}</div>
+                ${bayarNow > 0 ? `<div class="dp-note">DP/Deposit: ${formatRupiah(bayarNow)}</div>` : ""}
               </div>
             </div>
+            ${tolakBanner}
           </div>
-          ${extraBanner}
+          <div class="order-card-footer">
+            <button onclick="event.stopPropagation();openDetail('${o.id}')" class="btn btn-ghost btn-sm" style="font-size:0.75rem;">
+              <i class='bx bx-info-circle'></i> Detail
+            </button>
+            <button onclick="event.stopPropagation();doPrintA4('${o.id}')" class="btn btn-sm" style="font-size:0.75rem;background:#1e293b;color:#fff;border-color:#1e293b;">
+              <i class='bx bx-printer'></i> Invoice
+            </button>
+            ${(o.status === "Ditolak" || o.status === "Dibatalkan") ? `<a href="/pages/user/booking.html${car.id ? '?car_id='+car.id : ''}" onclick="event.stopPropagation()" class="btn btn-accent btn-sm" style="font-size:0.75rem;"><i class='bx bx-refresh'></i> Booking Ulang</a>` : ""}
+          </div>
         </div>`;
+    }
     }
 
     function openDetail(id) {
@@ -224,73 +296,148 @@
       const dp      = o.dp_amount || 0;
       const deposit = o.deposit_amount || 0;
       const bayarNow = dp + deposit;
-      const sisa     = o.sisa_pelunasan || (o.total_harga - dp);
+      const sisa     = o.sisa_pelunasan != null ? o.sisa_pelunasan : Math.max(0, (o.total_harga || 0) - dp);
+      const statusPay = o.status_pembayaran || (dp > 0 ? "DP" : "Belum Bayar");
+
+      // Status timeline logic
+      const ALL_STATUSES = ["Menunggu Konfirmasi","Dikonfirmasi","Aktif","Selesai"];
+      const REJECTED = ["Ditolak","Dibatalkan","Pembayaran Ditolak"];
+      const curIdx = ALL_STATUSES.indexOf(o.status);
+      const isRejected = REJECTED.includes(o.status);
+
+      const timelineHTML = (() => {
+        const steps = isRejected
+          ? [...ALL_STATUSES.slice(0, Math.max(curIdx, 1)), o.status]
+          : ALL_STATUSES;
+        return steps.map((s, i) => {
+          let dotClass = "pending"; let icon = "bx-circle";
+          if (isRejected && i === steps.length - 1) { dotClass = "current"; icon = "bxs-error-circle"; }
+          else if (curIdx > i) { dotClass = "done"; icon = "bxs-check-circle"; }
+          else if (curIdx === i) { dotClass = "current"; icon = "bx-radio-circle-marked"; }
+          const subText = curIdx === i ? "Status saat ini" : (curIdx > i ? "Selesai" : "Menunggu");
+          return `<div class="timeline-item">
+            <div class="tl-line"></div>
+            <div class="tl-dot ${dotClass}"><i class='bx ${icon}'></i></div>
+            <div class="tl-content">
+              <div class="tl-label">${s}</div>
+              <div class="tl-sub">${subText}</div>
+            </div>
+          </div>`;
+        }).join("");
+      })();
 
       document.getElementById("detailContent").innerHTML = `
-        <div style="display:flex;flex-direction:column;gap:0.875rem;">
-          ${car.foto_url ? `<img src="${car.foto_url}" style="width:100%;height:160px;object-fit:cover;border-radius:var(--radius-md);" />` : ""}
-          <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:1rem;">
-            <p style="font-weight:700;color:var(--color-primary);margin:0 0 0.15rem;">${car.nama || "—"}</p>
-            <p style="font-size:0.8rem;color:var(--color-text-muted);margin:0;">${car.tipe || ""} ${car.transmisi ? "· " + car.transmisi : ""}</p>
-          </div>
-          ${infoRow("Kode Booking", `<code style="font-family:monospace;font-weight:700;">${kode}</code>`)}
-          ${infoRow("Status", `<span class="badge ${statusBadgeClass(o.status)}">${o.status}</span>`)}
-          ${infoRow("Tanggal Mulai", formatTanggal(o.tanggal_mulai))}
-          ${infoRow("Tanggal Selesai", formatTanggal(o.tanggal_selesai))}
-          ${infoRow("Durasi", (o.durasi_hari || "—") + " hari")}
-          ${infoRow("Nama Pemesan", o.nama_pemesan || "—")}
-          ${infoRow("No. HP", o.no_hp || "—")}
-          ${infoRow("Jenis Jaminan", o.jenis_jaminan === "kendaraan" ? "Jaminan Kendaraan" : "Jaminan Non-Kendaraan")}
+        <div style="display:flex;flex-direction:column;gap:1rem;">
 
-          ${o.alasan_tolak ? `
-            <div class="tolak-banner" style="margin-top:0;">
-              <i class='bx bxs-error-circle'></i>
-              <div>
-                <div class="tolak-title">Alasan Penolakan Admin</div>
-                <div class="tolak-alasan">${o.alasan_tolak}</div>
-              </div>
-            </div>` : ""}
-
-          <!-- Breakdown Pembayaran -->
+          <!-- Informasi Pesanan -->
           <div>
-            <p style="font-size:0.75rem;font-weight:700;color:var(--color-primary);margin:0 0 0.625rem;text-transform:uppercase;letter-spacing:0.05em;">Rincian Pembayaran</p>
+            <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 0.625rem;">📋 Informasi Pesanan</p>
+            <div class="detail-info-grid">
+              <div class="detail-info-box">
+                <p class="lbl">Kode Booking</p>
+                <p class="val" style="font-family:monospace;color:var(--color-primary);">${kode}</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Status</p>
+                <span class="badge ${statusBadgeClass(o.status)}" style="font-size:0.75rem;">${o.status}</span>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Tanggal Pesan</p>
+                <p class="val">${formatTanggalShort(o.created_at || o.tanggal_mulai)}</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Status Bayar</p>
+                <p class="val">${statusPay}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detail Kendaraan -->
+          <div>
+            <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 0.625rem;">🚗 Detail Kendaraan</p>
+            <div class="detail-info-grid">
+              <div class="detail-info-box">
+                <p class="lbl">Kendaraan</p>
+                <p class="val">${car.nama || "—"}</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Harga / Hari</p>
+                <p class="val" style="color:var(--color-accent);">${car.harga_per_hari ? formatRupiah(car.harga_per_hari) : "—"}</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Mulai Sewa</p>
+                <p class="val">${formatTanggal(o.tanggal_mulai)}</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Selesai Sewa</p>
+                <p class="val">${formatTanggal(o.tanggal_selesai)}</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Durasi</p>
+                <p class="val">${o.durasi_hari || "—"} hari</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Lokasi Ambil</p>
+                <p class="val">Kantor EasyCar</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rincian Pembayaran -->
+          <div>
+            <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 0.625rem;">💰 Rincian Pembayaran</p>
             <div class="pay-breakdown">
               <div class="pay-row">
-                <span style="font-size:0.8125rem;color:var(--color-text-muted);">Harga Sewa (${o.durasi_hari || "?"} hari)</span>
-                <span style="font-size:0.8125rem;font-weight:600;">${formatRupiah(o.total_harga || 0)}</span>
+                <span style="font-size:0.8125rem;color:var(--color-text-muted);">Total Sewa</span>
+                <span style="font-size:0.8125rem;font-weight:700;">${formatRupiah(o.total_harga || 0)}</span>
               </div>
               <div class="pay-row">
-                <span style="font-size:0.8125rem;color:var(--color-text-muted);">DP Booking${dp > 0 ? " (30%)" : ""}</span>
-                <span style="font-size:0.8125rem;font-weight:600;color:var(--color-accent);">${dp > 0 ? formatRupiah(dp) : "Tidak ada"}</span>
+                <span style="font-size:0.8125rem;color:var(--color-text-muted);">DP / Deposit Dibayar</span>
+                <span style="font-size:0.8125rem;font-weight:700;color:var(--color-accent);">${formatRupiah(bayarNow)}</span>
               </div>
               <div class="pay-row">
-                <span style="font-size:0.8125rem;color:var(--color-text-muted);">Deposit Jaminan</span>
-                <span style="font-size:0.8125rem;font-weight:600;color:var(--color-accent);">${formatRupiah(deposit)}</span>
+                <span style="font-size:0.8125rem;color:var(--color-text-muted);">Deposit E-Tilang</span>
+                <span style="font-size:0.8125rem;font-weight:700;">${formatRupiah(deposit)}</span>
               </div>
               <div class="pay-row pay-total">
-                <span style="font-size:0.875rem;font-weight:700;color:var(--color-primary);">Total Dibayar Awal</span>
-                <span style="font-size:1rem;font-weight:800;color:var(--color-accent);">${formatRupiah(bayarNow)}</span>
+                <span style="font-size:0.875rem;font-weight:700;color:var(--color-primary);">Sisa Pembayaran</span>
+                <span style="font-size:0.9375rem;font-weight:800;color:${sisa > 0 ? '#dc2626' : '#16a34a'};">${formatRupiah(sisa)}</span>
               </div>
-              ${sisa > 0 ? `<div class="pay-row" style="border-top:none;"><span style="font-size:0.75rem;color:var(--color-text-muted);font-style:italic;">Sisa pelunasan saat pengambilan</span><span style="font-size:0.75rem;font-weight:700;color:#dc2626;">${formatRupiah(sisa)}</span></div>` : ""}
             </div>
+          </div>
+
+          ${o.alasan_tolak ? `
+          <div class="tolak-banner" style="margin:0;">
+            <i class='bx bxs-error-circle'></i>
+            <div><div class="tolak-title">Alasan Penolakan Admin</div><div class="tolak-alasan">${o.alasan_tolak}</div></div>
+          </div>` : ""}
+
+          <!-- Riwayat Status -->
+          <div>
+            <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 0.75rem;">📌 Riwayat Status</p>
+            <div class="status-timeline">${timelineHTML}</div>
           </div>
         </div>`;
 
       // Action buttons
       const actionsEl = document.getElementById("detailActions");
-      let actionsHTML = "";
+      let actionsHTML = `
+        <button onclick="doPrintA4('${id}')" class="btn btn-sm" style="width:100%;justify-content:center;background:#1e293b;color:#fff;border-color:#1e293b;">
+          <i class='bx bx-printer'></i> Cetak Invoice A4
+        </button>`;
 
-      // Cetak invoice (semua status)
-      actionsHTML += `<button onclick="doPrintA4('${id}')" class="btn btn-sm" style="width:100%;justify-content:center;background:#1e293b;color:#fff;border-color:#1e293b;"><i class='bx bx-printer'></i> Cetak Invoice A4</button>`;
-
-      // WA admin
       const waLink = EasyCarRealtime.buildWALink(o, car);
-      actionsHTML += `<a href="${waLink}" target="_blank" class="btn btn-sm" style="width:100%;justify-content:center;background:#16a34a;color:#fff;border-color:#16a34a;"><i class='bx bxl-whatsapp'></i> Hubungi Admin via WhatsApp</a>`;
+      actionsHTML += `
+        <a href="${waLink}" target="_blank" class="btn btn-sm" style="width:100%;justify-content:center;background:#16a34a;color:#fff;border-color:#16a34a;">
+          <i class='bx bxl-whatsapp'></i> Hubungi Admin via WhatsApp
+        </a>`;
 
-      // Booking ulang jika ditolak
       if (o.status === "Ditolak" || o.status === "Dibatalkan") {
-        const carIdForRebook = car.id || (o.cars && o.cars.id) || "";
-        actionsHTML += `<a href="/pages/user/booking.html${carIdForRebook ? '?car_id=' + carIdForRebook : ''}" class="btn btn-accent btn-sm" style="width:100%;justify-content:center;"><i class='bx bx-refresh'></i> Booking Ulang</a>`;
+        const carIdForRebook = car.id || "";
+        actionsHTML += `
+          <a href="/pages/user/booking.html${carIdForRebook ? '?car_id=' + carIdForRebook : ''}" class="btn btn-accent btn-sm" style="width:100%;justify-content:center;">
+            <i class='bx bx-refresh'></i> Booking Ulang
+          </a>`;
       }
 
       actionsEl.innerHTML = actionsHTML;

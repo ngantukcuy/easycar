@@ -56,9 +56,9 @@
     /* ── GRID RESPONSIVE ── */
     .grid-2col { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
     .grid-3col { display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem; }
-    .grid-step6 { display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:800px; }
+    .grid-step6 { display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;max-width:640px; }
 
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
       .grid-2col  { grid-template-columns: 1fr !important; }
       .grid-3col  { grid-template-columns: 1fr 1fr !important; }
       .grid-step6 { grid-template-columns: 1fr !important; max-width:100% !important; }
@@ -626,6 +626,7 @@
       currentUser = await requireAdmin();
       if (!currentUser) return;
       initAdminSidebar("booking", currentUser);
+      injectTopbarNotifBell();
       await loadVehicles();
 
       // Pre-fill email dari profile

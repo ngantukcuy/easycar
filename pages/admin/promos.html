@@ -118,6 +118,7 @@
       const user = await requireAdmin();
       if (!user) return;
       initAdminSidebar("promos", user);
+      injectTopbarNotifBell();
       await loadPromos();
       document.body.classList.add("ec-ready");
     })();

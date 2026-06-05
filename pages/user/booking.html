@@ -624,6 +624,7 @@
       currentUser = await requireLogin();
       if (!currentUser) return;
       initUserSidebar("booking", currentUser);
+      injectTopbarNotifBell();
       await loadVehicles();
 
       // Pre-fill email dari profile

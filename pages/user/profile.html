@@ -111,6 +111,7 @@
       if (!currentUser) return;
 
       initUserSidebar("profile", currentUser);
+      injectTopbarNotifBell();
       fillProfile(currentUser);
       document.body.classList.add("ec-ready");
     })();

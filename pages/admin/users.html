@@ -60,6 +60,7 @@
       const user = await requireAdmin();
       if (!user) return;
       initAdminSidebar("users", user);
+      injectTopbarNotifBell();
       await loadUsers();
       document.body.classList.add("ec-ready");
     })();

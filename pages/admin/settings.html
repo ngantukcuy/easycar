@@ -142,6 +142,7 @@
       currentUser = await requireAdmin();
       if (!currentUser) return;
       initAdminSidebar("settings", currentUser);
+      injectTopbarNotifBell();
       fillProfile(currentUser);
       document.body.classList.add("ec-ready");
     })();

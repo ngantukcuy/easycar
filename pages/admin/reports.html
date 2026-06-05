@@ -202,6 +202,7 @@
       const user = await requireAdmin();
       if (!user) return;
       initAdminSidebar("reports", user);
+      injectTopbarNotifBell();
       await loadAllData();
       document.body.classList.add("ec-ready");
     })();
