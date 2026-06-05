@@ -387,9 +387,9 @@ function injectTopbarNotifBell({ fetchCount, onOpen } = {}) {
     } else if (typeof supabase !== "undefined" && typeof currentUser !== "undefined" && currentUser) {
       const { data } = await supabase
         .from("bookings")
-        .select("id,kode_booking,status,updated_at,cars(nama)")
+        .select("id,kode_booking,status,created_at,cars(nama)")
         .eq("user_id", currentUser.id)
-        .order("updated_at", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(10);
       renderNotifItems((data || []).map(b => ({
         title: b.kode_booking || ("EC" + b.id.slice(-6).toUpperCase()),

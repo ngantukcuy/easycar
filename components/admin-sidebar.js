@@ -379,11 +379,11 @@ function injectTopbarNotifBell({ fetchCount, onOpen } = {}) {
     } else if (typeof supabase !== "undefined") {
       const { data } = await supabase
         .from("bookings")
-        .select("id,kode_booking,status,status_pembayaran,nama_pemesan,updated_at,cars(nama)")
-        .order("updated_at", { ascending: false })
+        .select("id,kode_booking,status,status_pembayaran,created_at,cars(nama)")
+        .order("created_at", { ascending: false })
         .limit(12);
       renderNotifItems((data || []).map(b => ({
-        title: (b.nama_pemesan || "Pemesan") + " — " + (b.kode_booking || "EC" + b.id.slice(-6).toUpperCase()),
+        title: b.kode_booking || ("EC" + b.id.slice(-6).toUpperCase()),
         sub: (b.cars?.nama || "Kendaraan") + " · " + (b.status || ""),
         status: b.status,
       })));
