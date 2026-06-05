@@ -76,13 +76,13 @@
         <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Manajemen Pemesanan</h2>
         <p id="subCount" style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">—</p>
       </div>
-      <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
-        <input type="text" id="searchInput" oninput="filterBookings()" placeholder="Cari nama / kode..." class="ec-input" style="width:200px;min-width:130px;" />
-      </div>
+      
     </header>
 
     <main class="page-content fade-in">
-
+      <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+        <input type="text" id="searchInput" oninput="filterBookings()" placeholder="Cari nama / kode..." class="ec-input" style="width:200px;min-width:130px;" />
+      </div>
       <!-- Filter tabs -->
       <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem;">
         <button class="filter-chip active" data-s="all"                   onclick="setFilter(this,'all')">Semua</button>
@@ -106,21 +106,67 @@
   </div>
 
   <!-- ─── MODAL DETAIL & AKSI ─── -->
-  <div id="editOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem;">
-    <div style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;">
-      <div class="detail-header-band">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="color:#fff;">
-            <p style="font-size:1.05rem;font-weight:800;margin:0;letter-spacing:0.02em;">Detail & Aksi Booking</p>
-            <p style="font-size:0.72rem;opacity:0.65;margin:0.15rem 0 0;">EasyCar Admin Panel</p>
-          </div>
-          <button onclick="closeEdit()" style="background:rgba(255,255,255,0.15);border:none;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;">✕</button>
-        </div>
-      </div>
-      <div id="editContent" style="padding:1.25rem;"></div>
-    </div>
-  </div>
+  <div id="editOverlay" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  backdrop-filter:blur(4px);
+  z-index:200;
 
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:1rem;
+  box-sizing:border-box;
+">
+  
+  <div style="
+    background:#fff;
+    border-radius:20px;
+    box-shadow:0 24px 64px rgba(0,0,0,0.2);
+
+    width:100%;
+    max-width:500px; /* diperkecil biar ga terlalu kanan */
+    
+    max-height:90vh;
+    overflow-y:auto;
+
+    margin:auto; /* penting biar center */
+  ">
+    
+    <div class="detail-header-band">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="color:#fff;">
+          <p style="font-size:1.05rem;font-weight:800;margin:0;letter-spacing:0.02em;">
+            Detail & Aksi Booking
+          </p>
+          <p style="font-size:0.72rem;opacity:0.65;margin:0.15rem 0 0;">
+            EasyCar Admin Panel
+          </p>
+        </div>
+
+        <button onclick="closeEdit()" style="
+          background:rgba(255,255,255,0.15);
+          border:none;
+          cursor:pointer;
+          width:32px;
+          height:32px;
+          border-radius:50%;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          color:#fff;
+          font-size:1rem;
+        ">✕</button>
+      </div>
+    </div>
+
+    <div id="editContent" style="padding:1.25rem;"></div>
+
+  </div>
+</div>
   <!-- ─── MODAL BUKTI BAYAR ─── -->
   <div id="buktiOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);z-index:210;align-items:center;justify-content:center;padding:1rem;">
     <div style="background:#fff;border-radius:20px;max-width:560px;width:100%;overflow:hidden;">
