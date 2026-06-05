@@ -281,7 +281,7 @@
             <button onclick="event.stopPropagation();doPrintA4('${o.id}')" class="btn btn-sm" style="font-size:0.75rem;background:#1e293b;color:#fff;border-color:#1e293b;">
               <i class='bx bx-printer'></i> Invoice
             </button>
-            ${(o.status === "Dibatalkan") ? `<a href="/pages/user/booking.html${car.id ? '?car_id='+car.id : ''}" onclick="event.stopPropagation()" class="btn btn-accent btn-sm" style="font-size:0.75rem;"><i class='bx bx-refresh'></i> Booking Ulang</a>` : ""}
+            ${(o.status === "Dibatalkan") ? `<a href="/pages/user/booking.html${car.id ? '?car_id='+car.id : ''}" onclick="event.stopPropagation()" class="btn btn-accent btn-sm" style="font-size:0.75rem;"><i class='bx bx-refresh'></i> Booking Lagi</a>` : ""}
           </div>
         </div>`;
     }
@@ -436,7 +436,7 @@
         const carIdForRebook = car.id || "";
         actionsHTML += `
           <a href="/pages/user/booking.html${carIdForRebook ? '?car_id=' + carIdForRebook : ''}" class="btn btn-accent btn-sm" style="width:100%;justify-content:center;">
-            <i class='bx bx-refresh'></i> Booking Ulang
+            <i class='bx bx-refresh'></i> Booking Lagi
           </a>`;
       }
 
