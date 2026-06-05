@@ -274,7 +274,7 @@
       if (!sp || sp === 'Belum Bayar')           return 'badge-pay-belum';
       if (sp === 'Menunggu Konfirmasi')           return 'badge-pay-menunggu';
       if (sp === 'Dikonfirmasi')                  return 'badge-pay-konfirmasi';
-      if (sp === 'Ditolak' || sp === 'Pembayaran Ditolak') return 'badge-pay-ditolak';
+      if (sp === 'Ditolak' || sp === 'Dibatalkan') return 'badge-pay-ditolak';
       return 'badge-pay-belum';
     }
 
@@ -563,7 +563,7 @@
       // Coba update dengan alasan_tolak dulu
       let { error } = await supabase.from("bookings").update({
         status:            "Dibatalkan",
-        status_pembayaran: "Ditolak",
+        status_pembayaran: "Belum Bayar",
         alasan_tolak:      alasan,
       }).eq("id", pendingTolakId);
 
@@ -571,7 +571,7 @@
       if (error && error.message && error.message.includes("alasan_tolak")) {
         ({ error } = await supabase.from("bookings").update({
           status:            "Dibatalkan",
-          status_pembayaran: "Ditolak",
+          status_pembayaran: "Belum Bayar",
         }).eq("id", pendingTolakId));
       }
 
