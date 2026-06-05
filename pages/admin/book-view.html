@@ -91,7 +91,7 @@
         <button class="filter-chip"        data-s="Aktif"                 onclick="setFilter(this,'Aktif')">Aktif</button>
         <button class="filter-chip"        data-s="Selesai"               onclick="setFilter(this,'Selesai')">Selesai</button>
         <button class="filter-chip"        data-s="Dibatalkan"            onclick="setFilter(this,'Dibatalkan')">Dibatalkan</button>
-        <button class="filter-chip"        data-s="Pembayaran Ditolak"    onclick="setFilter(this,'Pembayaran Ditolak')">Ditolak</button>
+        <button class="filter-chip"        data-s="Dibatalkan"           onclick="setFilter(this,'Dibatalkan')">Ditolak/Batal</button>
       </div>
 
       <!-- Cards -->
@@ -150,7 +150,7 @@
     <div style="background:#fff;border-radius:20px;max-width:420px;width:100%;padding:1.5rem;">
       <h4 style="font-family:var(--font-body);font-weight:700;color:var(--color-primary);margin:0 0 1rem;">❌ Tolak Pembayaran</h4>
       <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Alasan Penolakan *</label>
-      <textarea id="alasanPenolakan" class="ec-input" rows="3" placeholder="Contoh: Bukti bayar tidak jelas / nominal tidak sesuai..."></textarea>
+      <textarea id="alasanTolak" class="ec-input" rows="3" placeholder="Contoh: Bukti bayar tidak jelas / nominal tidak sesuai..."></textarea>
       <div style="display:flex;gap:0.75rem;margin-top:1rem;">
         <button onclick="closeTolak()" class="btn btn-ghost" style="flex:1;justify-content:center;">Batal</button>
         <button id="tolakBtn" onclick="doTolak()" class="btn" style="flex:1;justify-content:center;background:#dc2626;color:#fff;border-color:#dc2626;">Tolak</button>
@@ -337,7 +337,7 @@
                 <span class="bk-meta"><i class='bx bx-time-five'></i><strong>${b.durasi_hari || "—"} hari</strong></span>
                 <span class="bk-meta"><i class='bx bx-credit-card'></i><strong>${sp}</strong></span>
               </div>
-              ${b.alasan_penolakan ? `<div class="tolak-banner" style="margin-top:0.625rem;"><i class='bx bxs-error-circle'></i><div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${b.alasan_penolakan}</div></div></div>` : ""}
+              ${b.alasan_tolak ? `<div class="tolak-banner" style="margin-top:0.625rem;"><i class='bx bxs-error-circle'></i><div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${b.alasan_tolak}</div></div></div>` : ""}
             </div>
             <div class="booking-card-footer">
               <button onclick="event.stopPropagation();openEdit('${b.id}')" class="btn btn-ghost btn-sm" style="font-size:0.73rem;">
@@ -369,12 +369,12 @@
       const bayarNow = dp + deposit;
       const sisa = b.sisa_pelunasan != null ? b.sisa_pelunasan : Math.max(0, (b.total_harga || 0) - dp);
 
-      const statuses = ["Menunggu","Menunggu Konfirmasi","Dikonfirmasi","Aktif","Selesai","Dibatalkan","Pembayaran Ditolak"];
+      const statuses = ["Menunggu","Menunggu Konfirmasi","Dikonfirmasi","Aktif","Selesai","Dibatalkan"];
       const opts = statuses.map(s => `<option value="${s}" ${b.status===s?"selected":""}>${s}</option>`).join("");
 
       // Status timeline
       const ALL_STATUSES = ["Menunggu Konfirmasi","Dikonfirmasi","Aktif","Selesai"];
-      const REJECTED = ["Ditolak","Dibatalkan","Pembayaran Ditolak"];
+      const REJECTED = ["Dibatalkan"];
       const curIdx = ALL_STATUSES.indexOf(b.status);
       const isRejected = REJECTED.includes(b.status);
       const timelineSteps = isRejected
@@ -474,9 +474,9 @@
             </div>
           </div>
 
-          ${b.alasan_penolakan ? `
+          ${b.alasan_tolak ? `
           <div class="tolak-banner"><i class='bx bxs-error-circle'></i>
-            <div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${b.alasan_penolakan}</div></div>
+            <div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${b.alasan_tolak}</div></div>
           </div>` : ""}
 
           <!-- Riwayat Status -->
@@ -550,27 +550,27 @@
     // ─── TOLAK PEMBAYARAN ───
     function openTolak(id) {
       pendingTolakId = id;
-      document.getElementById("alasanPenolakan").value = "";
+      document.getElementById("alasanTolak").value = "";
       document.getElementById("tolakOverlay").style.display = "flex";
     }
     function closeTolak() { document.getElementById("tolakOverlay").style.display = "none"; pendingTolakId = null; }
 
     async function doTolak() {
-      const alasan = document.getElementById("alasanPenolakan").value.trim();
+      const alasan = document.getElementById("alasanTolak").value.trim();
       if (!alasan) { showToast("Isi alasan penolakan.", "warning"); return; }
       showLoading("Menolak...");
 
-      // Coba update dengan alasan_penolakan dulu
+      // Coba update dengan alasan_tolak dulu
       let { error } = await supabase.from("bookings").update({
-        status:            "Ditolak",
+        status:            "Dibatalkan",
         status_pembayaran: "Ditolak",
-        alasan_penolakan:      alasan,
+        alasan_tolak:      alasan,
       }).eq("id", pendingTolakId);
 
-      // Jika kolom alasan_penolakan belum ada, fallback tanpa kolom itu
-      if (error && error.message && error.message.includes("alasan_penolakan ")) {
+      // Jika kolom alasan_tolak belum ada, fallback tanpa kolom itu
+      if (error && error.message && error.message.includes("alasan_tolak")) {
         ({ error } = await supabase.from("bookings").update({
-          status:            "Ditolak",
+          status:            "Dibatalkan",
           status_pembayaran: "Ditolak",
         }).eq("id", pendingTolakId));
       }

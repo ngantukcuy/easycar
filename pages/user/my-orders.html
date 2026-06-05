@@ -124,7 +124,7 @@
         <button class="filter-chip" onclick="setFilter(this,'Dikonfirmasi')">Dikonfirmasi</button>
         <button class="filter-chip" onclick="setFilter(this,'Aktif')">Aktif</button>
         <button class="filter-chip" onclick="setFilter(this,'Selesai')">Selesai</button>
-        <button class="filter-chip" onclick="setFilter(this,'Ditolak')">Ditolak</button>
+        <button class="filter-chip" onclick="setFilter(this,'Dibatalkan')">Ditolak/Batal</button>
         <button class="filter-chip" onclick="setFilter(this,'Dibatalkan')">Dibatalkan</button>
       </div>
 
@@ -243,7 +243,7 @@
       const statusPay = o.status_pembayaran || (dp > 0 ? "DP" : "Belum Bayar");
 
       let tolakBanner = "";
-      if ((o.status === "Ditolak" || o.status === "Pembayaran Ditolak") && o.alasan_tolak) {
+      if ((o.status === "Dibatalkan") && o.alasan_tolak) {
         tolakBanner = `<div class="tolak-banner"><i class='bx bxs-error-circle'></i><div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${o.alasan_tolak}</div></div></div>`;
       }
 
@@ -281,7 +281,7 @@
             <button onclick="event.stopPropagation();doPrintA4('${o.id}')" class="btn btn-sm" style="font-size:0.75rem;background:#1e293b;color:#fff;border-color:#1e293b;">
               <i class='bx bx-printer'></i> Invoice
             </button>
-            ${(o.status === "Ditolak" || o.status === "Dibatalkan") ? `<a href="/pages/user/booking.html${car.id ? '?car_id='+car.id : ''}" onclick="event.stopPropagation()" class="btn btn-accent btn-sm" style="font-size:0.75rem;"><i class='bx bx-refresh'></i> Booking Ulang</a>` : ""}
+            ${(o.status === "Dibatalkan") ? `<a href="/pages/user/booking.html${car.id ? '?car_id='+car.id : ''}" onclick="event.stopPropagation()" class="btn btn-accent btn-sm" style="font-size:0.75rem;"><i class='bx bx-refresh'></i> Booking Ulang</a>` : ""}
           </div>
         </div>`;
     }
@@ -301,7 +301,7 @@
 
       // Status timeline logic
       const ALL_STATUSES = ["Menunggu Konfirmasi","Dikonfirmasi","Aktif","Selesai"];
-      const REJECTED = ["Ditolak","Dibatalkan","Pembayaran Ditolak"];
+      const REJECTED = ["Dibatalkan"];
       const curIdx = ALL_STATUSES.indexOf(o.status);
       const isRejected = REJECTED.includes(o.status);
 
@@ -432,7 +432,7 @@
           <i class='bx bxl-whatsapp'></i> Hubungi Admin via WhatsApp
         </a>`;
 
-      if (o.status === "Ditolak" || o.status === "Dibatalkan") {
+      if (o.status === "Dibatalkan") {
         const carIdForRebook = car.id || "";
         actionsHTML += `
           <a href="/pages/user/booking.html${carIdForRebook ? '?car_id=' + carIdForRebook : ''}" class="btn btn-accent btn-sm" style="width:100%;justify-content:center;">

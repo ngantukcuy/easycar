@@ -99,7 +99,7 @@ window.EasyCarRealtime = (function () {
       "Menunggu":          "Menunggu Konfirmasi",
       "Menunggu Konfirmasi":"Menunggu Konfirmasi",
       "Dikonfirmasi":      "Dikonfirmasi",
-      "Ditolak":           "Ditolak",
+      "Dibatalkan":        "Dibatalkan",
       "Aktif":             "Aktif",
       "Selesai":           "Selesai",
       "Dibatalkan":        "Dibatalkan",
@@ -150,7 +150,7 @@ window.EasyCarRealtime = (function () {
                   "🎉 Booking Dikonfirmasi",
                   7000
                 );
-              } else if (status === "Ditolak") {
+              } else if (status === "Dibatalkan") {
                 const alasan = booking.alasan_tolak || "Tidak ada keterangan.";
                 showNotif(
                   `Booking <strong>${booking.kode_booking || ""}</strong> ditolak.<br><small>Alasan: ${alasan}</small>`,
