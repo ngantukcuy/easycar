@@ -84,7 +84,7 @@ async function getSessionUser() {
 
 async function handleLogout() {
   await supabase.auth.signOut();
-  window.location.href = "/auth.html";
+  window.location.href = "/index.html";
 }
 
 // ─── AUTH LOADING SCREEN ─────────────────────────────
