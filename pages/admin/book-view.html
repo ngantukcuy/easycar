@@ -85,11 +85,14 @@
       </div>
       <!-- Filter tabs -->
       <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem;">
-        <button class="filter-chip active" data-s="all"                   onclick="setFilter(this,'all')">Semua</button>
-        <button class="filter-chip"        data-s="Menunggu Konfirmasi"   onclick="setFilter(this,'Menunggu Konfirmasi')">Menunggu Konfirmasi</button>
-        <button class="filter-chip"        data-s="Dikonfirmasi"          onclick="setFilter(this,'Dikonfirmasi')">Dikonfirmasi</button>
-        <button class="filter-chip"        data-s="Aktif"                 onclick="setFilter(this,'Aktif')">Aktif</button>
-        <button class="filter-chip"        data-s="Selesai"               onclick="setFilter(this,'Selesai')">Selesai</button>
+        <select id="statusFilter" onchange="setFilter(this, this.value)" class="ec-input" style="width:200px;min-width:130px;">
+          <option value="all">Semua Status</option>
+          <option value="Menunggu Konfirmasi">Menunggu Konfirmasi</option>
+          <option value="Dikonfirmasi">Dikonfirmasi</option>
+          <option value="Aktif">Aktif</option>
+          <option value="Selesai">Selesai</option>
+        </select>
+      </div>
         <button class="filter-chip"        data-s="Dibatalkan"            onclick="setFilter(this,'Dibatalkan')">Dibatalkan</button>
         <button class="filter-chip"        data-s="Dibatalkan"           onclick="setFilter(this,'Dibatalkan')">Ditolak/Batal</button>
       </div>
