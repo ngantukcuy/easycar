@@ -238,14 +238,14 @@
           .join("");
 
         return `
-          <div class="car-card">
-            <div style="position:relative;cursor:pointer;" onclick="openDetail('${c.id}')">
+          <div class="car-card" style="cursor:pointer;" onclick="openDetail('${c.id}')">
+            <div style="position:relative;">
               ${imgBlock}
               <span class="badge badge-success" style="position:absolute;top:10px;left:10px;">Tersedia</span>
             </div>
             <div style="padding:1.25rem;flex:1;display:flex;flex-direction:column;">
               <div style="flex:1;">
-                <h3 style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0 0 0.35rem;cursor:pointer;" onclick="openDetail('${c.id}')">${c.nama}</h3>
+                <h3 style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0 0 0.35rem;">${c.nama}</h3>
                 <div style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.875rem;">${chips}</div>
                 <p style="font-size:1rem;font-weight:700;color:var(--color-accent);margin:0;">
                   ${formatRupiah(c.harga_per_hari||0)}
@@ -253,10 +253,10 @@
                 </p>
               </div>
               <div style="display:flex;gap:0.625rem;margin-top:1rem;">
-                <button onclick="openDetail('${c.id}')" class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;">
+                <button onclick="event.stopPropagation();openDetail('${c.id}')" class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;">
                   <i class='bx bx-info-circle'></i> Detail
                 </button>
-                <button onclick="handleBook('${c.id}')" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">
+                <button onclick="event.stopPropagation();handleBook('${c.id}')" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">
                   <i class='bx bxs-calendar-plus'></i> Pesan
                 </button>
               </div>

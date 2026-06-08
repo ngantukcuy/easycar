@@ -23,6 +23,12 @@
       transition: transform 0.22s ease, box-shadow 0.22s ease; display: flex; flex-direction: column;
     }
     .car-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+      z-index: 200; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
     .filter-chip {
       padding: 0.4rem 1rem; border-radius: 999px; border: 1.5px solid var(--color-border);
       background: var(--color-surface); font-size: 0.8125rem; font-weight: 600;
@@ -202,6 +208,13 @@
       </div>
     </div>
   </section>
+
+  <!-- Car Detail Modal -->
+  <div id="carDetailModal" class="modal-overlay" onclick="handleCarModalClick(event)">
+    <div id="carDetailBox" style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;">
+      <div id="carDetailContent"></div>
+    </div>
+  </div>
 
   <footer style="background:var(--color-primary);color:rgba(255,255,255,0.45);text-align:center;padding:1.5rem;font-size:0.8125rem;">
     &copy; 2026 EasyCar &mdash; Rental Kendaraan Terpercaya
@@ -407,7 +420,7 @@
       if (car.transmisi)  chips += `<span style="font-size:0.7rem;background:#f0f4f8;color:#64748b;padding:0.2rem 0.55rem;border-radius:6px;font-weight:600;">${car.transmisi}</span>`;
       if (car.kapasitas)  chips += `<span style="font-size:0.7rem;background:#f0f4f8;color:#64748b;padding:0.2rem 0.55rem;border-radius:6px;font-weight:600;"><i class='bx bxs-user' style="vertical-align:middle;"></i> ${car.kapasitas}</span>`;
       if (car.tahun)      chips += `<span style="font-size:0.7rem;background:#f0f4f8;color:#64748b;padding:0.2rem 0.55rem;border-radius:6px;font-weight:600;">${car.tahun}</span>`;
-      return `<div class="car-card"><div style="position:relative;">${imgHTML}<span class="badge badge-success" style="position:absolute;top:10px;left:10px;">Tersedia</span></div><div style="padding:1.25rem;flex:1;display:flex;flex-direction:column;"><div style="flex:1;"><h3 style="font-weight:700;color:var(--color-primary);font-size:0.95rem;margin:0 0 0.35rem;">${car.nama}</h3><div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.875rem;">${chips}</div><p style="font-size:1rem;font-weight:700;color:var(--color-accent);margin:0;">${price}<span style="font-size:0.75rem;font-weight:500;color:var(--color-text-muted);">/hari</span></p></div><button onclick="handleBookClick('${car.id}','${car.nama.replace(/'/g,"\\'")}',event)" class="btn btn-primary" style="width:100%;margin-top:1rem;justify-content:center;"><i class='bx bx-calendar-plus'></i> Pesan Sekarang</button></div></div>`;
+      return `<div class="car-card" style="cursor:pointer;" onclick="openDetail('${car.id}')"><div style="position:relative;">${imgHTML}<span class="badge badge-success" style="position:absolute;top:10px;left:10px;">Tersedia</span></div><div style="padding:1.25rem;flex:1;display:flex;flex-direction:column;"><div style="flex:1;"><h3 style="font-weight:700;color:var(--color-primary);font-size:0.95rem;margin:0 0 0.35rem;">${car.nama}</h3><div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.875rem;">${chips}</div><p style="font-size:1rem;font-weight:700;color:var(--color-accent);margin:0;">${price}<span style="font-size:0.75rem;font-weight:500;color:var(--color-text-muted);">/hari</span></p></div><button onclick="event.stopPropagation();handleBookClick('${car.id}','${car.nama.replace(/'/g,"\\'")}',event)" class="btn btn-primary" style="width:100%;margin-top:1rem;justify-content:center;"><i class='bx bx-calendar-plus'></i> Pesan Sekarang</button></div></div>`;
     }
 
     function setFilter(btn, filter) {
@@ -424,6 +437,71 @@
         return;
       }
       window.location.href = "/pages/user/booking.html?car_id=" + carId;
+    }
+
+    function openDetail(carId) {
+      const car = allCars.find(c => c.id === carId);
+      if (!car) return;
+
+      const imgHTML = car.foto_url
+        ? `<img src="${car.foto_url}" alt="${car.nama}" style="width:100%;height:220px;object-fit:cover;border-radius:24px 24px 0 0;display:block;" onerror="this.style.display='none'" />`
+        : `<div style="width:100%;height:180px;background:linear-gradient(135deg,#e8edf5,#d0dae8);border-radius:24px 24px 0 0;display:flex;align-items:center;justify-content:center;"><i class='bx bxs-car' style="font-size:4rem;color:#b0bdce;"></i></div>`;
+
+      const specs = [
+        ["Tipe", car.tipe || "—"],
+        ["Transmisi", car.transmisi || "—"],
+        ["Kapasitas", car.kapasitas ? car.kapasitas + " orang" : "—"],
+        ["Tahun", car.tahun || "—"],
+        ["Nomor Plat", car.no_plat || "—"],
+      ];
+
+      document.getElementById("carDetailContent").innerHTML = `
+        <div>
+          ${imgHTML}
+          <div style="padding:1.5rem;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.75rem;">
+              <div>
+                <h3 style="font-size:1.25rem;font-weight:800;color:var(--color-primary);margin:0 0 0.25rem;">${car.nama}</h3>
+                <span style="font-size:0.85rem;color:var(--color-text-muted);">${car.tipe || ""}${car.transmisi ? " · " + car.transmisi : ""}</span>
+              </div>
+              <button onclick="closeCarDetail()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--color-text-muted);flex-shrink:0;">✕</button>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem;">
+              ${specs.map(([label, value]) => `
+                <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:0.75rem;">
+                  <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0 0 0.25rem;text-transform:uppercase;letter-spacing:0.04em;">${label}</p>
+                  <p style="font-size:0.9rem;font-weight:700;color:var(--color-text);margin:0;">${value}</p>
+                </div>
+              `).join("")}
+            </div>
+
+            ${car.deskripsi ? `<p style="font-size:0.875rem;color:var(--color-text-muted);line-height:1.7;margin-bottom:1.25rem;">${car.deskripsi}</p>` : ""}
+
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem;background:var(--color-bg);border-radius:var(--radius-md);margin-bottom:1.25rem;">
+              <div>
+                <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.2rem;">Harga sewa per hari</p>
+                <p style="font-size:1.35rem;font-weight:800;color:var(--color-accent);margin:0;">${formatRupiah(car.harga_per_hari || 0)}</p>
+              </div>
+              <span style="background:#dcfce7;color:#166534;font-size:0.725rem;font-weight:700;padding:0.35rem 0.75rem;border-radius:999px;">Tersedia</span>
+            </div>
+
+            <button onclick="window.location.href='/pages/user/booking.html?car_id=${car.id}'" class="btn btn-accent" style="width:100%;justify-content:center;">
+              <i class='bx bxs-calendar-plus'></i> Booking Kendaraan Ini
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("carDetailModal").style.display = "flex";
+    }
+
+    function closeCarDetail() {
+      document.getElementById("carDetailModal").style.display = "none";
+    }
+
+    function handleCarModalClick(e) {
+      if (e.target === document.getElementById("carDetailModal")) closeCarDetail();
     }
 
     // ── AUTH MODAL ──────────────────────────────────────
