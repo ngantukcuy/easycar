@@ -1,52 +1,51 @@
 // =====================================================
-// EASYCAR — ADMIN SIDEBAR v4 (Sama persis user sidebar)
+// EASYCAR — ADMIN SIDEBAR COMPONENT (v2 — Fixed)
 // =====================================================
 
 const ADMIN_SIDEBAR_HTML = `
-<aside id="sidebar" class="ec-sidebar ec-admin-sidebar">
+<aside id="sidebar" class="ec-sidebar">
   <div class="sb-brand">
     <div class="sb-brand-icon"><i class='bx bxs-car'></i></div>
     <div>
       <div class="sb-brand-name">Easy<span>Car</span></div>
-      <div class="sb-brand-sub">Panel Admin</div>
+      <div class="sb-brand-sub">Rental Kendaraan</div>
     </div>
   </div>
 
   <nav class="sb-nav">
-    <div class="sb-section-label">Menu Utama</div>
-    <a href="/pages/admin/dashboard.html"  class="sb-link" data-page="dashboard">
+    <div class="sb-section-label">Menu</div>
+    <a href="/pages/admin/dashboard.html" class="sb-link" data-page="dashboard">
       <i class='bx bxs-home'></i><span>Dashboard</span>
     </a>
-    <a href="/pages/admin/book-view.html"  class="sb-link" data-page="book-views">
-      <i class='bx bxs-calendar-check'></i><span>Manajemen Booking</span>
-      <span class="sb-notif-badge" id="sbAdminBadge" style="display:none;">0</span>
+    <a href="/pages/admin/booking.html" class="sb-link" data-page="booking">
+      <i class='bx bxs-calendar-plus'></i><span>Booking Baru</span>
     </a>
-    <a href="/pages/admin/booking.html"    class="sb-link" data-page="booking">
-      <i class='bx bxs-calendar-plus'></i><span>Buat Booking</span>
+    <a href="/pages/admin/book-view.html" class="sb-link" data-page="book-view">
+      <i class='bx bxs-receipt'></i><span>Manajemen Booking</span>
+      <span class="sb-notif-badge" id="sbOrderBadge" style="display:none;">0</span>
     </a>
-
-    <div class="sb-section-label" style="margin-top:0.5rem;">Kelola Data</div>
-    <a href="/pages/admin/vehicles.html"   class="sb-link" data-page="vehicles">
-      <i class='bx bxs-car'></i><span>Kendaraan</span>
+    <div class="sb-section-label">Data Master</div>
+    <a href="/pages/admin/vehicles.html" class="sb-link" data-page="vehicles">
+      <i class='bx bxs-car'></i><span>Manajemen Kendaraan</span>
     </a>
-    <a href="/pages/admin/users.html"      class="sb-link" data-page="users">
-      <i class='bx bxs-user-account'></i><span>Pengguna</span>
+    <a href="/pages/admin/users.html" class="sb-link" data-page="users"></a>
+      <i class='bx bxs-user-account'></i><span>Manajemen Pelanggan</span>
     </a>
-    <a href="/pages/admin/promos.html"     class="sb-link" data-page="promos">
-      <i class='bx bxs-tag'></i><span>Promo</span>
+    <div class="sb-section-label">Laporan</div>
+    <a href="/pages/admin/reports.html" class="sb-link" data-page="reports">
+      <i class='bx bxs-bar-chart-alt-2'></i><span>Laporan Penjualan</span>
     </a>
-
-    <div class="sb-section-label" style="margin-top:0.5rem;">Laporan</div>
-    <a href="/pages/admin/reports.html"    class="sb-link" data-page="reports">
-      <i class='bx bxs-report'></i><span>Laporan</span>
+    <a href="/pages/admin/promos.html" class="sb-link" data-page="promos"></a>
+      <i class='bx bxs-comment-detail'></i><span>Promo</span>
     </a>
-    <a href="/pages/admin/settings.html"   class="sb-link" data-page="settings">
-      <i class='bx bxs-cog'></i><span>Pengaturan</span>
+    <div class="sb-section-label" style="margin-top:0.5rem;">Akun</div>
+    <a href="/pages/admin/settings.html" class="sb-link" data-page="settings">
+      <i class='bx bxs-user'></i><span>Profil Saya</span>
     </a>
   </nav>
 
   <div class="sb-user-footer">
-    <div id="sbAvatar" class="sb-avatar">A</div>
+    <div id="sbAvatar" class="sb-avatar">U</div>
     <div class="sb-user-info">
       <div id="sbName" class="sb-user-name">Memuat...</div>
       <div class="sb-user-role">Administrator</div>
@@ -64,30 +63,31 @@ const ADMIN_SIDEBAR_HTML = `
 </button>
 `;
 
-const ADMIN_SB_STYLES = `
-<style id="ecAdminSidebarStyles">
+const SB_STYLES = `
+<style id="ecSidebarStyles">
   /* ── SIDEBAR BASE ── */
-  .ec-admin-sidebar {
+  .ec-sidebar {
     position: fixed;
     left: 0; top: 0;
     width: 260px;
-    height: 100%;
+    height: 100%;           /* pakai % bukan 100vh — fix iOS bounce */
     background: linear-gradient(180deg, #0f2347 0%, #1a3060 100%);
     display: flex;
     flex-direction: column;
     z-index: 100;
     box-shadow: 4px 0 24px rgba(0,0,0,0.18);
     overflow: hidden;
+    /* Tidak pakai transform di sini; diatur JS */
   }
 
   /* Brand */
-  .ec-admin-sidebar .sb-brand {
+  .sb-brand {
     display: flex; align-items: center; gap: 0.75rem;
     padding: 1.375rem 1.25rem;
     border-bottom: 1px solid rgba(255,255,255,0.08);
     flex-shrink: 0;
   }
-  .ec-admin-sidebar .sb-brand-icon {
+  .sb-brand-icon {
     width: 38px; height: 38px;
     background: #e85d04;
     border-radius: 10px;
@@ -95,25 +95,24 @@ const ADMIN_SB_STYLES = `
     flex-shrink: 0;
     box-shadow: 0 4px 12px rgba(232,93,4,0.4);
   }
-  .ec-admin-sidebar .sb-brand-icon i { color: #fff; font-size: 1.25rem; }
-  .ec-admin-sidebar .sb-brand-name { color: #fff; font-weight: 800; font-size: 1.1rem; line-height: 1.2; }
-  .ec-admin-sidebar .sb-brand-name span { color: #fb923c; }
-  .ec-admin-sidebar .sb-brand-sub { color: rgba(255,255,255,0.4); font-size: 0.7rem; }
+  .sb-brand-icon i { color: #fff; font-size: 1.25rem; }
+  .sb-brand-name { color: #fff; font-weight: 800; font-size: 1.1rem; line-height: 1.2; }
+  .sb-brand-name span { color: #fb923c; }
+  .sb-brand-sub { color: rgba(255,255,255,0.4); font-size: 0.7rem; }
 
-  /* Nav — kunci scroll tidak negantung */
-  .ec-admin-sidebar .sb-nav {
+  /* Nav */
+  .sb-nav {
     flex: 1;
-    min-height: 0;          /* WAJIB agar flex child bisa scroll */
     padding: 0.875rem 0;
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
-  .ec-admin-sidebar .sb-nav::-webkit-scrollbar { width: 3px; }
-  .ec-admin-sidebar .sb-nav::-webkit-scrollbar-track { background: transparent; }
-  .ec-admin-sidebar .sb-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+  .sb-nav::-webkit-scrollbar { width: 3px; }
+  .sb-nav::-webkit-scrollbar-track { background: transparent; }
+  .sb-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
 
-  .ec-admin-sidebar .sb-section-label {
+  .sb-section-label {
     padding: 0 1.25rem 0.375rem;
     color: rgba(255,255,255,0.3);
     font-size: 0.625rem;
@@ -123,7 +122,7 @@ const ADMIN_SB_STYLES = `
     margin-top: 0.25rem;
   }
 
-  .ec-admin-sidebar .sb-link {
+  .sb-link {
     display: flex; align-items: center; gap: 0.75rem;
     padding: 0.6rem 0.875rem;
     margin: 0.1rem 0.625rem;
@@ -135,30 +134,31 @@ const ADMIN_SB_STYLES = `
     transition: all 0.18s;
     position: relative;
   }
-  .ec-admin-sidebar .sb-link:hover { color: #fff; background: rgba(255,255,255,0.07); }
-  .ec-admin-sidebar .sb-link.active { color: #fff; background: rgba(232,93,4,0.15); border-left-color: #e85d04; font-weight: 600; }
-  .ec-admin-sidebar .sb-link i { font-size: 1.1rem; flex-shrink: 0; }
+  .sb-link:hover { color: #fff; background: rgba(255,255,255,0.07); }
+  .sb-link.active { color: #fff; background: rgba(232,93,4,0.15); border-left-color: #e85d04; font-weight: 600; }
+  .sb-link i { font-size: 1.1rem; flex-shrink: 0; }
 
   /* Notif badge */
-  .ec-admin-sidebar .sb-notif-badge {
+  .sb-notif-badge {
     margin-left: auto;
     min-width: 18px; height: 18px;
     background: #e85d04;
     border-radius: 9px;
-    font-size: 0.65rem; font-weight: 700;
+    font-size: 0.65rem;
+    font-weight: 700;
     color: #fff;
     display: flex; align-items: center; justify-content: center;
     padding: 0 5px;
   }
 
-  /* Footer */
-  .ec-admin-sidebar .sb-user-footer {
+  /* User footer */
+  .sb-user-footer {
     display: flex; align-items: center; gap: 0.75rem;
     padding: 0.875rem 1.125rem;
     border-top: 1px solid rgba(255,255,255,0.08);
     flex-shrink: 0;
   }
-  .ec-admin-sidebar .sb-avatar {
+  .sb-avatar {
     width: 36px; height: 36px;
     background: linear-gradient(135deg, #e85d04, #ff7733);
     border-radius: 10px;
@@ -166,19 +166,19 @@ const ADMIN_SB_STYLES = `
     color: #fff; font-weight: 700; font-size: 0.9rem;
     flex-shrink: 0;
   }
-  .ec-admin-sidebar .sb-user-info { flex: 1; min-width: 0; }
-  .ec-admin-sidebar .sb-user-name { color: #fff; font-size: 0.8125rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ec-admin-sidebar .sb-user-role { color: rgba(255,255,255,0.35); font-size: 0.7rem; }
-  .ec-admin-sidebar .sb-logout-btn {
+  .sb-user-info { flex: 1; min-width: 0; }
+  .sb-user-name { color: #fff; font-size: 0.8125rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sb-user-role { color: rgba(255,255,255,0.35); font-size: 0.7rem; }
+  .sb-logout-btn {
     background: none; border: none; cursor: pointer;
     color: rgba(255,255,255,0.3);
     padding: 4px; transition: color 0.15s;
     display: flex; align-items: center;
   }
-  .ec-admin-sidebar .sb-logout-btn:hover { color: #fb923c; }
-  .ec-admin-sidebar .sb-logout-btn i { font-size: 1.1rem; }
+  .sb-logout-btn:hover { color: #fb923c; }
+  .sb-logout-btn i { font-size: 1.1rem; }
 
-  /* Overlay */
+  /* Mobile overlay */
   #sbOverlay {
     display: none;
     position: fixed; inset: 0;
@@ -204,23 +204,26 @@ const ADMIN_SB_STYLES = `
   .sb-hamburger:hover { background: #1a3c6e; }
   .sb-hamburger i { color: #fff; font-size: 1.25rem; }
 
-  /* Desktop */
+  /* ── LAYOUT INTEGRATION ── */
+  /* page-wrapper harus tahu sidebar ada */
   @media (min-width: 1024px) {
-    .ec-admin-sidebar { transform: translateX(0) !important; }
-    .sb-hamburger     { display: none !important; }
-    #sbOverlay        { display: none !important; }
-    .page-wrapper     { margin-left: 260px; }
+    .page-wrapper {
+      margin-left: 260px;
+    }
+    .ec-sidebar {
+      transform: translateX(0) !important;
+    }
+    .sb-hamburger { display: none !important; }
+    #sbOverlay    { display: none !important; }
   }
-
-  /* Mobile */
   @media (max-width: 1023px) {
-    .page-wrapper       { margin-left: 0 !important; }
-    .sb-hamburger       { display: flex; }
-    .ec-admin-sidebar {
+    .page-wrapper { margin-left: 0 !important; }
+    .sb-hamburger { display: flex; }
+    .ec-sidebar {
       transform: translateX(-100%);
       transition: transform 0.28s cubic-bezier(.4,0,.2,1);
     }
-    .ec-admin-sidebar.sb-open {
+    .ec-sidebar.sb-open {
       transform: translateX(0);
       box-shadow: 6px 0 32px rgba(0,0,0,0.28);
     }
@@ -229,19 +232,27 @@ const ADMIN_SB_STYLES = `
 `;
 
 function initAdminSidebar(activePage, user) {
-  if (!document.getElementById("ecAdminSidebarStyles")) {
-    document.head.insertAdjacentHTML("beforeend", ADMIN_SB_STYLES);
+  // Inject styles only once
+  if (!document.getElementById("ecSidebarStyles")) {
+    document.head.insertAdjacentHTML("beforeend", SB_STYLES);
   }
 
+  // Inject sidebar
   const wrapper = document.createElement("div");
   wrapper.innerHTML = ADMIN_SIDEBAR_HTML;
   document.body.insertBefore(wrapper.firstElementChild, document.body.firstChild); // aside
+  // append overlay & hamburger
   while (wrapper.firstElementChild) {
     document.body.insertBefore(wrapper.firstElementChild, document.body.firstChild);
   }
 
+  // Re-query after DOM insert
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("sbOverlay");
+  const hamburger = document.getElementById("hamburgerBtn");
+
   // Set active link + close sidebar on mobile click
-  document.querySelectorAll(".ec-admin-sidebar .sb-link").forEach(link => {
+  document.querySelectorAll(".sb-link").forEach(link => {
     if (activePage && link.dataset.page === activePage) link.classList.add("active");
     link.addEventListener("click", () => {
       if (window.innerWidth < 1024) closeSidebar();
@@ -250,20 +261,19 @@ function initAdminSidebar(activePage, user) {
 
   // Fill user info
   if (user) {
-    const name     = user.full_name || user.email || "Admin";
-    const initial  = name.charAt(0).toUpperCase();
-    const nameEl   = document.getElementById("sbName");
+    const name    = user.full_name || user.email || "User";
+    const initial = name.charAt(0).toUpperCase();
+    const nameEl  = document.getElementById("sbName");
     const avatarEl = document.getElementById("sbAvatar");
     if (nameEl)   nameEl.textContent   = name;
     if (avatarEl) avatarEl.textContent = initial;
   }
 
+  // Responsive init — hanya set class, bukan inline transform
   function handleResize() {
     if (window.innerWidth >= 1024) {
-      const sb = document.getElementById("sidebar");
-      const ov = document.getElementById("sbOverlay");
-      if (sb) sb.classList.remove("sb-open");
-      if (ov) ov.classList.remove("visible");
+      sidebar.classList.remove("sb-open");
+      overlay.classList.remove("visible");
     }
   }
   window.addEventListener("resize", handleResize);
@@ -277,10 +287,10 @@ function toggleSidebar() {
   const isOpen = sb.classList.contains("sb-open");
   if (isOpen) {
     sb.classList.remove("sb-open");
-    if (ov) ov.classList.remove("visible");
+    ov.classList.remove("visible");
   } else {
     sb.classList.add("sb-open");
-    if (ov) ov.classList.add("visible");
+    ov.classList.add("visible");
   }
 }
 
@@ -291,7 +301,19 @@ function closeSidebar() {
   if (ov) ov.classList.remove("visible");
 }
 
-// ── TOPBAR NOTIF BELL untuk admin ──
+// Set badge angka di sidebar (pesanan baru / update)
+function setSidebarBadge(count) {
+  const badge = document.getElementById("sbOrderBadge");
+  if (!badge) return;
+  if (count > 0) {
+    badge.textContent = count > 9 ? "9+" : count;
+    badge.style.display = "flex";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+// ── TOPBAR NOTIF BELL ── inject bell icon ke .page-topbar
 function injectTopbarNotifBell({ fetchCount, onOpen } = {}) {
   const topbar = document.querySelector(".page-topbar");
   if (!topbar || document.getElementById("topbarNotifBtn")) return;
@@ -317,14 +339,14 @@ function injectTopbarNotifBell({ fetchCount, onOpen } = {}) {
     #topbarNotifDot.visible { display:block; }
     .topbar-notif-panel {
       position:absolute; top:calc(100% + 8px); right:0;
-      width:310px; background:#fff; border-radius:14px;
+      width:300px; background:#fff; border-radius:14px;
       box-shadow:0 8px 32px rgba(0,0,0,0.15); border:1px solid var(--color-border,#e2e8f0);
       z-index:500; display:none; overflow:hidden;
     }
     .topbar-notif-panel.open { display:block; }
     .topbar-notif-header { padding:0.75rem 1rem; border-bottom:1px solid var(--color-border,#e2e8f0); display:flex; align-items:center; justify-content:space-between; }
     .topbar-notif-header span { font-size:0.8125rem; font-weight:700; color:var(--color-primary,#0f2347); }
-    .topbar-notif-body { max-height:300px; overflow-y:auto; }
+    .topbar-notif-body { max-height:280px; overflow-y:auto; }
     .notif-item { display:flex; gap:0.625rem; padding:0.75rem 1rem; border-bottom:1px solid var(--color-bg,#f8fafc); cursor:pointer; transition:background 0.1s; }
     .notif-item:hover { background:var(--color-bg,#f8fafc); }
     .notif-item:last-child { border-bottom:none; }
@@ -343,13 +365,13 @@ function injectTopbarNotifBell({ fetchCount, onOpen } = {}) {
   const wrap = document.createElement("div");
   wrap.className = "topbar-notif-wrap";
   wrap.innerHTML = `
-    <button id="topbarNotifBtn" title="Notifikasi Booking">
+    <button id="topbarNotifBtn" title="Notifikasi">
       <i class='bx bx-bell'></i>
       <span id="topbarNotifDot"></span>
     </button>
     <div class="topbar-notif-panel" id="topbarNotifPanel">
       <div class="topbar-notif-header">
-        <span>🔔 Booking Masuk</span>
+        <span>🔔 Notifikasi</span>
         <button onclick="markAllRead()" style="font-size:0.7rem;background:none;border:none;color:var(--color-accent,#e85d04);font-weight:600;cursor:pointer;font-family:inherit;">Tandai dibaca</button>
       </div>
       <div class="topbar-notif-body" id="topbarNotifBody">
@@ -376,12 +398,13 @@ function injectTopbarNotifBell({ fetchCount, onOpen } = {}) {
     if (onOpen) {
       const items = await onOpen();
       renderNotifItems(items || []);
-    } else if (typeof supabase !== "undefined") {
+    } else if (typeof supabase !== "undefined" && typeof currentUser !== "undefined" && currentUser) {
       const { data } = await supabase
         .from("bookings")
-        .select("id,kode_booking,status,status_pembayaran,created_at,cars(nama)")
+        .select("id,kode_booking,status,created_at,cars(nama)")
+        .eq("user_id", currentUser.id)
         .order("created_at", { ascending: false })
-        .limit(12);
+        .limit(10);
       renderNotifItems((data || []).map(b => ({
         title: b.kode_booking || ("EC" + b.id.slice(-6).toUpperCase()),
         sub: (b.cars?.nama || "Kendaraan") + " · " + (b.status || ""),
@@ -392,15 +415,14 @@ function injectTopbarNotifBell({ fetchCount, onOpen } = {}) {
 
   function renderNotifItems(items) {
     const body = document.getElementById("topbarNotifBody");
-    if (!items.length) { body.innerHTML = `<div class="notif-empty">Belum ada booking</div>`; return; }
+    if (!items.length) { body.innerHTML = `<div class="notif-empty">Tidak ada notifikasi</div>`; return; }
     body.innerHTML = items.map(item => {
       let iconClass = "blue"; let iconName = "bx-calendar-check";
       if (item.status === "Dikonfirmasi") { iconClass = "green"; iconName = "bxs-check-circle"; }
       else if (item.status === "Ditolak" || item.status === "Dibatalkan") { iconClass = "red"; iconName = "bxs-error-circle"; }
       else if (item.status === "Aktif") { iconClass = "orange"; iconName = "bxs-car"; }
       else if (item.status === "Selesai") { iconClass = "green"; iconName = "bxs-flag-checkered"; }
-      else if (item.status === "Menunggu Konfirmasi") { iconClass = "blue"; iconName = "bx-time-five"; }
-      return `<div class="notif-item" onclick="window.location.href='/pages/admin/book-view.html'">
+      return `<div class="notif-item">
         <div class="notif-item-icon ${iconClass}"><i class='bx ${iconName}'></i></div>
         <div class="notif-item-text">
           <div class="notif-item-title">${item.title}</div>
@@ -420,16 +442,5 @@ function injectTopbarNotifBell({ fetchCount, onOpen } = {}) {
     fetchCount().then(count => {
       if (count > 0) dot.classList.add("visible");
     });
-  }
-
-  // Auto-show dot jika ada booking Menunggu Konfirmasi
-  if (typeof supabase !== "undefined") {
-    setTimeout(async () => {
-      const { count } = await supabase
-        .from("bookings")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "Menunggu Konfirmasi");
-      if (count > 0) dot.classList.add("visible");
-    }, 500);
   }
 }
