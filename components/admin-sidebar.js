@@ -28,14 +28,14 @@ const ADMIN_SIDEBAR_HTML = `
     <a href="/pages/admin/vehicles.html" class="sb-link" data-page="vehicles">
       <i class='bx bxs-car'></i><span>Manajemen Kendaraan</span>
     </a>
-    <a href="/pages/admin/users.html" class="sb-link" data-page="users"></a>
+    <a href="/pages/admin/users.html" class="sb-link" data-page="users">
       <i class='bx bxs-user-account'></i><span>Manajemen Pelanggan</span>
     </a>
     <div class="sb-section-label">Laporan</div>
     <a href="/pages/admin/reports.html" class="sb-link" data-page="reports">
       <i class='bx bxs-bar-chart-alt-2'></i><span>Laporan Penjualan</span>
     </a>
-    <a href="/pages/admin/promos.html" class="sb-link" data-page="promos"></a>
+    <a href="/pages/admin/promos.html" class="sb-link" data-page="promos">
       <i class='bx bxs-comment-detail'></i><span>Promo</span>
     </a>
     <div class="sb-section-label" style="margin-top:0.5rem;">Akun</div>
