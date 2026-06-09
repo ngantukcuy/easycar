@@ -104,9 +104,6 @@
         <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Pesanan Saya</h2>
         <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">Riwayat dan status pesanan Anda</p>
       </div>
-      <a href="/pages/user/booking.html" class="btn btn-accent btn-sm">
-        <i class='bx bx-plus'></i> Booking Baru
-      </a>
     </header>
 
     <main class="page-content fade-in">
@@ -281,7 +278,7 @@
             <button onclick="event.stopPropagation();doPrintA4('${o.id}')" class="btn btn-sm" style="font-size:0.75rem;background:#1e293b;color:#fff;border-color:#1e293b;">
               <i class='bx bx-printer'></i> Invoice
             </button>
-            ${(o.status === "Dibatalkan") ? `<a href="/pages/user/booking.html${car.id ? '?car_id='+car.id : ''}" onclick="event.stopPropagation()" class="btn btn-accent btn-sm" style="font-size:0.75rem;"><i class='bx bx-refresh'></i> Booking Lagi</a>` : ""}
+            ${(o.status === "Dibatalkan") ? `<a href="/pages/user/booking.html${car.id ? '?car_id='+car.id : ''}" onclick="event.stopPropagation()" class="btn btn-accent btn-sm" style="font-size:0.75rem;"><i class='bx bx-refresh'></i> Rebooking </a>` : ""}
           </div>
         </div>`;
     }

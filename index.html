@@ -7,7 +7,7 @@
   <title>EasyCar — Rental Kendaraan Terpercaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <link rel="stylesheet" href="./assets/css/theme.css" />
   <style>
     .hero-section {
       background: linear-gradient(135deg, #0f2347 0%, #1a3c6e 60%, #2a5298 100%);
@@ -73,7 +73,7 @@
     <div class="hero-blob" style="width:200px;height:200px;background:rgba(79,70,229,0.1);top:80px;left:60%;"></div>
 
     <!-- Navbar in hero -->
-    <div style="position:absolute;top:0;left:0;right:0;padding:1.25rem 2rem;display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;width:100%;">
+    <div style="position:absolute;top:0;left:0;right:0;z-index:10;padding:1.25rem 2rem;display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;width:100%;">
       <a href="/index.html" style="display:flex;align-items:center;gap:0.625rem;text-decoration:none;">
         <div style="width:34px;height:34px;background:#e85d04;border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(232,93,4,0.4);">
           <i class='bx bxs-car' style="color:#fff;font-size:1rem;"></i>
@@ -240,40 +240,6 @@
         <button id="tabRegister" onclick="showTab('register')" class="tab-btn">Daftar</button>
       </div>
 
-      <!-- LOGIN -->
-      <div id="panelLogin" class="auth-panel">
-        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0 0 0.2rem;">Selamat Datang Kembali</h2>
-        <p style="font-size:0.8rem;color:var(--color-text-muted);margin:0 0 1.25rem;">Masuk untuk melanjutkan perjalanan Anda</p>
-        <div id="loginError" style="display:none;background:#fef2f2;color:#dc2626;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8rem;font-weight:500;margin-bottom:0.875rem;"></div>
-        <div style="display:flex;flex-direction:column;gap:0.875rem;">
-          <div>
-            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.35rem;">Email</label>
-            <div class="auth-input-wrap">
-              <input type="email" id="loginEmail" class="ec-input" placeholder="email@contoh.com" style="padding-right:2.5rem;" />
-              <i class="bx bxs-envelope icon"></i>
-            </div>
-          </div>
-          <div>
-            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.35rem;">Password</label>
-            <div class="auth-input-wrap">
-              <input type="password" id="loginPass" class="ec-input" placeholder="••••••••" style="padding-right:2.5rem;"
-                onkeydown="if(event.key==='Enter') doLogin()" />
-              <button class="icon btn-icon" onclick="togglePw('loginPass',this)"><i class='bx bx-hide'></i></button>
-            </div>
-          </div>
-          <div style="text-align:right;">
-            <button onclick="openForgot()" style="background:none;border:none;font-family:var(--font-body);font-size:0.75rem;font-weight:600;color:var(--color-primary-mid);cursor:pointer;">Lupa password?</button>
-          </div>
-        </div>
-        <button id="loginBtn" onclick="doLogin()" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:1.25rem;padding:0.875rem;">
-          Masuk ke Akun
-        </button>
-        <p style="text-align:center;font-size:0.75rem;color:var(--color-text-muted);margin-top:1rem;">
-          Belum punya akun?
-          <button onclick="showTab('register')" style="background:none;border:none;font-family:var(--font-body);font-size:0.75rem;font-weight:700;color:var(--color-primary-mid);cursor:pointer;margin-left:0.25rem;">Daftar sekarang</button>
-        </p>
-      </div>
-
       <!-- REGISTER -->
       <div id="panelRegister" class="auth-panel" style="display:none;">
         <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0 0 0.2rem;">Buat Akun Baru</h2>
@@ -318,6 +284,42 @@
           <button onclick="showTab('login')" style="background:none;border:none;font-family:var(--font-body);font-size:0.75rem;font-weight:700;color:var(--color-primary-mid);cursor:pointer;margin-left:0.25rem;">Masuk sekarang</button>
         </p>
       </div>
+
+      <!-- LOGIN -->
+      <div id="panelLogin" class="auth-panel">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0 0 0.2rem;">Selamat Datang Kembali</h2>
+        <p style="font-size:0.8rem;color:var(--color-text-muted);margin:0 0 1.25rem;">Masuk untuk melanjutkan perjalanan Anda</p>
+        <div id="loginError" style="display:none;background:#fef2f2;color:#dc2626;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8rem;font-weight:500;margin-bottom:0.875rem;"></div>
+        <div style="display:flex;flex-direction:column;gap:0.875rem;">
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.35rem;">Email</label>
+            <div class="auth-input-wrap">
+              <input type="email" id="loginEmail" class="ec-input" placeholder="email@contoh.com" style="padding-right:2.5rem;" />
+              <i class="bx bxs-envelope icon"></i>
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.35rem;">Password</label>
+            <div class="auth-input-wrap">
+              <input type="password" id="loginPass" class="ec-input" placeholder="••••••••" style="padding-right:2.5rem;"
+                onkeydown="if(event.key==='Enter') doLogin()" />
+              <button class="icon btn-icon" onclick="togglePw('loginPass',this)"><i class='bx bx-hide'></i></button>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <button onclick="openForgot()" style="background:none;border:none;font-family:var(--font-body);font-size:0.75rem;font-weight:600;color:var(--color-primary-mid);cursor:pointer;">Lupa password?</button>
+          </div>
+        </div>
+        <button id="loginBtn" onclick="doLogin()" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:1.25rem;padding:0.875rem;">
+          Masuk ke Akun
+        </button>
+        <p style="text-align:center;font-size:0.75rem;color:var(--color-text-muted);margin-top:1rem;">
+          Belum punya akun?
+          <button onclick="showTab('register')" style="background:none;border:none;font-family:var(--font-body);font-size:0.75rem;font-weight:700;color:var(--color-primary-mid);cursor:pointer;margin-left:0.25rem;">Daftar sekarang</button>
+        </p>
+      </div>
+
+      
     </div>
   </div>
 
@@ -337,8 +339,8 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/services/supabase.js"></script>
-  <script src="/components/public-navbar.js"></script>
+  <script src="./services/supabase.js"></script>
+  <script src="./components/public-navbar.js"></script>
 
   <script>
     let allCars = []; let activeFilter = "all"; let searchTerm = ""; let _pendingCarId = null;
@@ -420,7 +422,7 @@
       if (car.transmisi)  chips += `<span style="font-size:0.7rem;background:#f0f4f8;color:#64748b;padding:0.2rem 0.55rem;border-radius:6px;font-weight:600;">${car.transmisi}</span>`;
       if (car.kapasitas)  chips += `<span style="font-size:0.7rem;background:#f0f4f8;color:#64748b;padding:0.2rem 0.55rem;border-radius:6px;font-weight:600;"><i class='bx bxs-user' style="vertical-align:middle;"></i> ${car.kapasitas}</span>`;
       if (car.tahun)      chips += `<span style="font-size:0.7rem;background:#f0f4f8;color:#64748b;padding:0.2rem 0.55rem;border-radius:6px;font-weight:600;">${car.tahun}</span>`;
-      return `<div class="car-card" style="cursor:pointer;" onclick="openDetail('${car.id}')"><div style="position:relative;">${imgHTML}<span class="badge badge-success" style="position:absolute;top:10px;left:10px;">Tersedia</span></div><div style="padding:1.25rem;flex:1;display:flex;flex-direction:column;"><div style="flex:1;"><h3 style="font-weight:700;color:var(--color-primary);font-size:0.95rem;margin:0 0 0.35rem;">${car.nama}</h3><div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.875rem;">${chips}</div><p style="font-size:1rem;font-weight:700;color:var(--color-accent);margin:0;">${price}<span style="font-size:0.75rem;font-weight:500;color:var(--color-text-muted);">/hari</span></p></div><button onclick="event.stopPropagation();handleBookClick('${car.id}','${car.nama.replace(/'/g,"\\'")}',event)" class="btn btn-primary" style="width:100%;margin-top:1rem;justify-content:center;"><i class='bx bx-calendar-plus'></i> Pesan Sekarang</button></div></div>`;
+      return `<div class="car-card" style="cursor:pointer;" onclick="openDetail('${car.id}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openDetail('${car.id}'); }" tabindex="0" role="button" aria-label="Lihat detail ${car.nama}"><div style="position:relative;">${imgHTML}<span class="badge badge-success" style="position:absolute;top:10px;left:10px;">Tersedia</span></div><div style="padding:1.25rem;flex:1;display:flex;flex-direction:column;"><div style="flex:1;"><h3 style="font-weight:700;color:var(--color-primary);font-size:0.95rem;margin:0 0 0.35rem;">${car.nama}</h3><div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.875rem;">${chips}</div><p style="font-size:1rem;font-weight:700;color:var(--color-accent);margin:0;">${price}<span style="font-size:0.75rem;font-weight:500;color:var(--color-text-muted);">/hari</span></p></div><button onclick="event.stopPropagation();handleBookClick('${car.id}','${car.nama.replace(/'/g,"\\'")}',event)" class="btn btn-primary" style="width:100%;margin-top:1rem;justify-content:center;"><i class='bx bx-calendar-plus'></i> Pesan Sekarang</button></div></div>`;
     }
 
     function setFilter(btn, filter) {
@@ -436,7 +438,7 @@
         openAuthModal("login");
         return;
       }
-      window.location.href = "/pages/user/booking.html?car_id=" + carId;
+      window.location.href = "./pages/user/booking.html?car_id=" + carId;
     }
 
     function openDetail(carId) {
@@ -455,6 +457,15 @@
         ["Nomor Plat", car.no_plat || "—"],
       ];
 
+      const detailSpecs = [
+        ["Kapasitas", car.kapasitas ? car.kapasitas + " orang" : "—", "bxs-user"],
+        ["Tahun", car.tahun || "—", "bx-calendar"],
+        ["Bahan Bakar", car.bahan_bakar || "—", "bx-gas-pump"],
+        ["Transmisi", car.transmisi || "—", "bx-cog"],
+        ["Warna", car.warna || "—", "bx-palette"],
+        ["Plat Nomor", car.no_plat || "—", "bx-id-card"],
+      ];
+
       document.getElementById("carDetailContent").innerHTML = `
         <div>
           ${imgHTML}
@@ -468,9 +479,12 @@
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem;">
-              ${specs.map(([label, value]) => `
+              ${detailSpecs.map(([label, value, icon]) => `
                 <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:0.75rem;">
-                  <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0 0 0.25rem;text-transform:uppercase;letter-spacing:0.04em;">${label}</p>
+                  <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.2rem;">
+                    <i class='bx ${icon}' style="font-size:0.85rem;color:var(--color-primary-mid);"></i>
+                    <span style="font-size:0.675rem;color:var(--color-text-muted);font-weight:600;">${label}</span>
+                  </div>
                   <p style="font-size:0.9rem;font-weight:700;color:var(--color-text);margin:0;">${value}</p>
                 </div>
               `).join("")}
@@ -486,7 +500,7 @@
               <span style="background:#dcfce7;color:#166534;font-size:0.725rem;font-weight:700;padding:0.35rem 0.75rem;border-radius:999px;">Tersedia</span>
             </div>
 
-            <button onclick="window.location.href='/pages/user/booking.html?car_id=${car.id}'" class="btn btn-accent" style="width:100%;justify-content:center;">
+            <button onclick="window.location.href='./pages/user/booking.html?car_id=${car.id}'" class="btn btn-accent" style="width:100%;justify-content:center;">
               <i class='bx bxs-calendar-plus'></i> Booking Kendaraan Ini
             </button>
           </div>
@@ -526,9 +540,9 @@
     }
 
     function redirectAfterLogin(user) {
-      if (_pendingCarId) { window.location.href = "/pages/user/booking.html?car_id=" + _pendingCarId; return; }
-      if (user?.role === "admin") window.location.href = "/pages/admin/dashboard.html";
-      else window.location.href = "/pages/user/dashboard.html";
+      if (_pendingCarId) { window.location.href = "./pages/user/booking.html?car_id=" + _pendingCarId; return; }
+      if (user?.role === "admin") window.location.href = "./pages/admin/dashboard.html";
+      else window.location.href = "./pages/user/dashboard.html";
     }
 
     async function doLogin() {
