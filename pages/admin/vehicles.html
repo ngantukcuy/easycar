@@ -216,7 +216,7 @@
         document.getElementById("fHarga").value  = c.harga_per_hari || "";
         document.getElementById("fFoto").value   = c.foto_url || "";
         document.getElementById("fStatus").value = c.status || "Tersedia";
-        document.getElementById("fPlat").value   = c.nomor_plat || "";
+        document.getElementById("fPlat").value   = c.no_plat || "";
         document.getElementById("fDesc").value   = c.deskripsi || "";
       } else {
         document.getElementById("formTitle").textContent = "Tambah Kendaraan";
@@ -257,17 +257,35 @@
         harga_per_hari: harga,
         foto_url:     document.getElementById("fFoto").value.trim()   || null,
         status:       document.getElementById("fStatus").value,
-        nomor_plat:   document.getElementById("fPlat").value.trim()   || null,
+        no_plat:      document.getElementById("fPlat").value.trim()   || null,
         deskripsi:    document.getElementById("fDesc").value.trim()   || null,
       };
 
       setButtonLoading(btn, true);
-      const { error } = editingId
-        ? await supabase.from("cars").update(payload).eq("id", editingId)
-        : await supabase.from("cars").insert(payload);
+
+      let result;
+      if (editingId) {
+        result = await supabase.from("cars").update(payload).eq("id", editingId);
+      } else {
+        result = await supabase.from("cars").insert(payload);
+      }
+
+      if (result.error && /no_plat/i.test(result.error.message)) {
+        const fallbackPayload = { ...payload };
+        delete fallbackPayload.no_plat;
+
+        result = editingId
+          ? await supabase.from("cars").update(fallbackPayload).eq("id", editingId)
+          : await supabase.from("cars").insert(fallbackPayload);
+      }
+
       setButtonLoading(btn, false);
 
-      if (error) { errEl.textContent = "Gagal: " + error.message; errEl.style.display = "block"; return; }
+      if (result.error) {
+        errEl.textContent = "Gagal: " + result.error.message;
+        errEl.style.display = "block";
+        return;
+      }
 
       showToast(editingId ? "Kendaraan diperbarui!" : "Kendaraan ditambahkan!", "success");
       closeForm();

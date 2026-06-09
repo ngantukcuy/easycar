@@ -41,6 +41,15 @@
     .stat-num   { font-size: 2rem; font-weight: 800; color: var(--color-primary); }
     .stat-label { font-size: 0.8125rem; color: var(--color-text-muted); margin-top: 0.2rem; }
     .step-icon { width:56px;height:56px;background:var(--color-bg);border:2px solid var(--color-border);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem; }
+    .site-footer { background: linear-gradient(135deg, #07152b 0%, #132a46 100%); color: rgba(255,255,255,0.88); padding: 2.5rem 1rem 1rem; }
+    .site-footer a { color: inherit; text-decoration: none; }
+    .footer-grid { max-width: 1200px; margin: 0 auto; display:grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 1.5rem; }
+    .footer-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 1rem 1.1rem; }
+    .footer-title { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+    .footer-text, .footer-list { font-size: 0.875rem; color: rgba(255,255,255,0.75); line-height: 1.7; }
+    .footer-list { list-style:none; padding:0; margin:0; display:grid; gap:0.35rem; }
+    .footer-bottom { max-width: 1200px; margin: 1rem auto 0; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.55); }
+    @media (max-width: 920px) { .footer-grid { grid-template-columns: 1fr; } }
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes ecModalIn { from{opacity:0;transform:translateY(-20px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
 
@@ -216,8 +225,31 @@
     </div>
   </div>
 
-  <footer style="background:var(--color-primary);color:rgba(255,255,255,0.45);text-align:center;padding:1.5rem;font-size:0.8125rem;">
-    &copy; 2026 EasyCar &mdash; Rental Kendaraan Terpercaya
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-card">
+        <div class="footer-title">Tentang EasyCar</div>
+        <p class="footer-text" style="margin:0 0 0.5rem;">EasyCar adalah platform rental kendaraan yang memudahkan Anda mencari, memesan, dan mengelola sewa mobil dengan cepat, aman, dan transparan.</p>
+        <p class="footer-text" style="margin:0;">Kami hadir untuk memberi pengalaman perjalanan yang praktis, profesional, dan nyaman untuk semua kebutuhan transportasi Anda.</p>
+      </div>
+      <div class="footer-card">
+        <div class="footer-title">Alamat</div>
+        <ul class="footer-list">
+          <li><i class='bx bxs-map' style="margin-right:0.35rem;"></i> Jl. Raya Merdeka No. 88, Kota Rental</li>
+          <li><i class='bx bxs-city' style="margin-right:0.35rem;"></i> Jakarta Selatan, Indonesia</li>
+          <li><i class='bx bxs-time-five' style="margin-right:0.35rem;"></i> Operasional: 08.00 - 21.00 WIB</li>
+        </ul>
+      </div>
+      <div class="footer-card">
+        <div class="footer-title">Hubungi Kami</div>
+        <ul class="footer-list">
+          <li><i class='bx bxs-phone' style="margin-right:0.35rem;"></i> +62 812-3456-7890</li>
+          <li><i class='bx bxs-envelope' style="margin-right:0.35rem;"></i> support@easycar.id</li>
+          <li><i class='bx bxl-whatsapp' style="margin-right:0.35rem;"></i> WA: +62 812-3456-7890</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 EasyCar &mdash; Rental Kendaraan Terpercaya. Semua hak dilindungi.</div>
   </footer>
 
   <!-- ═══ AUTH MODAL ═══ -->

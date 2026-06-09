@@ -100,6 +100,21 @@ DO $$ BEGIN
   END IF;
 END $$;
 
+-- ── Pastikan kolom kendaraan penting ada di tabel cars ──
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='cars') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='cars' AND column_name='nomor_plat') THEN
+      ALTER TABLE cars ADD COLUMN nomor_plat TEXT;
+      RAISE NOTICE 'Added: cars.nomor_plat';
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='cars' AND column_name='deskripsi') THEN
+      ALTER TABLE cars ADD COLUMN deskripsi TEXT;
+      RAISE NOTICE 'Added: cars.deskripsi';
+    END IF;
+  END IF;
+END $$;
+
 -- ── Verifikasi hasil ──
 SELECT
   column_name,
