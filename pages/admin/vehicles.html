@@ -216,7 +216,7 @@
         document.getElementById("fNama").value   = c.nama || "";
         document.getElementById("fTipe").value   = c.tipe || "";
         document.getElementById("fTrans").value  = c.transmisi || "";
-        document.getElementById("fBahan").value  = c.bahan_bakar || "";
+        document.getElementById("fBahan_").value = c.bahan_bakar || "";
         document.getElementById("fWarna").value  = c.warna || "";
         document.getElementById("fKap").value    = c.kapasitas || "";
         document.getElementById("fTahun").value  = c.tahun || "";
@@ -227,7 +227,7 @@
         document.getElementById("fDesc").value   = c.deskripsi || "";
       } else {
         document.getElementById("formTitle").textContent = "Tambah Kendaraan";
-        ["fNama","fTipe","fTrans","fBahan","fWarna","fKap","fTahun","fHarga","fFoto","fPlat","fDesc"].forEach(id => {
+        ["fNama","fTipe","fTrans","fBahan_","fWarna","fKap","fTahun","fHarga","fFoto","fPlat","fDesc"].forEach(id => {
           document.getElementById(id).value = "";
         });
         document.getElementById("fStatus").value = "Tersedia";
@@ -266,7 +266,7 @@
         status:       document.getElementById("fStatus").value,
         no_plat:      document.getElementById("fPlat").value.trim()   || null,
         deskripsi:    document.getElementById("fDesc").value.trim()   || null,
-        bahan_bakar:  document.getElementById("fBahan").value || null,
+        bahan_bakar:  document.getElementById("fBahan_").value || null,
         warna:          document.getElementById("fWarna").value || null
       };
 
