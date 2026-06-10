@@ -22,7 +22,6 @@ const ADMIN_SIDEBAR_HTML = `
     </a>
     <a href="/pages/admin/book-view.html" class="sb-link" data-page="book-view">
       <i class='bx bxs-receipt'></i><span>Manajemen Booking</span>
-      <span class="sb-notif-badge" id="sbOrderBadge" style="display:none;">0</span>
     </a>
     <div class="sb-section-label">Data Master</div>
     <a href="/pages/admin/vehicles.html" class="sb-link" data-page="vehicles">
