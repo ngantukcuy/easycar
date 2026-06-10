@@ -86,7 +86,7 @@
           </div>
           <div>
             <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Bahan Bakar</label>
-            <select id="fBahan" class="ec-input">
+            <select id="fBahan_" class="ec-input">
               <option value="">— Pilih —</option>
               <option>Pertalite</option><option>Pertamax</option><option>Bio Solar</option><option>Dexlite</option><option>Pertamina Dex</option><option>Listrik </option>
             </select>
@@ -190,6 +190,8 @@
             <td style="font-weight:700;font-size:0.875rem;color:var(--color-primary);">${c.nama}</td>
             <td style="font-size:0.8125rem;">${c.tipe || "—"}</td>
             <td style="font-size:0.8125rem;">${c.transmisi || "—"}</td>
+            <td style="font-size:0.8125rem;text-align:center;">${c.bahan_bakar || "—"}</td>
+            <td style="font-size:0.8125rem;">${c.warna || "—"}</td>
             <td style="font-size:0.8125rem;text-align:center;">${c.kapasitas || "—"}</td>
             <td style="font-weight:600;font-size:0.8125rem;">${formatRupiah(c.harga_per_hari || 0)}</td>
             <td><span class="badge ${statusBadgeClass(c.status)}">${c.status || "—"}</span></td>
@@ -264,6 +266,8 @@
         status:       document.getElementById("fStatus").value,
         no_plat:      document.getElementById("fPlat").value.trim()   || null,
         deskripsi:    document.getElementById("fDesc").value.trim()   || null,
+        bahan_bakar:  document.getElementById("fBahan").value || null,
+        warna:          document.getElementById("fWarna").value || null
       };
 
       setButtonLoading(btn, true);
