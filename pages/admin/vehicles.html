@@ -190,8 +190,6 @@
             <td style="font-weight:700;font-size:0.875rem;color:var(--color-primary);">${c.nama}</td>
             <td style="font-size:0.8125rem;">${c.tipe || "—"}</td>
             <td style="font-size:0.8125rem;">${c.transmisi || "—"}</td>
-            <td style="font-size:0.8125rem;text-align:center;">${c.bahan_bakar || "—"}</td>
-            <td style="font-size:0.8125rem;">${c.warna || "—"}</td>
             <td style="font-size:0.8125rem;text-align:center;">${c.kapasitas || "—"}</td>
             <td style="font-weight:600;font-size:0.8125rem;">${formatRupiah(c.harga_per_hari || 0)}</td>
             <td><span class="badge ${statusBadgeClass(c.status)}">${c.status || "—"}</span></td>
@@ -216,18 +214,18 @@
         document.getElementById("fNama").value   = c.nama || "";
         document.getElementById("fTipe").value   = c.tipe || "";
         document.getElementById("fTrans").value  = c.transmisi || "";
-        document.getElementById("fBahan_").value = c.bahan_bakar || "";
-        document.getElementById("fWarna").value  = c.warna || "";
         document.getElementById("fKap").value    = c.kapasitas || "";
         document.getElementById("fTahun").value  = c.tahun || "";
         document.getElementById("fHarga").value  = c.harga_per_hari || "";
         document.getElementById("fFoto").value   = c.foto_url || "";
         document.getElementById("fStatus").value = c.status || "Tersedia";
         document.getElementById("fPlat").value   = c.no_plat || "";
+        document.getElementById("fBahan_").value = c.bahan_bakar || "";
+        document.getElementById("fWarna").value  = c.warna || "";
         document.getElementById("fDesc").value   = c.deskripsi || "";
       } else {
         document.getElementById("formTitle").textContent = "Tambah Kendaraan";
-        ["fNama","fTipe","fTrans","fBahan_","fWarna","fKap","fTahun","fHarga","fFoto","fPlat","fDesc"].forEach(id => {
+        ["fNama","fTipe","fTrans","fKap","fTahun","fHarga","fFoto","fPlat","fBahan_","fWarna","fDesc"].forEach(id => {
           document.getElementById(id).value = "";
         });
         document.getElementById("fStatus").value = "Tersedia";
