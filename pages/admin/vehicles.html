@@ -214,6 +214,7 @@
         document.getElementById("fNama").value   = c.nama || "";
         document.getElementById("fTipe").value   = c.tipe || "";
         document.getElementById("fTrans").value  = c.transmisi || "";
+        document.getElementById("fBahan").value  = c.bahan_bakar || "";
         document.getElementById("fKap").value    = c.kapasitas || "";
         document.getElementById("fTahun").value  = c.tahun || "";
         document.getElementById("fHarga").value  = c.harga_per_hari || "";
@@ -223,7 +224,7 @@
         document.getElementById("fDesc").value   = c.deskripsi || "";
       } else {
         document.getElementById("formTitle").textContent = "Tambah Kendaraan";
-        ["fNama","fTipe","fTrans","fKap","fTahun","fHarga","fFoto","fPlat","fDesc"].forEach(id => {
+        ["fNama","fTipe","fTrans","fBahan","fKap","fTahun","fHarga","fFoto","fPlat","fDesc"].forEach(id => {
           document.getElementById(id).value = "";
         });
         document.getElementById("fStatus").value = "Tersedia";
