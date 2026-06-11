@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Pesanan Saya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <style>
+    body.ec-loading { visibility: hidden; }
+    .filter-chip { padding:0.4rem 1rem;border-radius:999px;border:1.5px solid var(--color-border);background:var(--color-surface);font-size:0.8125rem;font-weight:600;color:var(--color-text-muted);cursor:pointer;transition:all 0.15s;font-family:var(--font-body); }
+    .filter-chip:hover { border-color:var(--color-primary-mid);color:var(--color-primary-mid); }
+    .filter-chip.active { background:var(--color-primary-mid);border-color:var(--color-primary-mid);color:#fff; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes pulseIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── ORDER CARD — style myorder.jpeg ── */
+    .order-card {
+      background:#fff;
+      border-radius:16px;
+      border:1.5px solid var(--color-border);
+      overflow:hidden;
+      cursor:pointer;
+      transition:box-shadow 0.2s, transform 0.15s;
+      animation: pulseIn 0.3s ease;
+    }
+    .order-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
+    .order-card-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0.875rem 1.125rem 0.75rem;
+      border-bottom:1px solid var(--color-border);
+    }
+    .order-card-body { padding:1rem 1.125rem; }
+    .order-card-footer {
+      display:flex; align-items:center; gap:0.625rem;
+      padding:0.75rem 1.125rem;
+      border-top:1px solid var(--color-border);
+      background:var(--color-bg);
+    }
+    .order-meta-row { display:flex; flex-wrap:wrap; gap:0.5rem 1.25rem; margin-top:0.625rem; }
+    .order-meta-item { display:flex; align-items:center; gap:0.3rem; font-size:0.75rem; color:var(--color-text-muted); }
+    .order-meta-item i { font-size:0.875rem; color:var(--color-primary-mid); }
+    .order-meta-item strong { font-weight:600; color:var(--color-text); }
+    .order-total { text-align:right; }
+    .order-total .label { font-size:0.7rem; color:var(--color-text-muted); }
+    .order-total .amount { font-size:1rem; font-weight:800; color:var(--color-accent); }
+    .order-total .dp-note { font-size:0.7rem; color:var(--color-text-muted); }
+
+    /* Alasan tolak banner */
+    .tolak-banner {
+      background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px;
+      padding: 0.625rem 0.875rem; margin-top: 0.75rem;
+      display: flex; gap: 0.5rem; align-items: flex-start;
+    }
+    .tolak-banner i { color: #dc2626; font-size: 0.9rem; flex-shrink: 0; margin-top: 2px; }
+    .tolak-banner .tolak-title { font-size: 0.7rem; font-weight: 700; color: #dc2626; }
+    .tolak-banner .tolak-alasan { font-size: 0.78rem; color: #7f1d1d; margin-top: 1px; }
+
+    /* ── DETAIL MODAL — style detail.jpeg ── */
+    .detail-header-band {
+      background: linear-gradient(135deg, #0f2347 0%, #1a3c6e 100%);
+      padding: 1.25rem 1.5rem;
+      border-radius: 24px 24px 0 0;
+      position: sticky; top: 0; z-index: 2;
+    }
+    .detail-info-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem;
+    }
+    .detail-info-box {
+      background: var(--color-bg); border-radius: 10px; padding: 0.75rem;
+    }
+    .detail-info-box .lbl { font-size: 0.7rem; color: var(--color-text-muted); margin: 0 0 0.2rem; }
+    .detail-info-box .val { font-size: 0.875rem; font-weight: 700; color: var(--color-text); margin: 0; }
+
+    /* Pay breakdown */
+    .pay-breakdown { background: var(--color-bg); border-radius: 10px; padding: 0.875rem; }
+    .pay-row { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; }
+    .pay-row + .pay-row { border-top: 1px solid var(--color-border); }
+    .pay-row.pay-total { border-top: 2px solid var(--color-primary); margin-top: 0.25rem; padding-top: 0.625rem; }
+
+    /* Status timeline */
+    .status-timeline { display:flex; flex-direction:column; gap:0; }
+    .timeline-item { display:flex; gap:0.875rem; position:relative; }
+    .timeline-item:not(:last-child) .tl-line { position:absolute; left:11px; top:24px; width:2px; bottom:-4px; background:var(--color-border); }
+    .tl-dot { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; z-index:1; }
+    .tl-dot.done { background:#dcfce7; }
+    .tl-dot.done i { color:#16a34a; font-size:0.75rem; }
+    .tl-dot.current { background:#fff7ed; border:2px solid #e85d04; }
+    .tl-dot.current i { color:#e85d04; font-size:0.75rem; }
+    .tl-dot.pending { background:#f1f5f9; }
+    .tl-dot.pending i { color:#cbd5e1; font-size:0.75rem; }
+    .tl-content { flex:1; padding-bottom:0.875rem; }
+    .tl-content .tl-label { font-size:0.8125rem; font-weight:600; color:var(--color-text); }
+    .tl-content .tl-sub { font-size:0.72rem; color:var(--color-text-muted); margin-top:1px; }
+  </style>
+</head>
+<body class="ec-loading">
+
+  <div class="page-wrapper">
+    <header class="page-topbar">
+      <div style="padding-left:3rem;">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Pesanan Saya</h2>
+        <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">Riwayat dan status pesanan Anda</p>
+      </div>
+    </header>
+
+    <main class="page-content fade-in">
+      <!-- Realtime indicator -->
+      <div id="realtimeIndicator" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:0.5rem 0.875rem;margin-bottom:1rem;font-size:0.78rem;color:#15803d;font-weight:500;display:flex;align-items:center;gap:0.5rem;">
+        <span style="width:7px;height:7px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0;"></span>
+        Terhubung realtime — status update otomatis
+      </div>
+      <style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}</style>
+
+      <!-- Filter tabs -->
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem;">
+        <button class="filter-chip active" onclick="setFilter(this,'all')">Semua</button>
+        <button class="filter-chip" onclick="setFilter(this,'Menunggu Konfirmasi')">Menunggu Konfirmasi</button>
+        <button class="filter-chip" onclick="setFilter(this,'Dikonfirmasi')">Dikonfirmasi</button>
+        <button class="filter-chip" onclick="setFilter(this,'Aktif')">Aktif</button>
+        <button class="filter-chip" onclick="setFilter(this,'Selesai')">Selesai</button>
+        <button class="filter-chip" onclick="setFilter(this,'Dibatalkan')">Ditolak/Batal</button>
+        <button class="filter-chip" onclick="setFilter(this,'Dibatalkan')">Dibatalkan</button>
+      </div>
+
+      <!-- Orders list -->
+      <div id="ordersList">
+        <div style="text-align:center;padding:3rem;color:var(--color-text-muted);">
+          <i class='bx bx-loader-alt' style="font-size:2.5rem;animation:spin 1s linear infinite;display:block;"></i>
+          <p style="margin-top:0.5rem;">Memuat pesanan...</p>
+        </div>
+      </div>
+    </main>
+    <footer style="text-align:center;color:var(--color-text-subtle);font-size:0.75rem;padding:1.25rem;">&copy; 2026 EasyCar</footer>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detailOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:500px;max-height:90vh;overflow-y:auto;">
+      <div class="detail-header-band">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div id="detailHeaderKode" style="color:#fff;">
+            <p style="font-size:1.1rem;font-weight:800;margin:0;letter-spacing:0.02em;">Detail Pesanan</p>
+            <p style="font-size:0.75rem;opacity:0.65;margin:0.15rem 0 0;">EasyCar Rental Kendaraan</p>
+          </div>
+          <button onclick="closeDetail()" style="background:rgba(255,255,255,0.15);border:none;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;">✕</button>
+        </div>
+      </div>
+      <div id="detailContent" style="padding:1.25rem;"></div>
+      <div style="padding:0 1.25rem 1.25rem;display:flex;flex-direction:column;gap:0.625rem;" id="detailActions"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/services/realtime.js"></script>
+  <script src="/services/print.js"></script>
+  <script src="/components/user-sidebar.js"></script>
+  <script src="/utils/ui.js"></script>
+
+  <script>
+    let allOrders    = [];
+    let activeFilter = "all";
+    let openBookingId = null;
+    let currentUser   = null;
+
+    (async () => {
+      currentUser = await requireLogin();
+      if (!currentUser) return;
+
+      initUserSidebar("my-orders", currentUser);
+      injectTopbarNotifBell();
+      await loadOrders();
+      document.body.classList.add("ec-ready");
+
+      // ── REALTIME ────────────────────────────────────
+      EasyCarRealtime.subscribeUserBookings(currentUser.id, {
+        onInsert: async () => { await loadOrders(); },
+        onUpdate: async (payload) => {
+          // Update data lokal tanpa full reload
+          const updated = payload.new;
+          const idx = allOrders.findIndex(o => o.id === updated.id);
+          if (idx !== -1) {
+            allOrders[idx] = { ...allOrders[idx], ...updated };
+            renderOrders();
+            // Jika detail modal sedang buka untuk booking ini, refresh
+            if (openBookingId === updated.id) openDetail(updated.id);
+          } else {
+            await loadOrders(); // fallback
+          }
+        },
+      });
+
+      // Show realtime indicator
+      document.getElementById("realtimeIndicator").style.display = "flex";
+    })();
+
+    async function loadOrders() {
+      const { data } = await supabase
+        .from("bookings")
+        .select("*, cars(id, nama, foto_url, tipe, transmisi, harga_per_hari)")
+        .eq("user_id", currentUser.id)
+        .order("created_at", { ascending: false });
+      allOrders = data || [];
+      renderOrders();
+    }
+
+    function setFilter(btn, status) {
+      document.querySelectorAll(".filter-chip").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeFilter = status;
+      renderOrders();
+    }
+
+    function renderOrders() {
+      const list = document.getElementById("ordersList");
+      const filtered = activeFilter === "all" ? allOrders : allOrders.filter(o => o.status === activeFilter);
+      if (!filtered.length) {
+        list.innerHTML = `
+          <div style="text-align:center;padding:4rem 1rem;">
+            <i class='bx bxs-receipt' style="font-size:3rem;color:var(--color-text-subtle);"></i>
+            <p style="color:var(--color-text-muted);margin-top:0.75rem;font-weight:500;">Belum ada pesanan ${activeFilter === "all" ? "" : "dengan status <strong>" + activeFilter + "</strong>"}</p>
+            <a href="/pages/user/booking.html" class="btn btn-accent" style="display:inline-flex;margin-top:1rem;">
+              <i class='bx bx-plus'></i> Buat Pesanan
+            </a>
+          </div>`;
+        return;
+      }
+      list.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;">${filtered.map(orderCardHTML).join("")}</div>`;
+    }
+
+    function orderCardHTML(o) {
+      const car  = o.cars || {};
+      const kode = o.kode_booking || ("EC" + o.id.slice(-6).toUpperCase());
+      const dp      = o.dp_amount || 0;
+      const deposit = o.deposit_amount || 0;
+      const bayarNow = dp + deposit;
+      const statusPay = o.status_pembayaran || (dp > 0 ? "DP" : "Belum Bayar");
+
+      let tolakBanner = "";
+      if ((o.status === "Dibatalkan") && o.alasan_tolak) {
+        tolakBanner = `<div class="tolak-banner"><i class='bx bxs-error-circle'></i><div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${o.alasan_tolak}</div></div></div>`;
+      }
+
+      return `
+        <div class="order-card" onclick="openDetail('${o.id}')">
+          <div class="order-card-header">
+            <div>
+              <p style="font-weight:800;color:var(--color-primary);font-size:0.9375rem;margin:0 0 0.1rem;">${kode}</p>
+              <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">Dipesan: ${formatTanggalShort(o.created_at || o.tanggal_mulai)}</p>
+            </div>
+            <span class="badge ${statusBadgeClass(o.status)}">${o.status}</span>
+          </div>
+          <div class="order-card-body">
+            <p style="font-weight:700;color:var(--color-text);font-size:0.9375rem;margin:0 0 0.5rem;">${car.nama || "Kendaraan"}</p>
+            <div class="order-meta-row">
+              <span class="order-meta-item"><i class='bx bx-calendar'></i><strong>${formatTanggalShort(o.tanggal_mulai)} → ${formatTanggalShort(o.tanggal_selesai)}</strong></span>
+              <span class="order-meta-item"><i class='bx bx-time-five'></i><strong>${o.durasi_hari || "—"} hari</strong></span>
+              <span class="order-meta-item"><i class='bx bx-credit-card'></i><strong>${statusPay}</strong></span>
+            </div>
+            ${car.harga_per_hari ? `<div class="order-meta-row" style="margin-top:0.4rem;"><span class="order-meta-item"><i class='bx bx-camera'></i><strong>${formatRupiah(car.harga_per_hari)}/hari</strong></span></div>` : ""}
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:0.875rem;flex-wrap:wrap;gap:0.5rem;">
+              <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;"><i class='bx bx-map-pin' style="font-size:0.8rem;"></i> Kantor EasyCar</p>
+              <div class="order-total">
+                <div class="label">Total Sewa</div>
+                <div class="amount">${formatRupiah(o.total_harga || 0)}</div>
+                ${bayarNow > 0 ? `<div class="dp-note">DP/Deposit: ${formatRupiah(bayarNow)}</div>` : ""}
+              </div>
+            </div>
+            ${tolakBanner}
+          </div>
+          <div class="order-card-footer">
+            <button onclick="event.stopPropagation();openDetail('${o.id}')" class="btn btn-ghost btn-sm" style="font-size:0.75rem;">
+              <i class='bx bx-info-circle'></i> Detail
+            </button>
+            <button onclick="event.stopPropagation();doPrintA4('${o.id}')" class="btn btn-sm" style="font-size:0.75rem;background:#1e293b;color:#fff;border-color:#1e293b;">
+              <i class='bx bx-printer'></i> Invoice
+            </button>
+            ${(o.status === "Dibatalkan") ? `<a href="/pages/user/booking.html${car.id ? '?car_id='+car.id : ''}" onclick="event.stopPropagation()" class="btn btn-accent btn-sm" style="font-size:0.75rem;"><i class='bx bx-refresh'></i> Rebooking </a>` : ""}
+          </div>
+        </div>`;
+    }
+    
+
+    function openDetail(id) {
+      const o = allOrders.find(x => x.id === id);
+      if (!o) return;
+      openBookingId = id;
+      const car  = o.cars || {};
+      const kode = o.kode_booking || ("EC" + o.id.slice(-6).toUpperCase());
+      const dp      = o.dp_amount || 0;
+      const deposit = o.deposit_amount || 0;
+      const bayarNow = dp + deposit;
+      const sisa     = o.sisa_pelunasan != null ? o.sisa_pelunasan : Math.max(0, (o.total_harga || 0) - dp);
+      const statusPay = o.status_pembayaran || (dp > 0 ? "DP" : "Belum Bayar");
+
+      // Status timeline logic
+      const ALL_STATUSES = ["Menunggu Konfirmasi","Dikonfirmasi","Aktif","Selesai"];
+      const REJECTED = ["Dibatalkan"];
+      const curIdx = ALL_STATUSES.indexOf(o.status);
+      const isRejected = REJECTED.includes(o.status);
+
+      const timelineHTML = (() => {
+        const steps = isRejected
+          ? [...ALL_STATUSES.slice(0, Math.max(curIdx, 1)), o.status]
+          : ALL_STATUSES;
+        return steps.map((s, i) => {
+          let dotClass = "pending"; let icon = "bx-circle";
+          if (isRejected && i === steps.length - 1) { dotClass = "current"; icon = "bxs-error-circle"; }
+          else if (curIdx > i) { dotClass = "done"; icon = "bxs-check-circle"; }
+          else if (curIdx === i) { dotClass = "current"; icon = "bx-radio-circle-marked"; }
+          const subText = curIdx === i ? "Status saat ini" : (curIdx > i ? "Selesai" : "Menunggu");
+          return `<div class="timeline-item">
+            <div class="tl-line"></div>
+            <div class="tl-dot ${dotClass}"><i class='bx ${icon}'></i></div>
+            <div class="tl-content">
+              <div class="tl-label">${s}</div>
+              <div class="tl-sub">${subText}</div>
+            </div>
+          </div>`;
+        }).join("");
+      })();
+
+      document.getElementById("detailContent").innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+
+          <!-- Informasi Pesanan -->
+          <div>
+            <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 0.625rem;">📋 Informasi Pesanan</p>
+            <div class="detail-info-grid">
+              <div class="detail-info-box">
+                <p class="lbl">Kode Booking</p>
+                <p class="val" style="font-family:monospace;color:var(--color-primary);">${kode}</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Status</p>
+                <span class="badge ${statusBadgeClass(o.status)}" style="font-size:0.75rem;">${o.status}</span>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Tanggal Pesan</p>
+                <p class="val">${formatTanggalShort(o.created_at || o.tanggal_mulai)}</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Status Bayar</p>
+                <p class="val">${statusPay}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detail Kendaraan -->
+          <div>
+            <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 0.625rem;">🚗 Detail Kendaraan</p>
+            <div class="detail-info-grid">
+              <div class="detail-info-box">
+                <p class="lbl">Kendaraan</p>
+                <p class="val">${car.nama || "—"}</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Harga / Hari</p>
+                <p class="val" style="color:var(--color-accent);">${car.harga_per_hari ? formatRupiah(car.harga_per_hari) : "—"}</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Mulai Sewa</p>
+                <p class="val">${formatTanggal(o.tanggal_mulai)}</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Selesai Sewa</p>
+                <p class="val">${formatTanggal(o.tanggal_selesai)}</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Durasi</p>
+                <p class="val">${o.durasi_hari || "—"} hari</p>
+              </div>
+              <div class="detail-info-box">
+                <p class="lbl">Lokasi Ambil</p>
+                <p class="val">Kantor EasyCar</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rincian Pembayaran -->
+          <div>
+            <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 0.625rem;">💰 Rincian Pembayaran</p>
+            <div class="pay-breakdown">
+              <div class="pay-row">
+                <span style="font-size:0.8125rem;color:var(--color-text-muted);">Total Sewa</span>
+                <span style="font-size:0.8125rem;font-weight:700;">${formatRupiah(o.total_harga || 0)}</span>
+              </div>
+              <div class="pay-row">
+                <span style="font-size:0.8125rem;color:var(--color-text-muted);">DP / Deposit Dibayar</span>
+                <span style="font-size:0.8125rem;font-weight:700;color:var(--color-accent);">${formatRupiah(bayarNow)}</span>
+              </div>
+              <div class="pay-row">
+                <span style="font-size:0.8125rem;color:var(--color-text-muted);">Deposit E-Tilang</span>
+                <span style="font-size:0.8125rem;font-weight:700;">${formatRupiah(deposit)}</span>
+              </div>
+              <div class="pay-row pay-total">
+                <span style="font-size:0.875rem;font-weight:700;color:var(--color-primary);">Sisa Pembayaran</span>
+                <span style="font-size:0.9375rem;font-weight:800;color:${sisa > 0 ? '#dc2626' : '#16a34a'};">${formatRupiah(sisa)}</span>
+              </div>
+            </div>
+          </div>
+
+          ${o.alasan_tolak ? `
+          <div class="tolak-banner" style="margin:0;">
+            <i class='bx bxs-error-circle'></i>
+            <div><div class="tolak-title">Alasan Penolakan Admin</div><div class="tolak-alasan">${o.alasan_tolak}</div></div>
+          </div>` : ""}
+
+          <!-- Riwayat Status -->
+          <div>
+            <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 0.75rem;">📌 Riwayat Status</p>
+            <div class="status-timeline">${timelineHTML}</div>
+          </div>
+        </div>`;
+
+      // Action buttons
+      const actionsEl = document.getElementById("detailActions");
+      let actionsHTML = `
+        <button onclick="doPrintA4('${id}')" class="btn btn-sm" style="width:100%;justify-content:center;background:#1e293b;color:#fff;border-color:#1e293b;">
+          <i class='bx bx-printer'></i> Cetak Invoice A4
+        </button>`;
+
+      const waLink = EasyCarRealtime.buildWALink(o, car);
+      actionsHTML += `
+        <a href="${waLink}" target="_blank" class="btn btn-sm" style="width:100%;justify-content:center;background:#16a34a;color:#fff;border-color:#16a34a;">
+          <i class='bx bxl-whatsapp'></i> Hubungi Admin via WhatsApp
+        </a>`;
+
+      if (o.status === "Dibatalkan") {
+        const carIdForRebook = car.id || "";
+        actionsHTML += `
+          <a href="/pages/user/booking.html${carIdForRebook ? '?car_id=' + carIdForRebook : ''}" class="btn btn-accent btn-sm" style="width:100%;justify-content:center;">
+            <i class='bx bx-refresh'></i> Booking Lagi
+          </a>`;
+      }
+
+      actionsEl.innerHTML = actionsHTML;
+      document.getElementById("detailOverlay").style.display = "flex";
+    }
+
+    function doPrintA4(bookingId) {
+      const o = allOrders.find(x => x.id === bookingId);
+      if (!o) return;
+      EasyCarPrint.printInvoiceA4(o, o.cars);
+    }
+
+    function infoRow(label, val) {
+      return `<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--color-border);"><span style="font-size:0.8125rem;color:var(--color-text-muted);">${label}</span><span style="font-size:0.8125rem;font-weight:600;color:var(--color-text);text-align:right;">${val}</span></div>`;
+    }
+
+    function closeDetail() {
+      document.getElementById("detailOverlay").style.display = "none";
+      openBookingId = null;
+    }
+    document.getElementById("detailOverlay").addEventListener("click", e => {
+      if (e.target === e.currentTarget) closeDetail();
+    });
+  </script>
+</body>
+</html>

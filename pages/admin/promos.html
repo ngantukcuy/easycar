@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Promo & Diskon</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <style> body.ec-loading { visibility: hidden; }
+    @media (max-width:1023px) { .page-topbar > div:first-child { padding-left: 3.5rem !important; } } </style>
+</head>
+<body class="ec-loading">
+
+  <div class="page-wrapper">
+    <header class="page-topbar">
+      <div style="padding-left:3rem;">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Promo & Diskon</h2>
+        <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">Kelola kode promo dan diskon</p>
+      </div>
+      
+    </header>
+      <button onclick="openForm(null)" class="btn btn-accent btn-sm" style= "margin-bottom:1.25rem;white-space:nowrap;height: 44px;width:160px;margin-left:2rem;margin-top:1.25rem;">
+        <i class='bx bx-plus'></i> Tambah Promo
+      </button>
+    <main class="page-content fade-in">
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Kode</th>
+                <th>Deskripsi</th>
+                <th>Diskon</th>
+                <th>Min. Hari</th>
+                <th>Berlaku s/d</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="promoTable">
+              <tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--color-text-muted);">Memuat...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Form Modal -->
+  <div id="formOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:440px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);">
+        <h3 id="formTitle" style="font-family:var(--font-body);font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Tambah Promo</h3>
+        <button onclick="closeForm()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--color-text-muted);">✕</button>
+      </div>
+      <div style="padding:1.5rem;">
+        <div id="formError" style="display:none;background:#fef2f2;color:#dc2626;border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:0.875rem;margin-bottom:1rem;"></div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Kode Promo *</label>
+            <input type="text" id="fKode" class="ec-input" placeholder="DISKON10" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Deskripsi</label>
+            <input type="text" id="fDesc" class="ec-input" placeholder="Diskon akhir tahun" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Tipe Diskon</label>
+            <select id="fTipe" class="ec-input" onchange="updateDiskonLabel()">
+              <option value="percent">Persen (%)</option>
+              <option value="nominal">Nominal (Rp)</option>
+            </select>
+          </div>
+          <div>
+            <label id="diskonLabel" style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Nilai Diskon (%)</label>
+            <input type="number" id="fNilai" class="ec-input" placeholder="10" min="0" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Minimal Hari Sewa</label>
+            <input type="number" id="fMinHari" class="ec-input" placeholder="3" min="1" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Berlaku Hingga</label>
+            <input type="date" id="fExpiry" class="ec-input" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Status</label>
+            <select id="fStatus" class="ec-input">
+              <option value="aktif">Aktif</option>
+              <option value="nonaktif">Nonaktif</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+          <button onclick="closeForm()" class="btn btn-ghost" style="flex:1;justify-content:center;">Batal</button>
+          <button id="saveBtn" onclick="savePromo()" class="btn btn-accent" style="flex:1;justify-content:center;">
+            <i class='bx bx-save'></i> Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/services/realtime.js"></script>
+  <script src="/services/print.js"></script>
+  <script src="/components/admin-sidebar.js"></script>
+  <script src="/utils/ui.js"></script>
+
+  <script>
+    let allPromos = [];
+    let editingId = null;
+
+    (async () => {
+      const user = await requireAdmin();
+      if (!user) return;
+      initAdminSidebar("promos", user);
+      injectTopbarNotifBell();
+      await loadPromos();
+      document.body.classList.add("ec-ready");
+    })();
+
+    async function loadPromos() {
+      const { data } = await supabase.from("promos").select("*").order("created_at", { ascending: false });
+      allPromos = data || [];
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("promoTable");
+      if (!allPromos.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--color-text-muted);">Belum ada promo</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = allPromos.map(p => {
+        const expired = p.berlaku_hingga && new Date(p.berlaku_hingga) < new Date();
+        const statusBadge = p.status === "aktif" && !expired
+          ? `<span class="badge badge-success">Aktif</span>`
+          : `<span class="badge badge-danger">${expired ? "Kadaluarsa" : "Nonaktif"}</span>`;
+        const diskon = p.tipe === "percent"
+          ? `${p.nilai_diskon}%`
+          : formatRupiah(p.nilai_diskon || 0);
+        return `
+          <tr>
+            <td style="font-weight:700;font-family:monospace;color:var(--color-primary);">${p.kode}</td>
+            <td style="font-size:0.8125rem;">${p.deskripsi || "—"}</td>
+            <td style="font-weight:600;color:var(--color-accent);">${diskon}</td>
+            <td style="text-align:center;">${p.min_hari || "—"}</td>
+            <td style="font-size:0.8rem;color:var(--color-text-muted);">${p.berlaku_hingga ? formatTanggalShort(p.berlaku_hingga) : "∞"}</td>
+            <td>${statusBadge}</td>
+            <td>
+              <div style="display:flex;gap:0.375rem;">
+                <button onclick="openForm('${p.id}')" class="btn btn-ghost btn-sm"><i class='bx bx-edit'></i></button>
+                <button onclick="deletePromo('${p.id}','${p.kode}')" class="btn btn-danger btn-sm"><i class='bx bx-trash'></i></button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function updateDiskonLabel() {
+      const tipe  = document.getElementById("fTipe").value;
+      const label = document.getElementById("diskonLabel");
+      label.textContent = tipe === "percent" ? "Nilai Diskon (%)" : "Nilai Diskon (Rp)";
+    }
+
+    function openForm(id) {
+      editingId = id;
+      document.getElementById("formError").style.display = "none";
+
+      if (id) {
+        const p = allPromos.find(x => x.id === id);
+        document.getElementById("formTitle").textContent = "Edit Promo";
+        document.getElementById("fKode").value    = p.kode || "";
+        document.getElementById("fDesc").value    = p.deskripsi || "";
+        document.getElementById("fTipe").value    = p.tipe || "percent";
+        document.getElementById("fNilai").value   = p.nilai_diskon || "";
+        document.getElementById("fMinHari").value = p.min_hari || "";
+        document.getElementById("fExpiry").value  = p.berlaku_hingga ? p.berlaku_hingga.split("T")[0] : "";
+        document.getElementById("fStatus").value  = p.status || "aktif";
+        updateDiskonLabel();
+      } else {
+        document.getElementById("formTitle").textContent = "Tambah Promo";
+        ["fKode","fDesc","fNilai","fMinHari","fExpiry"].forEach(id => document.getElementById(id).value = "");
+        document.getElementById("fTipe").value   = "percent";
+        document.getElementById("fStatus").value = "aktif";
+        updateDiskonLabel();
+      }
+
+      document.getElementById("formOverlay").style.display = "flex";
+    }
+
+    function closeForm() {
+      document.getElementById("formOverlay").style.display = "none";
+      editingId = null;
+    }
+    document.getElementById("formOverlay").addEventListener("click", e => {
+      if (e.target === e.currentTarget) closeForm();
+    });
+
+    async function savePromo() {
+      const btn   = document.getElementById("saveBtn");
+      const errEl = document.getElementById("formError");
+      const kode  = document.getElementById("fKode").value.trim().toUpperCase();
+      const nilai = parseFloat(document.getElementById("fNilai").value) || 0;
+
+      errEl.style.display = "none";
+      if (!kode)  { errEl.textContent = "Kode promo wajib diisi."; errEl.style.display = "block"; return; }
+      if (!nilai) { errEl.textContent = "Nilai diskon wajib diisi."; errEl.style.display = "block"; return; }
+
+      const payload = {
+        kode,
+        deskripsi:       document.getElementById("fDesc").value.trim() || null,
+        tipe:            document.getElementById("fTipe").value,
+        nilai_diskon:    nilai,
+        min_hari:        parseInt(document.getElementById("fMinHari").value) || null,
+        berlaku_hingga:  document.getElementById("fExpiry").value || null,
+        status:          document.getElementById("fStatus").value,
+      };
+
+      setButtonLoading(btn, true);
+      const { error } = editingId
+        ? await supabase.from("promos").update(payload).eq("id", editingId)
+        : await supabase.from("promos").insert(payload);
+      setButtonLoading(btn, false);
+
+      if (error) { errEl.textContent = "Gagal: " + error.message; errEl.style.display = "block"; return; }
+      showToast(editingId ? "Promo diperbarui!" : "Promo ditambahkan!", "success");
+      closeForm();
+      await loadPromos();
+    }
+
+    async function deletePromo(id, kode) {
+      const confirmed = await showModal({
+        title: "Hapus Promo?",
+        message: `Hapus promo <strong>${kode}</strong>?`,
+        confirmText: "Ya, Hapus",
+        type: "danger"
+      });
+      if (!confirmed) return;
+      const { error } = await supabase.from("promos").delete().eq("id", id);
+      if (error) { showToast("Gagal: " + error.message, "error"); return; }
+      showToast("Promo dihapus.", "success");
+      await loadPromos();
+    }
+  </script>
+</body>
+</html>

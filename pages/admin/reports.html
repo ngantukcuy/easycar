@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Laporan & Analitik</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    body.ec-loading { visibility: hidden; }
+    @media (max-width:1023px) { .page-topbar > div:first-child { padding-left: 3.5rem !important; } }
+
+    .report-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    @media (max-width: 900px) { .report-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px)  { .report-stats-grid { grid-template-columns: 1fr; } }
+
+    .stat-card-report {
+      background: #fff; border-radius: 16px; border: 1px solid var(--color-border);
+      padding: 1.25rem; display: flex; align-items: flex-start; gap: 1rem;
+    }
+    .stat-icon-box {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .stat-icon-box i { font-size: 1.375rem; }
+    .stat-label { font-size: 0.75rem; color: var(--color-text-muted); margin: 0 0 0.25rem; }
+    .stat-value { font-size: 1.375rem; font-weight: 800; color: var(--color-primary); margin: 0; line-height: 1.2; }
+    .stat-value-sm { font-size: 1rem; }
+    .stat-badge { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 999px; margin-top: 0.25rem; }
+
+    .report-two-col {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;
+    }
+    @media (max-width: 768px) { .report-two-col { grid-template-columns: 1fr; gap: 1rem; } }
+
+    .chart-card { background: #fff; border-radius: 16px; border: 1px solid var(--color-border); padding: 1.25rem; }
+    .chart-card h4 { font-size: 0.9rem; font-weight: 700; color: var(--color-primary); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+
+    .filter-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; background: #fff; border: 1px solid var(--color-border); border-radius: 12px; padding: 0.875rem 1.25rem; margin-bottom: 1.5rem; }
+    .filter-row label { font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted); }
+    .ec-select { font-family: var(--font-body); font-size: 0.8125rem; font-weight: 500; color: var(--color-text); background: var(--color-bg); border: 1.5px solid var(--color-border); border-radius: 8px; padding: 0.375rem 0.625rem; cursor: pointer; }
+    .ec-select:focus { outline: none; border-color: var(--color-primary-mid); }
+
+    .badge-status-Dikonfirmasi { background: #dbeafe; color: #1d4ed8; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; }
+    .badge-status-Aktif { background: #dcfce7; color: #15803d; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; }
+    .badge-status-Selesai { background: #f1f5f9; color: #475569; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; }
+    .badge-status-Menunggu { background: #fef9c3; color: #854d0e; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; }
+    .badge-status-Dibatalkan { background: #fee2e2; color: #991b1b; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; }
+  </style>
+</head>
+<body class="ec-loading">
+
+  <div class="page-wrapper">
+    <header class="page-topbar">
+      <div style="padding-left:3rem;">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Laporan & Analitik</h2>
+        <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">Rekap performa bisnis rental kendaraan Anda</p>
+      </div>
+      
+    </header>
+      <div style="display:flex;gap:0.625rem;flex-wrap:wrap;margin-bottom:1.25rem;margin-left:2rem;margin-top:1.25rem;">
+        <button onclick="exportCSV()" class="btn btn-accent btn-sm"><i class='bx bx-download'></i> Export CSV</button>
+        <button onclick="window.print()" class="btn btn-ghost btn-sm"><i class='bx bx-printer'></i> Cetak</button>
+      </div>
+    <main class="page-content fade-in">
+
+      <!-- Filter bar -->
+      <div class="filter-row">
+        <label>Periode:</label>
+        <select id="filterPeriode" class="ec-select" onchange="applyFilters()">
+          <option value="bulan_ini">Bulan Ini</option>
+          <option value="bulan_lalu">Bulan Lalu</option>
+          <option value="3_bulan">3 Bulan Terakhir</option>
+          <option value="tahun_ini">Tahun Ini</option>
+          <option value="semua">Semua Waktu</option>
+        </select>
+        <label>Status:</label>
+        <select id="filterStatus" class="ec-select" onchange="applyFilters()">
+          <option value="semua">Semua</option>
+          <option value="Dikonfirmasi">Dikonfirmasi</option>
+          <option value="Aktif">Aktif</option>
+          <option value="Selesai">Selesai</option>
+          <option value="Menunggu Konfirmasi">Menunggu Konfirmasi</option>
+          <option value="Dibatalkan">Dibatalkan</option>
+        </select>
+        <button onclick="applyFilters()" class="btn btn-primary btn-sm" style="margin-left:auto;"><i class='bx bx-refresh'></i> Perbarui</button>
+      </div>
+
+      <!-- Stats grid -->
+      <div class="report-stats-grid">
+        <div class="stat-card-report">
+          <div class="stat-icon-box" style="background:#dcfce7;"><i class='bx bx-dollar-circle' style="color:#16a34a;"></i></div>
+          <div>
+            <p class="stat-label">Total Pendapatan</p>
+            <p class="stat-value stat-value-sm" id="rPendapatan">—</p>
+            <span class="stat-badge" id="rPendapatanBadge" style="background:#dcfce7;color:#15803d;">— dibanding periode lalu</span>
+          </div>
+        </div>
+        <div class="stat-card-report">
+          <div class="stat-icon-box" style="background:#dbeafe;"><i class='bx bxs-calendar-check' style="color:#3b82f6;"></i></div>
+          <div>
+            <p class="stat-label">Total Pemesanan</p>
+            <p class="stat-value" id="rPemesanan">—</p>
+            <span class="stat-badge" style="background:#dbeafe;color:#1d4ed8;">—</span>
+          </div>
+        </div>
+        <div class="stat-card-report">
+          <div class="stat-icon-box" style="background:#fef3c7;"><i class='bx bx-time' style="color:#d97706;"></i></div>
+          <div>
+            <p class="stat-label">Rata-rata Durasi</p>
+            <p class="stat-value" id="rDurasi">—</p>
+            <span class="stat-badge" style="background:#fef3c7;color:#92400e;">per transaksi</span>
+          </div>
+        </div>
+        <div class="stat-card-report">
+          <div class="stat-icon-box" style="background:#fee2e2;"><i class='bx bx-error' style="color:#dc2626;"></i></div>
+          <div>
+            <p class="stat-label">Total Denda Terlambat</p>
+            <p class="stat-value stat-value-sm" id="rDenda">Rp 0</p>
+            <span class="stat-badge" style="background:#fee2e2;color:#991b1b;">dari pengembalian telat</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="report-two-col">
+        <div class="chart-card">
+          <h4><span>📈</span> Pendapatan per Bulan</h4>
+          <canvas id="chartPendapatan" height="200"></canvas>
+        </div>
+        <div class="chart-card">
+          <h4><span>🟠</span> Status Pemesanan</h4>
+          <canvas id="chartStatus" height="200"></canvas>
+          <div id="statusLegend" style="display:flex;flex-wrap:wrap;gap:0.625rem;margin-top:0.875rem;justify-content:center;"></div>
+        </div>
+      </div>
+
+      <!-- Charts row 2 -->
+      <div class="report-two-col">
+        <div class="chart-card">
+          <h4><span>🚗</span> Kendaraan Paling Sering Disewa</h4>
+          <canvas id="chartVehicles" height="200"></canvas>
+        </div>
+        <div class="chart-card">
+          <h4><span>💳</span> Metode Pembayaran</h4>
+          <canvas id="chartPayment" height="200"></canvas>
+          <div id="payLegend" style="display:flex;flex-wrap:wrap;gap:0.625rem;margin-top:0.875rem;justify-content:center;"></div>
+        </div>
+      </div>
+
+      <!-- Tabel detail transaksi -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);">
+          <h3 style="font-weight:700;color:var(--color-primary);font-size:0.9375rem;margin:0;">📋 Detail Transaksi</h3>
+          <span id="tabelCount" style="font-size:0.75rem;color:var(--color-text-muted);">—</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Kode Booking</th>
+                <th>Pelanggan</th>
+                <th>Kendaraan</th>
+                <th>Durasi</th>
+                <th>Total Sewa</th>
+                <th>Denda</th>
+                <th>Grand Total</th>
+                <th>Pembayaran</th>
+                <th>Status</th>
+                <th>Tanggal</th>
+              </tr>
+            </thead>
+            <tbody id="tabelTransaksi">
+              <tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--color-text-muted);">Memuat...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/services/realtime.js"></script>
+  <script src="/services/print.js"></script>
+  <script src="/components/admin-sidebar.js"></script>
+  <script src="/utils/ui.js"></script>
+
+  <script>
+    let allBookings = [];
+    let chartPend, chartStat, chartVeh, chartPay;
+
+    (async () => {
+      const user = await requireAdmin();
+      if (!user) return;
+      initAdminSidebar("reports", user);
+      injectTopbarNotifBell();
+      await loadAllData();
+      document.body.classList.add("ec-ready");
+    })();
+
+    async function loadAllData() {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*, profiles!bookings_user_id_fkey(full_name), cars(nama)")
+        .order("created_at", { ascending: false });
+      allBookings = data || [];
+      applyFilters();
+    }
+
+    function getDateRange(periode) {
+      const now = new Date();
+      let from, to = new Date();
+      if (periode === "bulan_ini") {
+        from = new Date(now.getFullYear(), now.getMonth(), 1);
+      } else if (periode === "bulan_lalu") {
+        from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        to   = new Date(now.getFullYear(), now.getMonth(), 0);
+      } else if (periode === "3_bulan") {
+        from = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      } else if (periode === "tahun_ini") {
+        from = new Date(now.getFullYear(), 0, 1);
+      } else {
+        return null; // semua
+      }
+      return { from, to };
+    }
+
+    function applyFilters() {
+      const periode = document.getElementById("filterPeriode").value;
+      const status  = document.getElementById("filterStatus").value;
+      const range   = getDateRange(periode);
+
+      let filtered = allBookings;
+      if (range) {
+        filtered = filtered.filter(b => {
+          const d = new Date(b.created_at);
+          return d >= range.from && d <= range.to;
+        });
+      }
+      if (status !== "semua") {
+        filtered = filtered.filter(b => b.status === status);
+      }
+
+      renderStats(filtered, periode);
+      renderCharts(filtered);
+      renderTable(filtered);
+    }
+
+    function renderStats(data, periode) {
+      const totalPend = data.reduce((s, b) => s + (b.total_harga || 0), 0);
+      const totalDenda = data.reduce((s, b) => s + (b.denda || 0), 0);
+      const totalDurasi = data.reduce((s, b) => s + (b.durasi_hari || 0), 0);
+      const avgDurasi = data.length ? (totalDurasi / data.length).toFixed(1) : 0;
+
+      document.getElementById("rPendapatan").textContent = formatRupiah(totalPend);
+      document.getElementById("rPemesanan").textContent  = data.length;
+      document.getElementById("rDurasi").textContent     = avgDurasi + " hari";
+      document.getElementById("rDenda").textContent      = formatRupiah(totalDenda);
+    }
+
+    function renderCharts(data) {
+      // --- Chart 1: Pendapatan per Bulan ---
+      const monthMap = {};
+      data.forEach(b => {
+        const d = new Date(b.created_at);
+        const key = d.toLocaleDateString("id-ID", { month:"short", year:"2-digit" });
+        monthMap[key] = (monthMap[key] || 0) + (b.total_harga || 0);
+      });
+      const months = Object.keys(monthMap);
+      const vals   = months.map(m => monthMap[m]);
+
+      if (chartPend) chartPend.destroy();
+      chartPend = new Chart(document.getElementById("chartPendapatan"), {
+        type: "bar",
+        data: {
+          labels: months,
+          datasets: [{ data: vals, backgroundColor: "#93c5fd", borderRadius: 8, borderSkipped: false }]
+        },
+        options: {
+          responsive: true, plugins: { legend: { display: false } },
+          scales: {
+            y: { ticks: { callback: v => "Rp " + (v/1e6).toFixed(1) + "jt", font: { size: 10 } }, grid: { color: "#f1f5f9" } },
+            x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+          }
+        }
+      });
+
+      // --- Chart 2: Status Pie ---
+      const statusMap = {};
+      data.forEach(b => { statusMap[b.status] = (statusMap[b.status] || 0) + 1; });
+      const statusColors = { "Dikonfirmasi":"#22c55e", "Selesai":"#93c5fd", "Aktif":"#f97316", "Menunggu Konfirmasi":"#fbbf24", "Menunggu":"#fbbf24", "Dibatalkan":"#f87171", "Ditolak":"#ef4444" };
+      const sLabels = Object.keys(statusMap);
+      const sVals   = sLabels.map(s => statusMap[s]);
+      const sColors = sLabels.map(s => statusColors[s] || "#9ca3af");
+
+      if (chartStat) chartStat.destroy();
+      chartStat = new Chart(document.getElementById("chartStatus"), {
+        type: "doughnut",
+        data: { labels: sLabels, datasets: [{ data: sVals, backgroundColor: sColors, borderWidth: 2, borderColor: "#fff" }] },
+        options: { responsive: true, cutout: "60%", plugins: { legend: { display: false } } }
+      });
+      document.getElementById("statusLegend").innerHTML = sLabels.map((s, i) =>
+        `<span style="display:flex;align-items:center;gap:0.3rem;font-size:0.72rem;font-weight:600;color:var(--color-text-muted);">
+          <span style="width:10px;height:10px;border-radius:50%;background:${sColors[i]};flex-shrink:0;"></span>${s}
+        </span>`).join("");
+
+      // --- Chart 3: Top Kendaraan ---
+      const carMap = {};
+      data.forEach(b => {
+        const name = b.cars?.nama || "Lainnya";
+        carMap[name] = (carMap[name] || 0) + 1;
+      });
+      const carSorted = Object.entries(carMap).sort((a,b) => b[1]-a[1]).slice(0,6);
+
+      if (chartVeh) chartVeh.destroy();
+      chartVeh = new Chart(document.getElementById("chartVehicles"), {
+        type: "bar",
+        data: {
+          labels: carSorted.map(x => x[0]),
+          datasets: [{ data: carSorted.map(x => x[1]), backgroundColor: "#fb923c", borderRadius: 6, borderSkipped: false }]
+        },
+        options: {
+          indexAxis: "y", responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { font: { size: 10 } }, grid: { color: "#f1f5f9" } },
+            y: { ticks: { font: { size: 10 } }, grid: { display: false } }
+          }
+        }
+      });
+
+      // --- Chart 4: Metode Pembayaran ---
+      const payMap = {};
+      data.forEach(b => {
+        const m = b.metode_pembayaran || b.payment_method || "Lainnya";
+        payMap[m] = (payMap[m] || 0) + 1;
+      });
+      const pLabels = Object.keys(payMap);
+      const pVals   = pLabels.map(p => payMap[p]);
+      const pColors = ["#1e40af","#93c5fd","#60a5fa","#3b82f6","#bfdbfe"];
+
+      if (chartPay) chartPay.destroy();
+      chartPay = new Chart(document.getElementById("chartPayment"), {
+        type: "pie",
+        data: { labels: pLabels, datasets: [{ data: pVals, backgroundColor: pColors.slice(0, pLabels.length), borderWidth: 2, borderColor: "#fff" }] },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+      document.getElementById("payLegend").innerHTML = pLabels.map((p, i) =>
+        `<span style="display:flex;align-items:center;gap:0.3rem;font-size:0.72rem;font-weight:600;color:var(--color-text-muted);">
+          <span style="width:10px;height:10px;border-radius:50%;background:${pColors[i]||'#9ca3af'};flex-shrink:0;"></span>${p}
+        </span>`).join("");
+    }
+
+    function renderTable(data) {
+      document.getElementById("tabelCount").textContent = data.length + " transaksi ditemukan";
+      const tbody = document.getElementById("tabelTransaksi");
+      if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--color-text-muted);">Tidak ada data untuk periode ini</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = data.map(b => {
+        const denda = b.denda || 0;
+        const grand = (b.total_harga || 0) + denda;
+        const badgeCls = `badge-status-${b.status}`.replace(/ /g, "-");
+        const tgl = b.created_at ? new Date(b.created_at).toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"}) : "—";
+        return `<tr>
+          <td style="font-weight:700;font-family:monospace;font-size:0.8rem;color:var(--color-primary);">${b.kode_booking || "BK"+b.id.slice(-6).toUpperCase()}</td>
+          <td style="font-size:0.8125rem;">${b.profiles?.full_name || b.nama_pemesan || "—"}</td>
+          <td style="font-size:0.8125rem;">${b.cars?.nama || "—"}</td>
+          <td style="text-align:center;font-size:0.8125rem;">${b.durasi_hari || "—"} hari</td>
+          <td style="font-weight:600;">${formatRupiah(b.total_harga || 0)}</td>
+          <td style="color:${denda>0?'#dc2626':'var(--color-text-muted)'};">${denda > 0 ? formatRupiah(denda) : "—"}</td>
+          <td style="font-weight:700;color:var(--color-primary);">${formatRupiah(grand)}</td>
+          <td style="font-size:0.8rem;">${b.metode_pembayaran || b.payment_method || "—"}</td>
+          <td><span class="${badgeCls}">${b.status}</span></td>
+          <td style="font-size:0.8rem;color:var(--color-text-muted);">${tgl}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    function exportCSV() {
+      const periode = document.getElementById("filterPeriode").value;
+      const status  = document.getElementById("filterStatus").value;
+      const range   = getDateRange(periode);
+
+      let data = allBookings;
+      if (range) data = data.filter(b => { const d=new Date(b.created_at); return d>=range.from && d<=range.to; });
+      if (status !== "semua") data = data.filter(b => b.status === status);
+
+      const headers = ["Kode Booking","Pelanggan","Kendaraan","Durasi (hari)","Total Sewa","Denda","Grand Total","Metode Pembayaran","Status","Tanggal"];
+      const rows = data.map(b => [
+        b.kode_booking || "",
+        b.profiles?.full_name || b.nama_pemesan || "",
+        b.cars?.nama || "",
+        b.durasi_hari || "",
+        b.total_harga || 0,
+        b.denda || 0,
+        (b.total_harga||0) + (b.denda||0),
+        b.metode_pembayaran || b.payment_method || "",
+        b.status || "",
+        b.created_at ? new Date(b.created_at).toLocaleDateString("id-ID") : ""
+      ]);
+
+      const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href = url; a.download = `laporan-easycar-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click(); URL.revokeObjectURL(url);
+      showToast("CSV berhasil diexport!", "success");
+    }
+  </script>
+</body>
+</html>

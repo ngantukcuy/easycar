@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Manajemen Pengguna</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <style> body.ec-loading { visibility: hidden; }
+    @media (max-width:1023px) { .page-topbar > div:first-child { padding-left: 3.5rem !important; } } </style>
+</head>
+<body class="ec-loading">
+
+  <div class="page-wrapper">
+    <header class="page-topbar">
+      <div style="padding-left:3rem;">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Manajemen Pengguna</h2>
+        <p id="userCount" style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">—</p>
+      </div>
+      
+    </header>
+    <input type="text" id="searchInput" oninput="filterUsers()" placeholder="Cari nama / email..." class="ec-input" style="width:200px;margin-bottom:1.25rem;margin-top:1.25rem;margin-left:2rem;" />
+    <main class="page-content fade-in">
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Pengguna</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>No. HP</th>
+                <th>Bergabung</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="userTable">
+              <tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--color-text-muted);">Memuat...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/services/realtime.js"></script>
+  <script src="/services/print.js"></script>
+  <script src="/components/admin-sidebar.js"></script>
+  <script src="/utils/ui.js"></script>
+
+  <script>
+    let allUsers   = [];
+    let searchTerm = "";
+
+    (async () => {
+      const user = await requireAdmin();
+      if (!user) return;
+      initAdminSidebar("users", user);
+      injectTopbarNotifBell();
+      await loadUsers();
+      document.body.classList.add("ec-ready");
+    })();
+
+    async function loadUsers() {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+      allUsers = data || [];
+      renderTable();
+    }
+
+    function filterUsers() {
+      searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      renderTable();
+    }
+
+    function renderTable() {
+      const filtered = allUsers.filter(u =>
+        !searchTerm ||
+        (u.full_name || "").toLowerCase().includes(searchTerm) ||
+        (u.email || "").toLowerCase().includes(searchTerm)
+      );
+
+      document.getElementById("userCount").textContent = filtered.length + " pengguna";
+
+      const tbody = document.getElementById("userTable");
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--color-text-muted);">Tidak ada data</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(u => {
+        const name    = u.full_name || "—";
+        const initial = name[0].toUpperCase();
+        const isAdmin = u.role === "admin";
+        const roleBadge = isAdmin
+          ? `<span class="badge badge-warning">Admin</span>`
+          : `<span class="badge badge-secondary">Pelanggan</span>`;
+
+        return `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:0.625rem;">
+                <div style="width:32px;height:32px;background:${isAdmin ? "var(--color-accent)" : "var(--color-primary-mid)"};border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.75rem;flex-shrink:0;">${initial}</div>
+                <span style="font-weight:600;font-size:0.875rem;color:var(--color-primary);">${name}</span>
+              </div>
+            </td>
+            <td style="font-size:0.8125rem;color:var(--color-text-muted);">${u.email || "—"}</td>
+            <td>${roleBadge}</td>
+            <td style="font-size:0.8125rem;">${u.phone || "—"}</td>
+            <td style="font-size:0.8rem;color:var(--color-text-muted);">${formatTanggalShort(u.created_at)}</td>
+            <td>
+              <button onclick="toggleRole('${u.id}','${u.role}','${name.replace(/'/g,"&#39;")}')"
+                class="btn btn-ghost btn-sm" ${isAdmin ? "style='color:var(--color-danger);'" : ""}>
+                ${isAdmin ? "<i class='bx bx-user'></i> Jadikan User" : "<i class='bx bxs-user-account'></i> Jadikan Admin"}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function toggleRole(id, currentRole, name) {
+      const newRole = currentRole === "admin" ? "user" : "admin";
+      const label   = newRole === "admin" ? "admin" : "user biasa";
+
+      const confirmed = await showModal({
+        title: "Ubah Role?",
+        message: `Ubah role <strong>${name}</strong> menjadi <strong>${label}</strong>?`,
+        confirmText: "Ya, Ubah",
+        type: newRole === "admin" ? "warning" : "default"
+      });
+      if (!confirmed) return;
+
+      showLoading("Mengubah role...");
+      const { error } = await supabase.from("profiles").update({ role: newRole }).eq("id", id);
+      hideLoading();
+      if (error) { showToast("Gagal: " + error.message, "error"); return; }
+      showToast(`Role ${name} diubah menjadi ${label}`, "success");
+      await loadUsers();
+    }
+  </script>
+</body>
+</html>

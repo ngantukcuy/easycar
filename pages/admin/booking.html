@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyCar — Booking Baru</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <style>
+    body.ec-loading { visibility: hidden; }
+    @media (max-width:1023px) { .page-topbar > div:first-child { padding-left: 3.5rem !important; } }
+    .vehicle-card { cursor:pointer; transition:all 0.2s; }
+    .vehicle-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); }
+    .vehicle-card.selected { border-color:var(--color-accent)!important; box-shadow:0 0 0 3px rgba(232,93,4,0.18)!important; }
+    .step { display:none; }
+    .step.active { display:block; }
+    .wizard-step { display:flex;align-items:center;gap:0.375rem; }
+    .wizard-step .num {
+      width:30px;height:30px;border-radius:50%;border:2px solid var(--color-border);
+      display:flex;align-items:center;justify-content:center;
+      font-size:0.7rem;font-weight:700;color:var(--color-text-muted);
+      transition:all 0.25s;flex-shrink:0;
+    }
+    .wizard-step.done .num  { background:#22c55e;border-color:#22c55e;color:#fff; }
+    .wizard-step.active .num{ background:var(--color-accent);border-color:var(--color-accent);color:#fff; }
+    .wizard-step .lbl       { font-size:0.7rem;font-weight:500;color:var(--color-text-muted);white-space:nowrap; }
+    .wizard-step.active .lbl{ color:var(--color-accent);font-weight:700; }
+    .wizard-step.done .lbl  { color:var(--color-text-muted); }
+    .avail-ok  { background:#f0fdf4;border:1.5px solid #86efac;color:#15803d;border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:0.875rem;font-weight:600; }
+    .avail-err { background:#fef2f2;border:1.5px solid #fca5a5;color:#dc2626;border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:0.875rem;font-weight:600; }
+    .doc-upload-box {
+      border:2px dashed var(--color-border);border-radius:var(--radius-md);
+      padding:1rem;cursor:pointer;transition:all 0.2s;text-align:center;
+      position:relative;
+    }
+    .doc-upload-box:hover { border-color:var(--color-accent);background:#fff7f3; }
+    .doc-upload-box.has-file { border-color:#22c55e;background:#f0fdf4; }
+    .doc-upload-box.required-doc { border-color:#fca5a5; }
+
+    /* Upload box after file selected — shows change/remove buttons */
+    .doc-upload-box.has-file .upload-actions { display:flex !important; }
+    .doc-upload-box .upload-actions { display:none; gap:0.375rem; margin-top:0.5rem; justify-content:center; }
+    .upload-btn-change { font-size:0.7rem;font-weight:600;padding:0.25rem 0.625rem;border-radius:6px;border:1.5px solid #22c55e;background:#fff;color:#16a34a;cursor:pointer;font-family:var(--font-body); }
+    .upload-btn-remove { font-size:0.7rem;font-weight:600;padding:0.25rem 0.625rem;border-radius:6px;border:1.5px solid #fca5a5;background:#fff;color:#dc2626;cursor:pointer;font-family:var(--font-body); }
+
+    .jaminan-card { cursor:pointer;border:2px solid var(--color-border);border-radius:var(--radius-md);padding:1.25rem;transition:all 0.2s; }
+    .jaminan-card:hover { border-color:var(--color-primary-mid); }
+    .jaminan-card.selected { border-color:var(--color-accent);background:#fff7f3;box-shadow:0 0 0 3px rgba(232,93,4,0.12); }
+    .biaya-row { display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0; }
+    .biaya-row + .biaya-row { border-top:1px solid var(--color-border); }
+    .biaya-total { border-top:2px solid var(--color-primary);margin-top:0.25rem;padding-top:0.75rem; }
+
+    /* ── GRID RESPONSIVE ── */
+    .grid-2col { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
+    .grid-3col { display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem; }
+    .grid-step6 { display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;max-width:640px; }
+
+    @media (max-width: 700px) {
+      .grid-2col  { grid-template-columns: 1fr !important; }
+      .grid-3col  { grid-template-columns: 1fr 1fr !important; }
+      .grid-step6 { grid-template-columns: 1fr !important; max-width:100% !important; }
+      .wizard-step .lbl { display:none; } /* on very small screens, hide step labels */
+      .wizard-step.active .lbl { display:block; } /* show only active */
+    }
+
+    @media print {
+      .no-print, .page-sidebar, .page-topbar, .btn, nav { display:none!important; }
+      .print-invoice { display:block!important; }
+      body { background:white; }
+      .page-content { padding:0; margin:0; }
+      .page-wrapper { display:block; }
+      @page { margin:1.5cm; size:A4; }
+    }
+    .print-invoice { display:none; }
+  </style>
+</head>
+<body class="ec-loading">
+
+  <div class="page-wrapper">
+
+    <!-- TOPBAR -->
+    <header class="page-topbar">
+      <div style="padding-left:3rem;">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0;">Booking Baru</h2>
+        <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;">Lengkapi langkah berikut</p>
+      </div>
+    </header>
+
+    <main class="page-content fade-in">
+
+      <!-- WIZARD BAR -->
+      <div class="card" style="padding:1rem 1.5rem;margin-bottom:1.5rem;overflow-x:auto;">
+        <div style="display:flex;align-items:center;gap:0.2rem;min-width:max-content;">
+          <div class="wizard-step active" data-step="1"><div class="num">1</div><span class="lbl">Pilih Mobil</span></div>
+          <div style="width:18px;height:2px;background:var(--color-border);border-radius:2px;" id="line1"></div>
+          <div class="wizard-step" data-step="2"><div class="num">2</div><span class="lbl">Jadwal</span></div>
+          <div style="width:18px;height:2px;background:var(--color-border);border-radius:2px;" id="line2"></div>
+          <div class="wizard-step" data-step="3"><div class="num">3</div><span class="lbl">Data Diri</span></div>
+          <div style="width:18px;height:2px;background:var(--color-border);border-radius:2px;" id="line3"></div>
+          <div class="wizard-step" data-step="4"><div class="num">4</div><span class="lbl">Dokumen</span></div>
+          <div style="width:18px;height:2px;background:var(--color-border);border-radius:2px;" id="line4"></div>
+          <div class="wizard-step" data-step="5"><div class="num">5</div><span class="lbl">Jaminan</span></div>
+          <div style="width:18px;height:2px;background:var(--color-border);border-radius:2px;" id="line5"></div>
+          <div class="wizard-step" data-step="6"><div class="num">6</div><span class="lbl">Pembayaran</span></div>
+          <div style="width:18px;height:2px;background:var(--color-border);border-radius:2px;" id="line6"></div>
+          <div class="wizard-step" data-step="7"><div class="num">7</div><span class="lbl">Selesai</span></div>
+        </div>
+      </div>
+
+      <!-- ===== STEP 1: PILIH KENDARAAN ===== -->
+      <div class="step active" id="step1">
+        <div style="margin-bottom:1.25rem;">
+          <h3 style="font-size:1.125rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">Pilih Kendaraan</h3>
+          <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Pilih kendaraan yang ingin Anda sewa</p>
+        </div>
+        <div class="card" style="padding:1rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;">
+          <select id="fTipe" onchange="filterVehicles()" class="ec-input" style="width:auto;">
+            <option value="">Semua Tipe</option>
+            <option>MPV</option><option>SUV</option><option>Sedan</option><option>Pickup</option>
+          </select>
+          <select id="fTrans" onchange="filterVehicles()" class="ec-input" style="width:auto;">
+            <option value="">Semua Transmisi</option>
+            <option>Matic</option><option>Manual</option>
+          </select>
+          <input type="text" id="fSearch" oninput="filterVehicles()" placeholder="Cari kendaraan..." class="ec-input" style="flex:1;min-width:160px;" />
+        </div>
+        <div id="vehicleGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem;">
+          <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--color-text-muted);">
+            <i class='bx bx-loader-alt' style="font-size:2.5rem;animation:spin 1s linear infinite;display:block;"></i>
+            <p style="margin-top:0.5rem;">Memuat kendaraan...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STEP 2: JADWAL ===== -->
+      <div class="step" id="step2">
+        <div style="margin-bottom:1.25rem;">
+          <h3 style="font-size:1.125rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">Pilih Tanggal Sewa</h3>
+          <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Tentukan periode rental kendaraan</p>
+        </div>
+        <div class="grid-2col" style="gap:1.5rem;">
+          <div class="card" style="padding:1.5rem;">
+            <div id="carPreview" style="display:flex;align-items:center;gap:0.875rem;background:var(--color-bg);border-radius:var(--radius-md);padding:0.875rem;margin-bottom:1.25rem;">
+              <div id="carThumb" style="width:72px;height:52px;background:var(--color-border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+                <i class='bx bxs-car' style="font-size:1.75rem;color:var(--color-text-subtle);"></i>
+              </div>
+              <div>
+                <p id="previewName"  style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin:0;">—</p>
+                <p id="previewPrice" style="font-size:0.8125rem;color:var(--color-accent);font-weight:600;margin:0;">—</p>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1rem;">
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Tanggal Mulai</label>
+                <input type="text" id="startDate" class="ec-input" placeholder="Pilih tanggal mulai" readonly />
+              </div>
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Tanggal Selesai</label>
+                <input type="text" id="endDate" class="ec-input" placeholder="Pilih tanggal selesai" readonly />
+              </div>
+            </div>
+            <div id="availMsg" style="margin-top:1rem;display:none;"></div>
+            <div style="margin-top:1rem;background:var(--color-bg);border-radius:var(--radius-md);padding:1rem;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                <span style="font-size:0.8125rem;color:var(--color-text-muted);">Durasi</span>
+                <span id="durasi" style="font-size:0.8125rem;font-weight:600;color:var(--color-text);">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span style="font-size:0.875rem;font-weight:700;color:var(--color-primary);">Estimasi Total</span>
+                <span id="estTotal" style="font-size:0.875rem;font-weight:800;color:var(--color-accent);">—</span>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin:0 0 0.75rem;">Catatan Tanggal Terpesan</h4>
+            <div id="unavailList" style="font-size:0.8125rem;color:var(--color-text-muted);">Memuat...</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+          <button onclick="goStep(1)" class="btn btn-ghost"><i class='bx bx-arrow-back'></i> Kembali</button>
+          <button id="step2Next" onclick="goStep(3)" class="btn btn-primary" disabled>
+            Lanjutkan <i class='bx bx-right-arrow-alt'></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== STEP 3: DATA PEMESAN ===== -->
+      <div class="step" id="step3">
+        <div style="margin-bottom:1.25rem;">
+          <h3 style="font-size:1.125rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">Data Pemesan</h3>
+          <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Lengkapi data diri Anda</p>
+        </div>
+        <div class="card" style="padding:1.5rem;max-width:640px;">
+          <div class="grid-2col">
+            <div style="grid-column:1/-1;">
+              <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Nama Lengkap *</label>
+              <input type="text" id="pNama" class="ec-input" placeholder="Sesuai KTP" />
+            </div>
+            <div>
+              <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">No. KTP *</label>
+              <input type="text" id="pKtp" class="ec-input" placeholder="16 digit NIK" maxlength="16" />
+            </div>
+            <div>
+              <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">No. HP / WA *</label>
+              <input type="tel" id="pPhone" class="ec-input" placeholder="08xx-xxxx-xxxx" />
+            </div>
+            <div>
+              <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Email</label>
+              <input type="email" id="pEmail" class="ec-input" placeholder="email@contoh.com" />
+            </div>
+            <div>
+              <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Tujuan Sewa *</label>
+              <select id="pTujuan" class="ec-input">
+                <option value="">-- Pilih tujuan --</option>
+                <option>Perjalanan wisata</option>
+                <option>Keperluan bisnis</option>
+                <option>Acara keluarga</option>
+                <option>Perjalanan dinas</option>
+                <option>Lainnya</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Punya Media Sosial?</label>
+              <div style="display:flex;gap:1rem;margin-top:0.4rem;">
+                <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.8125rem;cursor:pointer;">
+                  <input type="radio" name="sosmed" id="sosmedYa" value="ya" checked onchange="toggleSosmed()" /> Ya
+                </label>
+                <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.8125rem;cursor:pointer;">
+                  <input type="radio" name="sosmed" id="sosmedTidak" value="tidak" onchange="toggleSosmed()" /> Tidak
+                </label>
+              </div>
+            </div>
+            <div style="grid-column:1/-1;">
+              <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Alamat Lengkap *</label>
+              <textarea id="pAlamat" class="ec-input" rows="2" placeholder="Alamat anda"></textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+            <button onclick="goStep(2)" class="btn btn-ghost"><i class='bx bx-arrow-back'></i> Kembali</button>
+            <button onclick="goStep(4)" class="btn btn-primary">Lanjutkan <i class='bx bx-right-arrow-alt'></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STEP 4: DOKUMEN ===== -->
+      <div class="step" id="step4">
+        <div style="margin-bottom:1.25rem;">
+          <h3 style="font-size:1.125rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">Upload Dokumen</h3>
+          <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Upload dokumen yang diperlukan untuk proses sewa</p>
+        </div>
+        <div class="card" style="padding:1.5rem;max-width:700px;">
+
+          <!-- Wajib -->
+          <div style="margin-bottom:1.5rem;">
+            <h4 style="font-size:0.875rem;font-weight:700;color:var(--color-primary);margin:0 0 1rem;">📋 Dokumen Wajib</h4>
+            <div class="grid-2col">
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.5rem;">KTP <span style="color:#dc2626;">*</span></label>
+                <div class="doc-upload-box required-doc" id="boxKTP" onclick="triggerUpload('fileKTP')">
+                  <input type="file" id="fileKTP" accept="image/*,.pdf" style="display:none;" onchange="onFileSelect(this,'KTP','boxKTP','labelKTP')" />
+                  <i class='bx bx-id-card' style="font-size:1.5rem;color:var(--color-text-subtle);"></i>
+                  <p id="labelKTP" style="font-size:0.75rem;color:var(--color-text-muted);margin:0.25rem 0 0;">Klik untuk upload</p>
+                </div>
+              </div>
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.5rem;">SIM A <span style="color:#dc2626;">*</span></label>
+                <div class="doc-upload-box required-doc" id="boxSIM" onclick="triggerUpload('fileSIM')">
+                  <input type="file" id="fileSIM" accept="image/*,.pdf" style="display:none;" onchange="onFileSelect(this,'SIM','boxSIM','labelSIM')" />
+                  <i class='bx bxs-car' style="font-size:1.5rem;color:var(--color-text-subtle);"></i>
+                  <p id="labelSIM" style="font-size:0.75rem;color:var(--color-text-muted);margin:0.25rem 0 0;">Klik untuk upload</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KK atau pengganti -->
+          <div style="margin-bottom:1.5rem;">
+            <h4 style="font-size:0.875rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">🏠 Kartu Keluarga / Pengganti KK</h4>
+            <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 1rem;">Upload KK, atau minimal 2 dokumen pengganti berikut.</p>
+            <div style="margin-bottom:0.75rem;">
+              <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.5rem;">Kartu Keluarga (KK)</label>
+              <div class="doc-upload-box" id="boxKK" onclick="triggerUpload('fileKK')">
+                <input type="file" id="fileKK" accept="image/*,.pdf" style="display:none;" onchange="onFileSelect(this,'KK','boxKK','labelKK')" />
+                <i class='bx bx-home' style="font-size:1.5rem;color:var(--color-text-subtle);"></i>
+                <p id="labelKK" style="font-size:0.75rem;color:var(--color-text-muted);margin:0.25rem 0 0;">Klik untuk upload</p>
+              </div>
+            </div>
+            <p style="font-size:0.75rem;font-weight:600;color:var(--color-text-muted);margin:0.75rem 0 0.5rem;">Atau upload minimal 2 dari:</p>
+            <div class="grid-3col">
+              <div>
+                <label style="font-size:0.7rem;font-weight:600;color:var(--color-text);display:block;margin-bottom:0.375rem;">NPWP</label>
+                <div class="doc-upload-box" id="boxNPWP" onclick="triggerUpload('fileNPWP')">
+                  <input type="file" id="fileNPWP" accept="image/*,.pdf" style="display:none;" onchange="onFileSelect(this,'NPWP','boxNPWP','labelNPWP')" />
+                  <p id="labelNPWP" style="font-size:0.7rem;color:var(--color-text-muted);margin:0;">Upload</p>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:0.7rem;font-weight:600;color:var(--color-text);display:block;margin-bottom:0.375rem;">BPJS</label>
+                <div class="doc-upload-box" id="boxBPJS" onclick="triggerUpload('fileBPJS')">
+                  <input type="file" id="fileBPJS" accept="image/*,.pdf" style="display:none;" onchange="onFileSelect(this,'BPJS','boxBPJS','labelBPJS')" />
+                  <p id="labelBPJS" style="font-size:0.7rem;color:var(--color-text-muted);margin:0;">Upload</p>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:0.7rem;font-weight:600;color:var(--color-text);display:block;margin-bottom:0.375rem;">Akta Lahir</label>
+                <div class="doc-upload-box" id="boxAkta" onclick="triggerUpload('fileAkta')">
+                  <input type="file" id="fileAkta" accept="image/*,.pdf" style="display:none;" onchange="onFileSelect(this,'Akta','boxAkta','labelAkta')" />
+                  <p id="labelAkta" style="font-size:0.7rem;color:var(--color-text-muted);margin:0;">Upload</p>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:0.7rem;font-weight:600;color:var(--color-text);display:block;margin-bottom:0.375rem;">ID Card Kerja</label>
+                <div class="doc-upload-box" id="boxIDCard" onclick="triggerUpload('fileIDCard')">
+                  <input type="file" id="fileIDCard" accept="image/*,.pdf" style="display:none;" onchange="onFileSelect(this,'IDCard','boxIDCard','labelIDCard')" />
+                  <p id="labelIDCard" style="font-size:0.7rem;color:var(--color-text-muted);margin:0;">Upload</p>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:0.7rem;font-weight:600;color:var(--color-text);display:block;margin-bottom:0.375rem;">Paspor</label>
+                <div class="doc-upload-box" id="boxPaspor" onclick="triggerUpload('filePaspor')">
+                  <input type="file" id="filePaspor" accept="image/*,.pdf" style="display:none;" onchange="onFileSelect(this,'Paspor','boxPaspor','labelPaspor')" />
+                  <p id="labelPaspor" style="font-size:0.7rem;color:var(--color-text-muted);margin:0;">Upload</p>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:0.7rem;font-weight:600;color:var(--color-text);display:block;margin-bottom:0.375rem;">Ijazah</label>
+                <div class="doc-upload-box" id="boxIjazah" onclick="triggerUpload('fileIjazah')">
+                  <input type="file" id="fileIjazah" accept="image/*,.pdf" style="display:none;" onchange="onFileSelect(this,'Ijazah','boxIjazah','labelIjazah')" />
+                  <p id="labelIjazah" style="font-size:0.7rem;color:var(--color-text-muted);margin:0;">Upload</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Selfie jika tidak punya sosmed -->
+          <div id="selfieSection" style="display:none;margin-bottom:1.5rem;">
+            <h4 style="font-size:0.875rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">🤳 Selfie dengan KTP</h4>
+            <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.75rem;">Karena Anda tidak memiliki media sosial, selfie + KTP wajib diupload.</p>
+            <div class="doc-upload-box required-doc" id="boxSelfie" onclick="triggerUpload('fileSelfie')" style="max-width:220px;">
+              <input type="file" id="fileSelfie" accept="image/*" style="display:none;" onchange="onFileSelect(this,'Selfie','boxSelfie','labelSelfie')" />
+              <i class='bx bx-camera' style="font-size:1.75rem;color:var(--color-text-subtle);"></i>
+              <p id="labelSelfie" style="font-size:0.75rem;color:var(--color-text-muted);margin:0.25rem 0 0;">Klik untuk upload selfie+KTP</p>
+            </div>
+          </div>
+
+          <div id="docError" style="display:none;background:#fef2f2;color:#dc2626;border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:0.875rem;font-weight:500;margin-bottom:1rem;"></div>
+
+          <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+            <button onclick="goStep(3)" class="btn btn-ghost"><i class='bx bx-arrow-back'></i> Kembali</button>
+            <button onclick="validateAndGoStep5()" class="btn btn-primary">Lanjutkan <i class='bx bx-right-arrow-alt'></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STEP 5: JAMINAN ===== -->
+      <div class="step" id="step5">
+        <div style="margin-bottom:1.25rem;">
+          <h3 style="font-size:1.125rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">Jaminan Sewa</h3>
+          <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Pilih jenis jaminan untuk proses sewa</p>
+        </div>
+        <div class="card" style="padding:1.5rem;max-width:700px;">
+          <div class="grid-2col" style="margin-bottom:1.5rem;">
+            <div class="jaminan-card selected" id="jaminanKenCard" onclick="selectJaminan('kendaraan')">
+              <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.5rem;">
+                <i class='bx bxs-car' style="font-size:1.5rem;color:var(--color-accent);"></i>
+                <strong style="font-size:0.875rem;color:var(--color-primary);">Jaminan Kendaraan</strong>
+              </div>
+              <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.5rem;">Jaminankan kendaraan pribadi Anda. DP 30% dari total sewa + Deposit Rp 500.000.</p>
+              <span style="font-size:0.7rem;font-weight:700;color:#16a34a;background:#f0fdf4;padding:0.2rem 0.5rem;border-radius:6px;">Tahun minimal 2017</span>
+            </div>
+            <div class="jaminan-card" id="jaminanNonCard" onclick="selectJaminan('non-kendaraan')">
+              <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.5rem;">
+                <i class='bx bx-money' style="font-size:1.5rem;color:var(--color-primary-mid);"></i>
+                <strong style="font-size:0.875rem;color:var(--color-primary);">Jaminan Non-Kendaraan</strong>
+              </div>
+              <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.5rem;">Tanpa jaminan kendaraan. Deposit Rp 2.000.000 (tanpa DP). Dikembalikan saat mobil kembali.</p>
+              <span style="font-size:0.7rem;font-weight:700;color:#1d4ed8;background:#eff6ff;padding:0.2rem 0.5rem;border-radius:6px;">Deposit dikembalikan</span>
+            </div>
+          </div>
+
+          <!-- Form kendaraan jaminan -->
+          <div id="formKendaraanJaminan" style="border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:1.25rem;margin-bottom:1rem;">
+            <h4 style="font-size:0.875rem;font-weight:700;color:var(--color-primary);margin:0 0 1rem;">Detail Kendaraan Jaminan</h4>
+            <div class="grid-2col">
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Jenis Kendaraan *</label>
+                <select id="jkJenis" class="ec-input">
+                  <option value="">-- Pilih --</option>
+                  <option>Motor</option><option>Mobil</option><option>Pickup</option>
+                </select>
+              </div>
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Merek / Tipe *</label>
+                <input type="text" id="jkMerek" class="ec-input" placeholder="Contoh: Honda Jazz" />
+              </div>
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Tahun * <span style="color:#dc2626;font-size:0.7rem;">(min. 2017)</span></label>
+                <input type="number" id="jkTahun" class="ec-input" placeholder="2017" min="2017" max="2030" />
+              </div>
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">No. Plat *</label>
+                <input type="text" id="jkPlat" class="ec-input" placeholder="BM 1234 XX" style="text-transform:uppercase;" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Ringkasan biaya -->
+          <div id="ringkasanBiaya" style="background:var(--color-bg);border-radius:var(--radius-md);padding:1.25rem;margin-bottom:1rem;">
+            <h4 style="font-size:0.875rem;font-weight:700;color:var(--color-primary);margin:0 0 0.75rem;">💰 Rincian Biaya</h4>
+            <div class="biaya-row">
+              <span style="font-size:0.8125rem;color:var(--color-text-muted);">Total Sewa</span>
+              <span id="biayaTotalSewa" style="font-weight:600;font-size:0.8125rem;">—</span>
+            </div>
+            <div class="biaya-row">
+              <span style="font-size:0.8125rem;color:var(--color-text-muted);">DP (30%)</span>
+              <span id="biayaDP" style="font-weight:600;font-size:0.8125rem;">—</span>
+            </div>
+            <div class="biaya-row">
+              <span style="font-size:0.8125rem;color:var(--color-text-muted);">Deposit</span>
+              <span id="biayaDeposit" style="font-weight:600;font-size:0.8125rem;">—</span>
+            </div>
+            <div class="biaya-row biaya-total">
+              <span style="font-size:0.875rem;font-weight:700;color:var(--color-primary);">Bayar Sekarang</span>
+              <span id="biayaBayarSekarang" style="font-size:1rem;font-weight:800;color:var(--color-accent);">—</span>
+            </div>
+            <div class="biaya-row">
+              <span style="font-size:0.75rem;color:var(--color-text-muted);">Sisa saat pengambilan</span>
+              <span id="biayaSisa" style="font-weight:600;font-size:0.75rem;color:var(--color-text-muted);">—</span>
+            </div>
+          </div>
+
+          <div id="jaminanError" style="display:none;background:#fef2f2;color:#dc2626;border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:0.875rem;font-weight:500;margin-bottom:1rem;"></div>
+
+          <div style="display:flex;gap:0.75rem;">
+            <button onclick="goStep(4)" class="btn btn-ghost"><i class='bx bx-arrow-back'></i> Kembali</button>
+            <button onclick="validateAndGoStep6()" class="btn btn-primary">Lanjut Bayar <i class='bx bx-right-arrow-alt'></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STEP 6: PEMBAYARAN ===== -->
+      <div class="step" id="step6">
+        <div style="margin-bottom:1rem;">
+          <h3 style="font-size:1.125rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">Pembayaran DP & Deposit</h3>
+          <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0;">Scan QRIS dan upload bukti pembayaran</p>
+        </div>
+        <div class="grid-step6">
+          <!-- QRIS -->
+          <div class="card" style="padding:1rem;text-align:center;">
+            <h4 style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin:0 0 1rem;">Scan QRIS untuk Bayar</h4>
+            <div style="background:#f8fafc;border-radius:var(--radius-md);padding:1rem;margin-bottom:1rem;">
+              <img src="/assets/qris-gopay.jpeg" alt="QRIS GoPay" style="max-width:200px;width:100%;border-radius:8px;" onerror="this.parentElement.innerHTML='<div style=padding:2rem;color:var(--color-text-muted);text-align:center><i class=bx bx-qr style=font-size:4rem></i><p style=margin:0.5rem 0 0;font-size:0.75rem>Gambar QRIS belum tersedia<br>Letakkan qris-gopay.png di /assets/</p></div>'" />
+            </div>
+            <div id="nominalBayar" style="background:var(--color-accent);color:#fff;border-radius:var(--radius-md);padding:0.875rem;margin-bottom:0.75rem;">
+              <p style="font-size:0.75rem;margin:0 0 0.25rem;opacity:0.85;">Total yang harus dibayar</p>
+              <p id="nominalBayarText" style="font-size:1.25rem;font-weight:800;margin:0;">—</p>
+            </div>
+            <div style="text-align:left;font-size:0.75rem;color:var(--color-text-muted);">
+              <p style="font-weight:600;color:var(--color-text);margin:0 0 0.5rem;">Cara bayar:</p>
+              <ol style="padding-left:1rem;margin:0;display:flex;flex-direction:column;gap:0.25rem;">
+                <li>Scan QRIS menggunakan GoPay, OVO, DANA, atau m-banking apapun</li>
+                <li>Transfer sejumlah <strong id="nominalHint">—</strong></li>
+                <li>Screenshot bukti pembayaran</li>
+                <li>Upload di sebelah kanan</li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Upload bukti -->
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin:0 0 1rem;">Upload Bukti Pembayaran</h4>
+
+            <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:1rem;margin-bottom:1.25rem;font-size:0.8125rem;">
+              <div class="biaya-row" style="padding:0.3rem 0;">
+                <span style="color:var(--color-text-muted);">Kendaraan</span>
+                <span id="payCarName" style="font-weight:600;">—</span>
+              </div>
+              <div class="biaya-row" style="padding:0.3rem 0;">
+                <span style="color:var(--color-text-muted);">Durasi</span>
+                <span id="payDurasi" style="font-weight:600;">—</span>
+              </div>
+              <div class="biaya-row" style="padding:0.3rem 0;">
+                <span style="color:var(--color-text-muted);">DP (30%)</span>
+                <span id="payDP" style="font-weight:600;">—</span>
+              </div>
+              <div class="biaya-row" style="padding:0.3rem 0;">
+                <span style="color:var(--color-text-muted);">Deposit</span>
+                <span id="payDeposit" style="font-weight:600;">—</span>
+              </div>
+              <div class="biaya-row biaya-total" style="padding-top:0.5rem;">
+                <span style="font-weight:700;color:var(--color-primary);">Total Bayar</span>
+                <span id="payTotal" style="font-weight:800;color:var(--color-accent);">—</span>
+              </div>
+            </div>
+
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.5rem;">Bukti Transfer *</label>
+            <div class="doc-upload-box required-doc" id="boxBukti" onclick="triggerUpload('fileBuktiBayar')">
+              <input type="file" id="fileBuktiBayar" accept="image/*,.pdf" style="display:none;" onchange="onBuktiSelect(this)" />
+              <i class='bx bx-receipt' style="font-size:1.75rem;color:var(--color-text-subtle);"></i>
+              <p id="labelBukti" style="font-size:0.75rem;color:var(--color-text-muted);margin:0.25rem 0 0;">Klik untuk upload bukti transfer</p>
+            </div>
+
+            <div id="buktiPreview" style="display:none;margin-top:0.75rem;">
+              <img id="buktiImg" src="" alt="Bukti bayar" style="max-width:100%;max-height:150px;border-radius:var(--radius-md);border:1.5px solid var(--color-border);" />
+            </div>
+
+            <div id="payError" style="display:none;background:#fef2f2;color:#dc2626;border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:0.875rem;font-weight:500;margin-top:0.75rem;"></div>
+
+            <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+              <button onclick="goStep(5)" class="btn btn-ghost"><i class='bx bx-arrow-back'></i> Kembali</button>
+              <button id="submitBtn" onclick="submitBooking()" class="btn btn-accent" disabled style="flex:1;justify-content:center;">
+                <i class='bx bxs-calendar-check'></i> Kirim
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STEP 7: SUKSES + INVOICE ===== -->
+      <div class="step" id="step7">
+        <div class="no-print" style="text-align:center;margin-bottom:1.5rem;">
+          <div style="width:72px;height:72px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+            <i class='bx bxs-check-circle' style="font-size:2.5rem;color:#16a34a;"></i>
+          </div>
+          <h3 style="font-size:1.25rem;font-weight:800;color:var(--color-primary);margin:0 0 0.5rem;">Booking Berhasil Disubmit!</h3>
+          <p style="font-size:0.875rem;color:var(--color-text-muted);margin:0 0 1.25rem;">Menunggu konfirmasi admin. Anda akan dihubungi via WA.</p>
+          
+        </div>
+
+        <!-- INVOICE (printable) -->
+        <div class="card" id="invoiceCard" style="max-width:680px;margin:0 auto;padding:0;">
+          <div style="padding:1.5rem 2rem;border-bottom:2px solid var(--color-border);">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+              <div style="display:flex;align-items:center;gap:0.625rem;">
+                <div style="width:36px;height:36px;background:#e85d04;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                  <i class='bx bxs-car' style="color:#fff;font-size:1.125rem;"></i>
+                </div>
+                <div>
+                  <p style="font-weight:800;color:var(--color-primary);margin:0;font-size:1.125rem;">Easy<span style="color:#e85d04;">Car</span></p>
+                  <p style="font-size:0.7rem;color:var(--color-text-muted);margin:0;">Rental Kendaraan</p>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <p style="font-size:0.75rem;font-weight:700;color:var(--color-text-muted);margin:0;">INVOICE / TANDA TERIMA BOOKING</p>
+                <p id="invKode" style="font-size:1rem;font-weight:800;color:var(--color-primary);font-family:monospace;margin:0;">—</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding:1.5rem 2rem;">
+            <div class="grid-2col" style="margin-bottom:1.5rem;">
+              <div>
+                <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 0.5rem;">DATA PEMESAN</p>
+                <p id="invNama" style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin:0 0 0.2rem;"></p>
+                <p id="invKtp" style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.2rem;"></p>
+                <p id="invHp" style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.2rem;"></p>
+                <p id="invAlamat" style="font-size:0.75rem;color:var(--color-text-muted);margin:0;"></p>
+              </div>
+              <div>
+                <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 0.5rem;">DETAIL SEWA</p>
+                <p id="invMobil" style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin:0 0 0.2rem;"></p>
+                <p id="invTanggal" style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.2rem;"></p>
+                <p id="invDurasi" style="font-size:0.75rem;color:var(--color-text-muted);margin:0;"></p>
+                <p id="invCreated" style="font-size:0.7rem;color:var(--color-text-subtle);margin:0.25rem 0 0;"></p>
+              </div>
+            </div>
+
+            <!-- Tabel biaya -->
+            <table style="width:100%;border-collapse:collapse;font-size:0.8125rem;margin-bottom:1.5rem;">
+              <thead>
+                <tr style="background:var(--color-bg);">
+                  <th style="text-align:left;padding:0.625rem 0.75rem;font-weight:600;color:var(--color-text-muted);border-bottom:2px solid var(--color-border);">Keterangan</th>
+                  <th style="text-align:right;padding:0.625rem 0.75rem;font-weight:600;color:var(--color-text-muted);border-bottom:2px solid var(--color-border);">Jumlah</th>
+                </tr>
+              </thead>
+              <tbody id="invTabelBiaya"></tbody>
+            </table>
+
+            <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:var(--radius-md);padding:0.875rem 1rem;margin-bottom:1rem;">
+              <p style="font-size:0.75rem;font-weight:700;color:#9a3412;margin:0 0 0.25rem;">STATUS: <span id="invStatus">MENUNGGU KONFIRMASI ADMIN</span></p>
+              <p style="font-size:0.75rem;color:#c2410c;margin:0;">📌 Bawa invoice ini saat pengambilan kendaraan</p>
+            </div>
+
+            <div style="border-top:1px solid var(--color-border);padding-top:1rem;font-size:0.7rem;color:var(--color-text-muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+              <span>EasyCar — Medan, Sumatera Utara</span>
+              <span id="invFooterWA">WA: 082276100996</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:center;">
+            <button onclick="doPrintInvoice()" class="btn btn-ghost no-print"><i class='bx bx-printer'></i>Invoice</button>
+            <a href="/pages/admin/my-orders.html" class="btn btn-primary no-print"><i class='bx bxs-receipt'></i> Lihat Bookingan</a>
+          </div>
+      </div>
+      
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+  <script src="/services/supabase.js"></script>
+  <script src="/services/realtime.js"></script>
+  <script src="/services/print.js"></script>
+  <script src="/components/admin-sidebar.js"></script>
+  <script src="/utils/ui.js"></script>
+
+  <script>
+    let currentStep = 1;
+    let selectedCar = null;
+    let allCars     = [];
+    let fpStart, fpEnd;
+    let currentUser;
+    let selectedJaminan = 'kendaraan';
+
+    // Kumpulan file yang dipilih user
+    const docFiles = {};
+    let buktiBayarFile = null;
+
+    // ── INIT ──
+    (async () => {
+      currentUser = await requireAdmin();
+      if (!currentUser) return;
+      initAdminSidebar("booking", currentUser);
+      injectTopbarNotifBell();
+      await loadVehicles();
+
+      // Pre-fill email dari profile
+      if (currentUser.email) document.getElementById('pEmail').value = currentUser.email;
+      if (currentUser.full_name) document.getElementById('pNama').value = currentUser.full_name;
+      if (currentUser.phone) document.getElementById('pPhone').value = currentUser.phone;
+      if (currentUser.no_ktp) document.getElementById('pKtp').value = currentUser.no_ktp;
+      if (currentUser.alamat) document.getElementById('pAlamat').value = currentUser.alamat;
+
+      const params = new URLSearchParams(window.location.search);
+      const preCarId = params.get("car_id");
+      if (preCarId) {
+        const car = allCars.find(c => c.id === preCarId);
+        if (car) { selectCar(car); goStep(2); }
+      }
+      document.body.classList.add("ec-ready");
+
+      // Realtime: notifikasi admin saat ada booking baru/update
+      EasyCarRealtime.subscribeAllBookings({
+        onNew:    () => {}, // showNotif sudah dipanggil otomatis di dalam subscribeAllBookings
+        onUpdate: () => {},
+      });
+    })();
+
+    // ── VEHICLES ──
+    async function loadVehicles() {
+      const { data } = await supabase.from("cars").select("*").eq("status", "Tersedia").order("nama");
+      allCars = data || [];
+      renderVehicles(allCars);
+    }
+
+    function renderVehicles(cars) {
+      const grid = document.getElementById("vehicleGrid");
+      if (!cars.length) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--color-text-muted);">Tidak ada kendaraan tersedia.</div>`;
+        return;
+      }
+      grid.innerHTML = cars.map(c => {
+        const img = c.foto_url
+          ? `<img src="${c.foto_url}" alt="${c.nama}" style="width:100%;height:150px;object-fit:cover;" onerror="this.parentElement.innerHTML='<div style=height:150px;background:var(--color-bg);display:flex;align-items:center;justify-content:center><i class=bx bxs-car style=font-size:3rem;color:var(--color-text-subtle)></i></div>'" />`
+          : `<div style="height:150px;background:var(--color-bg);display:flex;align-items:center;justify-content:center;"><i class='bx bxs-car' style="font-size:3rem;color:var(--color-text-subtle);"></i></div>`;
+        return `
+          <div class="card vehicle-card" onclick="selectCar(${JSON.stringify(c).replace(/"/g,'&quot;')})" id="vc-${c.id}" style="overflow:hidden;">
+            ${img}
+            <div style="padding:1rem;">
+              <h4 style="font-weight:700;color:var(--color-primary);font-size:0.875rem;margin:0 0 0.35rem;">${c.nama}</h4>
+              <div style="display:flex;gap:0.375rem;flex-wrap:wrap;margin-bottom:0.75rem;">
+                ${c.tipe     ? `<span style="font-size:0.7rem;background:#f0f4f8;color:#64748b;padding:0.15rem 0.5rem;border-radius:6px;font-weight:600;">${c.tipe}</span>` : ""}
+                ${c.transmisi? `<span style="font-size:0.7rem;background:#f0f4f8;color:#64748b;padding:0.15rem 0.5rem;border-radius:6px;font-weight:600;">${c.transmisi}</span>` : ""}
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-weight:700;color:var(--color-accent);font-size:0.9rem;">${formatRupiah(c.harga_per_hari||0)}<span style="font-weight:400;color:var(--color-text-muted);font-size:0.75rem;">/hari</span></span>
+                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();selectCarAndNext(${JSON.stringify(c).replace(/"/g,'&quot;')})">Pilih</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function filterVehicles() {
+      const tipe  = document.getElementById("fTipe").value;
+      const trans = document.getElementById("fTrans").value;
+      const q     = document.getElementById("fSearch").value.toLowerCase();
+      renderVehicles(allCars.filter(c =>
+        (!tipe  || c.tipe      === tipe) &&
+        (!trans || c.transmisi === trans) &&
+        (!q     || c.nama.toLowerCase().includes(q))
+      ));
+    }
+
+    function selectCar(car) {
+      selectedCar = car;
+      document.querySelectorAll(".vehicle-card").forEach(el => el.classList.remove("selected"));
+      const el = document.getElementById("vc-" + car.id);
+      if (el) el.classList.add("selected");
+    }
+
+    function selectCarAndNext(car) {
+      selectCar(car);
+      goStep(2);
+    }
+
+    // ── FLATPICKR ──
+    function initDatePickers() {
+      if (fpStart) { fpStart.destroy(); fpStart = null; }
+      if (fpEnd)   { fpEnd.destroy();   fpEnd   = null; }
+      const today = new Date().toISOString().split("T")[0];
+      getUnavailableDates(selectedCar.id).then(unavail => {
+        const disabledDates = unavail.map(r => ({ from: r.from, to: r.to }));
+        const ul = document.getElementById("unavailList");
+        if (!unavail.length) {
+          ul.innerHTML = `<div style="color:#16a34a;font-weight:600;font-size:0.8125rem;"><i class='bx bxs-check-circle'></i> Semua tanggal tersedia</div>`;
+        } else {
+          ul.innerHTML = unavail.map(r =>
+            `<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+              <span style="width:8px;height:8px;background:#f87171;border-radius:50%;flex-shrink:0;"></span>
+              <span>${formatTanggalShort(r.from)} — ${formatTanggalShort(r.to)}</span>
+            </div>`
+          ).join("");
+        }
+        const cfg = { locale:"id", minDate:today, disable:disabledDates, dateFormat:"Y-m-d", allowInput:false, onChange:updateCalcTotal };
+        fpStart = flatpickr("#startDate", { ...cfg });
+        fpEnd   = flatpickr("#endDate",   { ...cfg });
+      });
+      document.getElementById("previewName").textContent  = selectedCar.nama;
+      document.getElementById("previewPrice").textContent = formatRupiah(selectedCar.harga_per_hari || 0) + "/hari";
+      if (selectedCar.foto_url) {
+        document.getElementById("carThumb").innerHTML = `<img src="${selectedCar.foto_url}" style="width:100%;height:100%;object-fit:cover;" />`;
+      }
+    }
+
+    function updateCalcTotal() {
+      const s = document.getElementById("startDate").value;
+      const e = document.getElementById("endDate").value;
+      const availMsg = document.getElementById("availMsg");
+      const nextBtn  = document.getElementById("step2Next");
+      availMsg.style.display = "none";
+      nextBtn.disabled = true;
+      if (!s || !e) return;
+      const start = new Date(s), end = new Date(e);
+      if (start >= end) {
+        availMsg.className = "avail-err";
+        availMsg.innerHTML = "⚠️ Tanggal selesai harus setelah tanggal mulai";
+        availMsg.style.display = "block";
+        return;
+      }
+      const days = Math.round((end - start) / 86400000);
+      document.getElementById("durasi").textContent   = days + " hari";
+      document.getElementById("estTotal").textContent = formatRupiah((selectedCar.harga_per_hari || 0) * days);
+      checkAvailability(selectedCar.id, s, e).then(avail => {
+        if (avail) {
+          availMsg.className = "avail-ok";
+          availMsg.innerHTML = "✅ Kendaraan tersedia pada tanggal ini!";
+          availMsg.style.display = "block";
+          nextBtn.disabled = false;
+        } else {
+          availMsg.className = "avail-err";
+          availMsg.innerHTML = "❌ Kendaraan tidak tersedia pada tanggal ini.";
+          availMsg.style.display = "block";
+        }
+      });
+    }
+
+    // ── STEP 3 — SOSMED TOGGLE ──
+    function toggleSosmed() {
+      const tidakPunya = document.querySelector('input[name="sosmed"]:checked').value === 'tidak';
+      document.getElementById('selfieSection').style.display = tidakPunya ? 'block' : 'none';
+    }
+
+    // ── STEP 4 — DOC UPLOAD ──
+    function triggerUpload(inputId) {
+      document.getElementById(inputId).click();
+    }
+
+    function onFileSelect(input, tipe, boxId, labelId) {
+      const file = input.files[0];
+      if (!file) return;
+      docFiles[tipe] = file;
+      const box   = document.getElementById(boxId);
+      const label = document.getElementById(labelId);
+      box.classList.add('has-file');
+      box.classList.remove('required-doc');
+      label.textContent = '✅ ' + file.name;
+
+      // Show change/remove action buttons
+      let actions = box.querySelector('.upload-actions');
+      if (!actions) {
+        actions = document.createElement('div');
+        actions.className = 'upload-actions';
+        actions.innerHTML = `
+          <button class="upload-btn-change" onclick="event.stopPropagation();triggerUpload('${input.id}')">✏️ Ganti</button>
+          <button class="upload-btn-remove" onclick="event.stopPropagation();removeDoc('${tipe}','${boxId}','${labelId}','${input.id}')">✕ Hapus</button>
+        `;
+        box.appendChild(actions);
+      }
+      actions.style.display = 'flex';
+
+      // Disable click-to-upload on box itself when file selected (use buttons instead)
+      box.onclick = null;
+    }
+
+    function removeDoc(tipe, boxId, labelId, inputId) {
+      delete docFiles[tipe];
+      const box   = document.getElementById(boxId);
+      const label = document.getElementById(labelId);
+      const input = document.getElementById(inputId);
+      box.classList.remove('has-file');
+      // Restore required styling if needed
+      if (tipe === 'KTP' || tipe === 'SIM' || tipe === 'Selfie') box.classList.add('required-doc');
+      label.textContent = 'Klik untuk upload';
+      input.value = '';
+      const actions = box.querySelector('.upload-actions');
+      if (actions) actions.style.display = 'none';
+      // Restore click handler
+      box.onclick = function() { triggerUpload(inputId); };
+    }
+
+    function validateAndGoStep5() {
+      const errEl = document.getElementById('docError');
+      errEl.style.display = 'none';
+
+      if (!docFiles['KTP']) { errEl.textContent = 'KTP wajib diupload.'; errEl.style.display='block'; return; }
+      if (!docFiles['SIM']) { errEl.textContent = 'SIM A wajib diupload.'; errEl.style.display='block'; return; }
+
+      // KK atau min 2 pengganti
+      const penggantiKeys = ['NPWP','BPJS','Akta','IDCard','Paspor','Ijazah'];
+      const penggantiCount = penggantiKeys.filter(k => docFiles[k]).length;
+      if (!docFiles['KK'] && penggantiCount < 2) {
+        errEl.textContent = 'Upload KK, atau minimal 2 dokumen pengganti KK.';
+        errEl.style.display='block'; return;
+      }
+
+      // Selfie jika tidak punya sosmed
+      const tidakPunya = document.querySelector('input[name="sosmed"]:checked').value === 'tidak';
+      if (tidakPunya && !docFiles['Selfie']) {
+        errEl.textContent = 'Selfie + KTP wajib diupload karena Anda tidak memiliki media sosial.';
+        errEl.style.display='block'; return;
+      }
+
+      goStep(5);
+    }
+
+    // ── STEP 5 — JAMINAN ──
+    function selectJaminan(tipe) {
+      selectedJaminan = tipe;
+      document.getElementById('jaminanKenCard').classList.toggle('selected', tipe === 'kendaraan');
+      document.getElementById('jaminanNonCard').classList.toggle('selected', tipe === 'non-kendaraan');
+      document.getElementById('formKendaraanJaminan').style.display = tipe === 'kendaraan' ? 'block' : 'none';
+      updateRingkasanBiaya();
+    }
+
+    function updateRingkasanBiaya() {
+      const s    = document.getElementById("startDate").value;
+      const e    = document.getElementById("endDate").value;
+      if (!s || !e || !selectedCar) return;
+      const days  = Math.round((new Date(e) - new Date(s)) / 86400000);
+      const total = (selectedCar.harga_per_hari || 0) * days;
+      const dp      = selectedJaminan === 'kendaraan' ? Math.round(total * 0.30) : 0;
+      const deposit = selectedJaminan === 'kendaraan' ? 500000 : 2000000;
+      const bayarNow = dp + deposit;
+      const sisa     = total - dp;
+
+      document.getElementById('biayaTotalSewa').textContent    = formatRupiah(total);
+      document.getElementById('biayaDP').textContent           = selectedJaminan === 'kendaraan' ? formatRupiah(dp) : 'Tidak ada (jaminan non-kendaraan)';
+      document.getElementById('biayaDeposit').textContent      = formatRupiah(deposit);
+      document.getElementById('biayaBayarSekarang').textContent = formatRupiah(bayarNow);
+      document.getElementById('biayaSisa').textContent         = formatRupiah(sisa);
+    }
+
+    function validateAndGoStep6() {
+      const errEl = document.getElementById('jaminanError');
+      errEl.style.display = 'none';
+
+      if (selectedJaminan === 'kendaraan') {
+        const jenis = document.getElementById('jkJenis').value;
+        const merek = document.getElementById('jkMerek').value.trim();
+        const tahun = parseInt(document.getElementById('jkTahun').value);
+        const plat  = document.getElementById('jkPlat').value.trim();
+        if (!jenis || !merek || !plat) { errEl.textContent='Lengkapi semua data kendaraan jaminan.'; errEl.style.display='block'; return; }
+        if (!tahun || tahun < 2017)    { errEl.textContent='Tahun kendaraan jaminan minimal 2017.'; errEl.style.display='block'; return; }
+      }
+
+      // Update step 6 UI
+      const s    = document.getElementById("startDate").value;
+      const e    = document.getElementById("endDate").value;
+      const days  = Math.round((new Date(e) - new Date(s)) / 86400000);
+      const total = (selectedCar.harga_per_hari || 0) * days;
+      const dp      = selectedJaminan === 'kendaraan' ? Math.round(total * 0.30) : 0;
+      const deposit = selectedJaminan === 'kendaraan' ? 500000 : 2000000;
+      const bayarNow = dp + deposit;
+
+      document.getElementById('payCarName').textContent = selectedCar.nama;
+      document.getElementById('payDurasi').textContent  = days + ' hari';
+      document.getElementById('payDP').textContent      = selectedJaminan === 'kendaraan' ? formatRupiah(dp) : 'Tidak ada';
+      document.getElementById('payDeposit').textContent = formatRupiah(deposit);
+      document.getElementById('payTotal').textContent   = formatRupiah(bayarNow);
+      document.getElementById('nominalBayarText').textContent = formatRupiah(bayarNow);
+      document.getElementById('nominalHint').textContent     = formatRupiah(bayarNow);
+
+      goStep(6);
+    }
+
+    // ── STEP 6 — BUKTI ──
+    function onBuktiSelect(input) {
+      buktiBayarFile = input.files[0];
+      if (!buktiBayarFile) return;
+      const box   = document.getElementById('boxBukti');
+      const label = document.getElementById('labelBukti');
+      box.classList.add('has-file');
+      box.classList.remove('required-doc');
+      label.textContent = '✅ ' + buktiBayarFile.name;
+
+      // Show change/remove buttons
+      let actions = box.querySelector('.upload-actions');
+      if (!actions) {
+        actions = document.createElement('div');
+        actions.className = 'upload-actions';
+        actions.innerHTML = `
+          <button class="upload-btn-change" onclick="event.stopPropagation();triggerUpload('fileBuktiBayar')">✏️ Ganti</button>
+          <button class="upload-btn-remove" onclick="event.stopPropagation();removeBukti()">✕ Hapus</button>
+        `;
+        box.appendChild(actions);
+      }
+      actions.style.display = 'flex';
+      box.onclick = null;
+
+      // Preview gambar
+      if (buktiBayarFile.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          document.getElementById('buktiImg').src = e.target.result;
+          document.getElementById('buktiPreview').style.display = 'block';
+        };
+        reader.readAsDataURL(buktiBayarFile);
+      }
+
+      document.getElementById('submitBtn').disabled = false;
+    }
+
+    function removeBukti() {
+      buktiBayarFile = null;
+      const box   = document.getElementById('boxBukti');
+      const label = document.getElementById('labelBukti');
+      const input = document.getElementById('fileBuktiBayar');
+      box.classList.remove('has-file');
+      box.classList.add('required-doc');
+      label.textContent = 'Klik untuk upload bukti transfer';
+      input.value = '';
+      document.getElementById('buktiPreview').style.display = 'none';
+      const actions = box.querySelector('.upload-actions');
+      if (actions) actions.style.display = 'none';
+      box.onclick = function() { triggerUpload('fileBuktiBayar'); };
+      document.getElementById('submitBtn').disabled = true;
+    }
+
+    // ── UPLOAD HELPERS ──
+    async function uploadDocToStorage(file, tipeDoc, bookingId) {
+      const ext  = file.name.split('.').pop();
+      const path = `${bookingId}/${tipeDoc}-${Date.now()}.${ext}`;
+      const { data, error } = await supabase.storage.from('booking-documents').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('booking-documents').getPublicUrl(path);
+      return publicUrl;
+    }
+
+    async function uploadBuktiBayar(file, bookingId) {
+      const ext  = file.name.split('.').pop();
+      const path = `${bookingId}/bukti-${Date.now()}.${ext}`;
+      const { data, error } = await supabase.storage.from('payment-proofs').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('payment-proofs').getPublicUrl(path);
+      return publicUrl;
+    }
+
+    // ── SUBMIT ──
+    async function submitBooking() {
+      const btn   = document.getElementById("submitBtn");
+      const errEl = document.getElementById("payError");
+      errEl.style.display = "none";
+
+      if (!buktiBayarFile) { errEl.textContent="Upload bukti pembayaran terlebih dahulu."; errEl.style.display="block"; return; }
+
+      const s    = document.getElementById("startDate").value;
+      const e    = document.getElementById("endDate").value;
+      const days  = Math.round((new Date(e) - new Date(s)) / 86400000);
+      const total = (selectedCar.harga_per_hari || 0) * days;
+      const dp      = selectedJaminan === 'kendaraan' ? Math.round(total * 0.30) : 0;
+      const deposit = selectedJaminan === 'kendaraan' ? 500000 : 2000000;
+      const bayarNow = dp + deposit;
+      const sisa     = total - dp;
+
+      setButtonLoading(btn, true);
+
+      const kode = "EC" + Date.now().toString(36).toUpperCase();
+
+      // 1. Atomic insert: cek ketersediaan + insert dalam 1 transaksi database
+      //    Ini mencegah race condition (2 user booking mobil & tanggal yang sama).
+      const atomicResult = await insertBookingAtomic({
+        user_id:          currentUser.id,
+        car_id:           selectedCar.id,
+        kode_booking:     kode,
+        tanggal_mulai:    s,
+        tanggal_selesai:  e,
+        durasi_hari:      days,
+        total_harga:      total,
+        nama_pemesan:     document.getElementById("pNama").value.trim(),
+        no_hp:            document.getElementById("pPhone").value.trim(),
+        no_ktp:           document.getElementById("pKtp").value.trim(),
+        email_pemesan:    document.getElementById("pEmail").value.trim(),
+        alamat:           document.getElementById("pAlamat").value.trim(),
+        tujuan_sewa:      document.getElementById("pTujuan").value,
+        punya_sosmed:     document.querySelector('input[name="sosmed"]:checked').value === 'ya',
+        jenis_jaminan:    selectedJaminan,
+        jaminan_kendaraan_jenis: selectedJaminan==='kendaraan' ? document.getElementById('jkJenis').value : null,
+        jaminan_kendaraan_merek: selectedJaminan==='kendaraan' ? document.getElementById('jkMerek').value.trim() : null,
+        jaminan_kendaraan_tahun: selectedJaminan==='kendaraan' ? parseInt(document.getElementById('jkTahun').value) : null,
+        jaminan_kendaraan_plat:  selectedJaminan==='kendaraan' ? document.getElementById('jkPlat').value.trim().toUpperCase() : null,
+        dp_amount:        dp,
+        deposit_amount:   deposit,
+        sudah_dibayar:    bayarNow,
+        sisa_pelunasan:   sisa,
+      });
+
+      if (!atomicResult.success) {
+        if (atomicResult.error === 'TANGGAL_BENTROK') {
+          errEl.textContent = "❌ Maaf, kendaraan baru saja dipesan oleh pengguna lain pada tanggal yang sama. Silakan pilih tanggal lain.";
+        } else {
+          errEl.textContent = "Gagal membuat pesanan: " + (atomicResult.message || "Terjadi kesalahan.");
+        }
+        errEl.style.display = "block";
+        setButtonLoading(btn, false); return;
+      }
+
+      const bookingId = atomicResult.booking_id;
+
+      // 2. Upload semua dokumen
+      for (const [tipe, file] of Object.entries(docFiles)) {
+        try {
+          const url = await uploadDocToStorage(file, tipe, bookingId);
+          await supabase.from('booking_documents').insert({
+            booking_id: bookingId,
+            tipe_doc:   tipe,
+            file_url:   url,
+            file_name:  file.name,
+          });
+        } catch (e) {
+          console.warn('Gagal upload doc', tipe, e);
+        }
+      }
+
+      // 3. Upload bukti bayar
+      let buktiBayarUrl = null;
+      try {
+        buktiBayarUrl = await uploadBuktiBayar(buktiBayarFile, bookingId);
+        await supabase.from('bookings').update({
+          bukti_bayar_url:  buktiBayarUrl,
+          status:           'Menunggu Konfirmasi',
+          status_pembayaran:'Menunggu Konfirmasi',
+        }).eq('id', bookingId);
+      } catch (e) {
+        console.warn('Gagal upload bukti bayar', e);
+      }
+
+      setButtonLoading(btn, false);
+
+      // 4. Tampilkan invoice (step 7)
+      buildInvoice(kode, { id: bookingId });
+      goStep(7);
+    }
+
+    function buildInvoice(kode, booking) {
+      const s    = document.getElementById("startDate").value;
+      const e    = document.getElementById("endDate").value;
+      const days  = Math.round((new Date(e) - new Date(s)) / 86400000);
+      const total = (selectedCar.harga_per_hari || 0) * days;
+      const dp      = selectedJaminan === 'kendaraan' ? Math.round(total * 0.30) : 0;
+      const deposit = selectedJaminan === 'kendaraan' ? 500000 : 2000000;
+      const bayarNow = dp + deposit;
+      const sisa     = total - dp;
+
+      document.getElementById('invKode').textContent  = kode;
+      document.getElementById('invNama').textContent  = document.getElementById('pNama').value.trim();
+      document.getElementById('invKtp').textContent   = 'KTP: ' + document.getElementById('pKtp').value.trim();
+      document.getElementById('invHp').textContent    = 'WA: ' + document.getElementById('pPhone').value.trim();
+      document.getElementById('invAlamat').textContent= document.getElementById('pAlamat').value.trim();
+      document.getElementById('invMobil').textContent = selectedCar.nama;
+      document.getElementById('invTanggal').textContent = formatTanggalShort(s) + ' s/d ' + formatTanggalShort(e);
+      document.getElementById('invDurasi').textContent  = days + ' hari';
+      document.getElementById('invCreated').textContent = 'Dibuat: ' + new Date().toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+      const rows = [
+        { label: `Sewa ${selectedCar.nama} (${formatRupiah(selectedCar.harga_per_hari||0)} × ${days} hari)`, val: formatRupiah(total) },
+        ...(dp > 0 ? [{ label: 'DP dibayar (30%)', val: formatRupiah(dp), bold: true, accent: true }] : []),
+        { label: `Deposit (${selectedJaminan==='kendaraan'?'jaminan kendaraan':'non-kendaraan'})`, val: formatRupiah(deposit), bold: true, accent: true },
+        { label: 'Total dibayar saat booking', val: formatRupiah(bayarNow), total: true },
+        { label: 'Sisa pelunasan saat pengambilan', val: formatRupiah(sisa), muted: true },
+      ];
+
+      document.getElementById('invTabelBiaya').innerHTML = rows.map(r => `
+        <tr style="${r.total?'background:var(--color-bg);font-weight:700;':''}">
+          <td style="padding:0.5rem 0.75rem;border-bottom:1px solid var(--color-border);${r.muted?'color:var(--color-text-muted);font-size:0.75rem;':''}${r.bold?'font-weight:600;':''}">${r.label}</td>
+          <td style="padding:0.5rem 0.75rem;border-bottom:1px solid var(--color-border);text-align:right;${r.accent?'color:var(--color-accent);':r.total?'color:var(--color-accent);font-size:1rem;':''}${r.muted?'color:var(--color-text-muted);font-size:0.75rem;':''}">${r.val}</td>
+        </tr>
+      `).join('');
+    }
+
+    function doPrintInvoice() {
+      const card = document.getElementById("invoiceCard");
+      if (!card) return;
+      const w = window.open("", "_blank", "width=400,height=700");
+      w.document.write(`<!DOCTYPE html><html><head>
+        <title>Invoice EasyCar</title>
+        <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+        <style>
+          @page { size: 80mm auto; margin: 0.3cm; }
+          body { margin:0; background:#fff; font-family:'Poppins',sans-serif; }
+          * { box-sizing:border-box; }
+          .card { width:100%; }
+          .card img { max-width:100%; }
+          .btn { display:none !important; }
+        </style>
+      </head><body>${card.outerHTML}<script>window.onload=function(){window.print();window.close();} <\/script></body></html>`);
+      w.document.close();
+    }
+
+    // ── STEP NAVIGATION ──
+    function goStep(n) {
+      if (n === 2 && !selectedCar) { showToast("Pilih kendaraan terlebih dahulu.", "warning"); return; }
+      if (n === 3) {
+        const s = document.getElementById("startDate").value;
+        const e = document.getElementById("endDate").value;
+        if (!s || !e) { showToast("Pilih tanggal sewa.", "warning"); return; }
+        if (document.getElementById("step2Next").disabled) { showToast("Tanggal tidak tersedia.", "error"); return; }
+      }
+      if (n === 4) {
+        const nama  = document.getElementById("pNama").value.trim();
+        const hp    = document.getElementById("pPhone").value.trim();
+        const ktp   = document.getElementById("pKtp").value.trim();
+        const tujuan= document.getElementById("pTujuan").value;
+        const alamat= document.getElementById("pAlamat").value.trim();
+        if (!nama || !hp || !ktp || !tujuan || !alamat) { showToast("Lengkapi semua field wajib.", "warning"); return; }
+      }
+      if (n === 5) updateRingkasanBiaya();
+
+      document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+      document.getElementById("step" + n).classList.add("active");
+
+      document.querySelectorAll(".wizard-step").forEach(ws => {
+        const sn = parseInt(ws.dataset.step);
+        ws.classList.remove("active", "done");
+        if (sn < n)  ws.classList.add("done");
+        if (sn === n) ws.classList.add("active");
+      });
+
+      currentStep = n;
+      if (n === 2) initDatePickers();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  </script>
+</body>
+</html>
