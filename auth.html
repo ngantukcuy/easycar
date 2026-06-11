@@ -170,6 +170,39 @@
         <button onclick="showTab('login')" style="background:none;border:none;font-family:var(--font-body);font-size:0.75rem;font-weight:700;color:var(--color-primary-mid);cursor:pointer;margin-left:0.25rem;">Masuk sekarang</button>
       </p>
     </div>
+
+    <!-- RESET PASSWORD -->
+    <div id="panelReset" class="panel" style="display:none;">
+      <h2 style="font-size:1.125rem;font-weight:700;color:var(--color-primary);margin:0 0 0.25rem;">Buat Password Baru</h2>
+      <p style="font-size:0.8125rem;color:var(--color-text-muted);margin:0 0 1.5rem;">Link reset sudah terbuka. Masukkan password baru Anda di bawah ini.</p>
+
+      <div id="resetMsg" style="display:none;background:#fef2f2;color:#dc2626;border-radius:10px;padding:0.75rem 1rem;font-size:0.8125rem;font-weight:500;margin-bottom:1rem;"></div>
+
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div>
+          <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Password Baru</label>
+          <div class="input-wrap">
+            <input type="password" id="resetPass" class="ec-input" placeholder="Minimal 6 karakter" style="padding-right:2.5rem;" />
+            <button class="icon btn" onclick="togglePw('resetPass',this)"><i class='bx bx-hide'></i></button>
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Konfirmasi Password</label>
+          <div class="input-wrap">
+            <input type="password" id="resetConfirm" class="ec-input" placeholder="Ulangi password baru" style="padding-right:2.5rem;" />
+            <button class="icon btn" onclick="togglePw('resetConfirm',this)"><i class='bx bx-hide'></i></button>
+          </div>
+        </div>
+      </div>
+
+      <button id="resetBtn" onclick="handleResetPassword()" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:1.5rem;padding:0.875rem;">
+        Simpan Password Baru
+      </button>
+
+      <p style="text-align:center;font-size:0.75rem;color:var(--color-text-muted);margin-top:1rem;">
+        <button onclick="window.location.href='/auth.html?tab=login'" style="background:none;border:none;font-family:var(--font-body);font-size:0.75rem;font-weight:700;color:var(--color-primary-mid);cursor:pointer;">Kembali ke halaman masuk</button>
+      </p>
+    </div>
   </div>
 
   <!-- Forgot Password Modal -->
@@ -194,17 +227,34 @@
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam  = urlParams.get("tab");
     const redirect  = urlParams.get("redirect");
+    const isResetMode = urlParams.get("mode") === "reset" || window.location.hash.includes("type=recovery");
+
+    function showResetMode() {
+      document.getElementById("panelLogin").style.display = "none";
+      document.getElementById("panelRegister").style.display = "none";
+      document.getElementById("panelReset").style.display = "block";
+      const tabRow = document.querySelector(".tab-row");
+      if (tabRow) tabRow.style.display = "none";
+    }
 
     // Auto-redirect if already logged in
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      if (isResetMode) {
+        showResetMode();
+        return;
+      }
       if (session) {
         const user = await getCurrentUser();
         redirectAfterLogin(user);
       }
     })();
 
-    if (tabParam === "register") showTab("register");
+    if (isResetMode) {
+      showResetMode();
+    } else if (tabParam === "register") {
+      showTab("register");
+    }
 
     function showTab(tab) {
       const isLogin = tab === "login";
@@ -333,7 +383,7 @@
       }
       setButtonLoading(btn, true);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + "/pages/user/profile.html"
+        redirectTo: window.location.origin + "/auth.html?mode=reset"
       });
       setButtonLoading(btn, false);
       if (error) {
@@ -344,6 +394,49 @@
         msgEl.style.cssText = "display:block;background:#f0fdf4;color:#15803d;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8125rem;font-weight:500;margin-bottom:0.875rem;";
         setTimeout(closeForgot, 4000);
       }
+    }
+
+    async function handleResetPassword() {
+      const btn = document.getElementById("resetBtn");
+      const msgEl = document.getElementById("resetMsg");
+      const pw = document.getElementById("resetPass").value;
+      const conf = document.getElementById("resetConfirm").value;
+
+      msgEl.style.display = "none";
+      if (!pw || !conf) {
+        msgEl.textContent = "Isi semua field password terlebih dahulu.";
+        msgEl.style.cssText = "display:block;background:#fef2f2;color:#dc2626;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8125rem;font-weight:500;margin-bottom:0.875rem;";
+        return;
+      }
+      if (pw.length < 6) {
+        msgEl.textContent = "Password minimal 6 karakter.";
+        msgEl.style.cssText = "display:block;background:#fef2f2;color:#dc2626;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8125rem;font-weight:500;margin-bottom:0.875rem;";
+        return;
+      }
+      if (pw !== conf) {
+        msgEl.textContent = "Konfirmasi password tidak cocok.";
+        msgEl.style.cssText = "display:block;background:#fef2f2;color:#dc2626;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8125rem;font-weight:500;margin-bottom:0.875rem;";
+        return;
+      }
+
+      setButtonLoading(btn, true);
+      const { error } = await supabase.auth.updateUser({ password: pw });
+      setButtonLoading(btn, false);
+
+      if (error) {
+        msgEl.textContent = error.message || "Gagal mengubah password. Silakan minta link reset baru.";
+        msgEl.style.cssText = "display:block;background:#fef2f2;color:#dc2626;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8125rem;font-weight:500;margin-bottom:0.875rem;";
+        return;
+      }
+
+      msgEl.textContent = "✅ Password berhasil diubah. Silakan masuk dengan password baru.";
+      msgEl.style.cssText = "display:block;background:#f0fdf4;color:#15803d;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8125rem;font-weight:500;margin-bottom:0.875rem;";
+      document.getElementById("resetPass").value = "";
+      document.getElementById("resetConfirm").value = "";
+
+      setTimeout(() => {
+        window.location.href = "/auth.html?tab=login";
+      }, 1800);
     }
 
     // Button loading helper (no ui.js on this page)

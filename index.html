@@ -633,7 +633,7 @@
       const btn   = document.getElementById("fpBtn");
       if (!email) { msgEl.textContent = "Masukkan email."; msgEl.style.cssText = "display:block;background:#fef2f2;color:#dc2626;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8125rem;font-weight:500;margin-bottom:0.875rem;"; return; }
       _setAuthBtnLoading(btn, true);
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/pages/user/profile.html" });
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/auth.html?mode=reset" });
       _setAuthBtnLoading(btn, false);
       if (error) { msgEl.textContent = "Gagal: " + error.message; msgEl.style.cssText = "display:block;background:#fef2f2;color:#dc2626;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8125rem;font-weight:500;margin-bottom:0.875rem;"; }
       else { msgEl.textContent = "✅ Link reset dikirim! Cek email Anda."; msgEl.style.cssText = "display:block;background:#f0fdf4;color:#15803d;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8125rem;font-weight:500;margin-bottom:0.875rem;"; setTimeout(closeForgot, 4000); }
