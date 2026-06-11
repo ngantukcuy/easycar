@@ -71,6 +71,7 @@
     .auth-input-wrap { position:relative; }
     .auth-input-wrap .icon { position:absolute;right:0.875rem;top:50%;transform:translateY(-50%);color:var(--color-text-subtle);font-size:1.1rem;pointer-events:none; }
     .auth-input-wrap .icon.btn-icon { pointer-events:auto;cursor:pointer;background:none;border:none;padding:0; }
+    .reset-pw-header { background:linear-gradient(135deg,#0f2347,#1a3c6e);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between; }
   </style>
 </head>
 <body>
@@ -265,6 +266,12 @@
         <button onclick="closeAuthModal()" style="background:rgba(255,255,255,0.1);border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;color:rgba(255,255,255,0.7);font-size:1rem;display:flex;align-items:center;justify-content:center;">✕</button>
       </div>
 
+      <!-- Tab row (disembunyikan saat mode reset) -->
+      <div id="authTabRow" class="tab-row">
+        <button id="tabLogin"    class="tab-btn active" onclick="showTab('login')">Masuk</button>
+        <button id="tabRegister" class="tab-btn"        onclick="showTab('register')">Daftar</button>
+      </div>
+
       <!-- REGISTER -->
       <div id="panelRegister" class="auth-panel" style="display:none;">
         <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0 0 0.2rem;">Buat Akun Baru</h2>
@@ -344,6 +351,38 @@
         </p>
       </div>
 
+      <!-- RESET PASSWORD (muncul otomatis dari link email) -->
+      <div id="panelReset" class="auth-panel" style="display:none;">
+        <div style="text-align:center;margin-bottom:1.25rem;">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#0f2347,#1a3c6e);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:0.75rem;">
+            <i class='bx bx-lock-open-alt' style="color:#fff;font-size:1.5rem;"></i>
+          </div>
+          <h2 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0 0 0.2rem;">Buat Password Baru</h2>
+          <p style="font-size:0.8rem;color:var(--color-text-muted);margin:0;">Masukkan password baru untuk akun Anda</p>
+        </div>
+        <div id="resetError"   style="display:none;background:#fef2f2;color:#dc2626;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8rem;font-weight:500;margin-bottom:0.875rem;"></div>
+        <div id="resetSuccess" style="display:none;background:#f0fdf4;color:#15803d;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8rem;font-weight:500;margin-bottom:0.875rem;"></div>
+        <div style="display:flex;flex-direction:column;gap:0.875rem;">
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.35rem;">Password Baru</label>
+            <div class="auth-input-wrap">
+              <input type="password" id="resetPass" class="ec-input" placeholder="Minimal 6 karakter" style="padding-right:2.5rem;" />
+              <button class="icon btn-icon" onclick="togglePw('resetPass',this)"><i class='bx bx-hide'></i></button>
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.35rem;">Konfirmasi Password Baru</label>
+            <div class="auth-input-wrap">
+              <input type="password" id="resetPassConfirm" class="ec-input" placeholder="Ulangi password baru" style="padding-right:2.5rem;"
+                onkeydown="if(event.key==='Enter') doResetPassword()" />
+              <button class="icon btn-icon" onclick="togglePw('resetPassConfirm',this)"><i class='bx bx-hide'></i></button>
+            </div>
+          </div>
+        </div>
+        <button id="resetBtn" onclick="doResetPassword()" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:1.25rem;padding:0.875rem;">
+          <i class='bx bx-check-shield'></i> Simpan Password Baru
+        </button>
+      </div>
       
     </div>
   </div>
@@ -558,10 +597,15 @@
 
     function showTab(tab) {
       const isLogin = tab === "login";
-      document.getElementById("panelLogin").style.display    = isLogin ? "block" : "none";
-      document.getElementById("panelRegister").style.display = isLogin ? "none" : "block";
-      document.getElementById("tabLogin").className    = "tab-btn" + (isLogin ? " active" : "");
-      document.getElementById("tabRegister").className = "tab-btn" + (isLogin ? "" : " active");
+      const isReset = tab === "reset";
+      document.getElementById("panelLogin").style.display    = (!isReset && isLogin)  ? "block" : "none";
+      document.getElementById("panelRegister").style.display = (!isReset && !isLogin) ? "block" : "none";
+      document.getElementById("panelReset").style.display    = isReset ? "block" : "none";
+      document.getElementById("authTabRow").style.display    = isReset ? "none" : "flex";
+      if (!isReset) {
+        document.getElementById("tabLogin").className    = "tab-btn" + (isLogin ? " active" : "");
+        document.getElementById("tabRegister").className = "tab-btn" + (isLogin ? "" : " active");
+      }
     }
 
     function redirectAfterLogin(user) {
@@ -633,7 +677,7 @@
       const btn   = document.getElementById("fpBtn");
       if (!email) { msgEl.textContent = "Masukkan email."; msgEl.style.cssText = "display:block;background:#fef2f2;color:#dc2626;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8125rem;font-weight:500;margin-bottom:0.875rem;"; return; }
       _setAuthBtnLoading(btn, true);
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/auth.html?mode=reset" });
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/index.html' });
       _setAuthBtnLoading(btn, false);
       if (error) { msgEl.textContent = "Gagal: " + error.message; msgEl.style.cssText = "display:block;background:#fef2f2;color:#dc2626;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8125rem;font-weight:500;margin-bottom:0.875rem;"; }
       else { msgEl.textContent = "✅ Link reset dikirim! Cek email Anda."; msgEl.style.cssText = "display:block;background:#f0fdf4;color:#15803d;border-radius:10px;padding:0.625rem 0.875rem;font-size:0.8125rem;font-weight:500;margin-bottom:0.875rem;"; setTimeout(closeForgot, 4000); }
@@ -643,9 +687,60 @@
       if (loading) { btn.dataset.orig = btn.innerHTML; btn.innerHTML = `<span style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin 0.7s linear infinite;margin-right:6px;vertical-align:middle;"></span>Memproses...`; btn.disabled = true; }
       else { btn.innerHTML = btn.dataset.orig; btn.disabled = false; }
     }
+    async function doResetPassword() {
+      const btn       = document.getElementById("resetBtn");
+      const errEl     = document.getElementById("resetError");
+      const successEl = document.getElementById("resetSuccess");
+      const pass      = document.getElementById("resetPass").value;
+      const confirm   = document.getElementById("resetPassConfirm").value;
+      errEl.style.display = successEl.style.display = "none";
+      if (!pass || !confirm) { errEl.textContent = "Lengkapi semua field."; errEl.style.display = "block"; return; }
+      if (pass.length < 6)   { errEl.textContent = "Password minimal 6 karakter."; errEl.style.display = "block"; return; }
+      if (pass !== confirm)  { errEl.textContent = "Konfirmasi password tidak cocok."; errEl.style.display = "block"; return; }
+      _setAuthBtnLoading(btn, true);
+      const { error } = await supabase.auth.updateUser({ password: pass });
+      _setAuthBtnLoading(btn, false);
+      if (error) {
+        errEl.textContent = "Gagal: " + error.message;
+        errEl.style.display = "block";
+      } else {
+        successEl.textContent = "✅ Password berhasil diubah! Silakan masuk kembali.";
+        successEl.style.display = "block";
+        await supabase.auth.signOut();
+        // Bersihkan URL hash agar token tidak tersimpan di history
+        window.history.replaceState(null, "", window.location.pathname);
+        setTimeout(() => {
+          showTab("login");
+          document.getElementById("resetPass").value = "";
+          document.getElementById("resetPassConfirm").value = "";
+        }, 2500);
+      }
+    }
+
     const _ss = document.createElement("style");
     _ss.textContent = "@keyframes spin{to{transform:rotate(360deg)}}";
     document.head.appendChild(_ss);
+
+    // ── DETEKSI TOKEN RESET PASSWORD DARI URL ──────────────────────────────
+    // Supabase mengirim link dengan format: ...index.html#access_token=...&type=recovery
+    (function handleAuthRedirect() {
+      const hash = window.location.hash;
+      if (!hash) return;
+      const params = new URLSearchParams(hash.substring(1));
+      const type   = params.get("type");
+      const accessToken  = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+      if (type === "recovery" && accessToken) {
+        // Set session dari token agar updateUser bisa jalan
+        supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken || "" })
+          .then(() => {
+            // Bersihkan hash dari URL
+            window.history.replaceState(null, "", window.location.pathname);
+            // Buka modal dan tampilkan panel reset
+            openAuthModal("reset");
+          });
+      }
+    })();
   </script>
 </body>
 </html>
