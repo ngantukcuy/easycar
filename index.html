@@ -178,53 +178,223 @@
   </section>
 
   <!-- ═══ CARA PESAN ═══ -->
-  <section id="cara-pesan" style="background:var(--color-surface);border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border);padding:4rem 2rem;">
-    <div style="max-width:1100px;margin:0 auto;text-align:center;">
-      <h2 style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin-bottom:0.5rem;">Cara Booking</h2>
-      <p style="color:var(--color-text-muted);margin-bottom:3rem;">7 langkah mudah — dari pilih mobil sampai kendaraan siap di tangan Anda</p>
+  <style>
+    /* ── BOOKING STEPS ── */
+    .steps-section {
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      padding: 4.5rem 2rem;
+    }
+    .steps-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .steps-header h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      margin-bottom: 0.5rem;
+    }
+    .steps-header p {
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+    }
+    /* Row 1: 4 columns on desktop */
+    .steps-row-top {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      max-width: 1000px;
+      margin: 0 auto 1.5rem;
+    }
+    /* Row 2: 3 columns centered on desktop */
+    .steps-row-bottom {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+    .step-card {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 18px;
+      padding: 1.5rem 1.25rem 1.35rem;
+      text-align: center;
+      position: relative;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .step-card:hover {
+      box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.09));
+      transform: translateY(-3px);
+    }
+    .step-card-last {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+    .step-badge {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-accent, #e85d04);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 800;
+      border-radius: 999px;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(232,93,4,0.35);
+    }
+    .step-badge-done {
+      background: #22c55e;
+      box-shadow: 0 2px 6px rgba(34,197,94,0.35);
+    }
+    .step-icon-wrap {
+      width: 52px;
+      height: 52px;
+      background: var(--color-surface, #fff);
+      border: 2px solid var(--color-border);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0.5rem auto 0.875rem;
+    }
+    .step-card-last .step-icon-wrap {
+      border-color: #86efac;
+      background: #dcfce7;
+    }
+    .step-title {
+      font-weight: 700;
+      color: var(--color-primary);
+      font-size: 0.875rem;
+      margin-bottom: 0.3rem;
+    }
+    .step-desc {
+      font-size: 0.775rem;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+    /* ── TABLET: 2x2 top + 3 bottom ── */
+    @media (max-width: 860px) and (min-width: 541px) {
+      .steps-row-top {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 520px;
+      }
+      .steps-row-bottom {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 520px;
+      }
+    }
+    /* ── MOBILE: single column ── */
+    @media (max-width: 540px) {
+      .steps-section { padding: 3rem 1.25rem; }
+      .steps-row-top,
+      .steps-row-bottom {
+        grid-template-columns: 1fr;
+        max-width: 340px;
+        gap: 1rem;
+      }
+      .step-card {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+      }
+      .step-badge {
+        top: 50%;
+        left: -10px;
+        transform: translateY(-50%);
+      }
+      .step-icon-wrap {
+        flex-shrink: 0;
+        margin: 0;
+        width: 46px;
+        height: 46px;
+      }
+      .step-body { flex: 1; }
+    }
+  </style>
 
-      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.5rem;justify-items:center;align-items:start;">
-        <div style="text-align:center;max-width:240px;">
-          <div class="step-icon" style="position:relative;"><i class='bx bx-search' style="font-size:1.5rem;color:var(--color-primary-mid);"></i><span style="position:absolute;top:-8px;right:-8px;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">1</span></div>
-          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Pilih Mobil</div>
-          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Pilih armada yang cocok dari katalog</div>
+  <section id="cara-pesan" class="steps-section">
+    <div style="max-width:1100px;margin:0 auto;">
+      <div class="steps-header">
+        <h2>Cara Booking</h2>
+        <p>7 langkah mudah — dari pilih mobil sampai kendaraan siap di tangan Anda</p>
+      </div>
+
+      <!-- Row 1: 4 langkah -->
+      <div class="steps-row-top">
+        <div class="step-card">
+          <div class="step-badge">1</div>
+          <div class="step-icon-wrap"><i class='bx bx-search' style="font-size:1.4rem;color:var(--color-primary-mid);"></i></div>
+          <div class="step-body">
+            <div class="step-title">Pilih Mobil</div>
+            <div class="step-desc">Pilih armada yang cocok dari katalog</div>
+          </div>
         </div>
-        <div style="text-align:center;max-width:240px;">
-          <div class="step-icon" style="position:relative;"><i class='bx bx-calendar-check' style="font-size:1.5rem;color:var(--color-primary-mid);"></i><span style="position:absolute;top:-8px;right:-8px;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">2</span></div>
-          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Pilih Jadwal</div>
-          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Tentukan tanggal mulai &amp; selesai sewa</div>
+        <div class="step-card">
+          <div class="step-badge">2</div>
+          <div class="step-icon-wrap"><i class='bx bx-calendar-check' style="font-size:1.4rem;color:var(--color-primary-mid);"></i></div>
+          <div class="step-body">
+            <div class="step-title">Pilih Jadwal</div>
+            <div class="step-desc">Tentukan tanggal mulai &amp; selesai sewa</div>
+          </div>
         </div>
-        <div style="text-align:center;max-width:240px;">
-          <div class="step-icon" style="position:relative;"><i class='bx bx-user-pin' style="font-size:1.5rem;color:var(--color-primary-mid);"></i><span style="position:absolute;top:-8px;right:-8px;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">3</span></div>
-          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Data Diri</div>
-          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Isi nama, no. HP, KTP &amp; alamat pemesan</div>
+        <div class="step-card">
+          <div class="step-badge">3</div>
+          <div class="step-icon-wrap"><i class='bx bx-user-pin' style="font-size:1.4rem;color:var(--color-primary-mid);"></i></div>
+          <div class="step-body">
+            <div class="step-title">Data Diri</div>
+            <div class="step-desc">Isi nama, no. HP, KTP &amp; alamat pemesan</div>
+          </div>
         </div>
-        <div style="text-align:center;max-width:240px;">
-          <div class="step-icon" style="position:relative;"><i class='bx bx-file' style="font-size:1.5rem;color:var(--color-primary-mid);"></i><span style="position:absolute;top:-8px;right:-8px;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">4</span></div>
-          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Upload Dokumen</div>
-          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Upload KTP, SIM, KK &amp; selfie pemesan</div>
+        <div class="step-card">
+          <div class="step-badge">4</div>
+          <div class="step-icon-wrap"><i class='bx bx-file' style="font-size:1.4rem;color:var(--color-primary-mid);"></i></div>
+          <div class="step-body">
+            <div class="step-title">Upload Dokumen</div>
+            <div class="step-desc">Upload KTP, SIM, KK &amp; selfie pemesan</div>
+          </div>
         </div>
       </div>
 
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:1.5rem;margin-top:1.5rem;">
-        <div style="text-align:center;max-width:240px;">
-          <div class="step-icon" style="position:relative;"><i class='bx bx-car' style="font-size:1.5rem;color:var(--color-primary-mid);"></i><span style="position:absolute;top:-8px;right:-8px;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">5</span></div>
-          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Jaminan</div>
-          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Pilih jaminan kendaraan atau non-kendaraan</div>
+      <!-- Row 2: 3 langkah, rata tengah -->
+      <div class="steps-row-bottom">
+        <div class="step-card">
+          <div class="step-badge">5</div>
+          <div class="step-icon-wrap"><i class='bx bx-car' style="font-size:1.4rem;color:var(--color-primary-mid);"></i></div>
+          <div class="step-body">
+            <div class="step-title">Jaminan</div>
+            <div class="step-desc">Pilih jaminan kendaraan atau non-kendaraan</div>
+          </div>
         </div>
-        <div style="text-align:center;max-width:240px;">
-          <div class="step-icon" style="position:relative;"><i class='bx bx-credit-card' style="font-size:1.5rem;color:var(--color-primary-mid);"></i><span style="position:absolute;top:-8px;right:-8px;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">6</span></div>
-          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Pembayaran</div>
-          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Bayar DP via QRIS / transfer &amp; upload bukti</div>
+        <div class="step-card">
+          <div class="step-badge">6</div>
+          <div class="step-icon-wrap"><i class='bx bx-credit-card' style="font-size:1.4rem;color:var(--color-primary-mid);"></i></div>
+          <div class="step-body">
+            <div class="step-title">Pembayaran</div>
+            <div class="step-desc">Bayar DP via QRIS / transfer &amp; upload bukti</div>
+          </div>
         </div>
-        <div style="text-align:center;max-width:240px;">
-          <div class="step-icon" style="position:relative;"><i class='bx bx-check-shield' style="font-size:1.5rem;color:var(--color-accent);"></i><span style="position:absolute;top:-8px;right:-8px;background:#22c55e;color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">7</span></div>
-          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Selesai</div>
-          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Admin konfirmasi &amp; kendaraan siap diambil</div>
+        <div class="step-card step-card-last">
+          <div class="step-badge step-badge-done">7</div>
+          <div class="step-icon-wrap"><i class='bx bx-check-shield' style="font-size:1.4rem;color:#22c55e;"></i></div>
+          <div class="step-body">
+            <div class="step-title" style="color:#15803d;">Selesai</div>
+            <div class="step-desc">Admin konfirmasi &amp; kendaraan siap diambil</div>
+          </div>
         </div>
       </div>
+
     </div>
-  </section>    
+  </section>
 
       <!-- catatan kecil
       <p style="margin-top:2.5rem;font-size:0.775rem;color:var(--color-text-subtle);background:var(--color-bg);border:1px solid var(--color-border);border-radius:10px;display:inline-block;padding:0.5rem 1.25rem;">
@@ -779,6 +949,32 @@
     const _ss = document.createElement("style");
     _ss.textContent = "@keyframes spin{to{transform:rotate(360deg)}}";
     document.head.appendChild(_ss);
+
+    // ── SCROLL TO TOP BUTTON ──
+    (function initScrollTop() {
+      const btn = document.createElement("button");
+      btn.innerHTML = `<i class='bx bx-chevron-up'></i>`;
+      btn.setAttribute("aria-label", "Kembali ke atas");
+      btn.style.cssText = `
+        position:fixed;bottom:1.75rem;right:1.75rem;z-index:999;
+        width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
+        background:linear-gradient(135deg,#1a3c6e,#2a5298);color:#fff;
+        font-size:1.4rem;display:flex;align-items:center;justify-content:center;
+        box-shadow:0 4px 16px rgba(15,35,71,0.35);
+        opacity:0;transform:translateY(12px) scale(0.9);
+        transition:opacity 0.25s,transform 0.25s;pointer-events:none;
+      `;
+      document.body.appendChild(btn);
+
+      window.addEventListener("scroll", () => {
+        const show = window.scrollY > 280;
+        btn.style.opacity = show ? "1" : "0";
+        btn.style.transform = show ? "translateY(0) scale(1)" : "translateY(12px) scale(0.9)";
+        btn.style.pointerEvents = show ? "auto" : "none";
+      }, { passive: true });
+
+      btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    })();
 
     // ── DETEKSI TOKEN RESET PASSWORD DARI URL ──────────────────────────────
     // Supabase mengirim link dengan format: ...index.html#access_token=...&type=recovery
