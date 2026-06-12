@@ -243,9 +243,9 @@
       <div class="footer-card">
         <div class="footer-title">Hubungi Kami</div>
         <ul class="footer-list">
-          <li><i class='bx bxs-phone' style="margin-right:0.35rem;"></i> +62 822-7610-0996</li>
-          <li><i class='bx bxs-envelope' style="margin-right:0.35rem;"></i> support@easycar.id</li>
-          <li><i class='bx bxl-whatsapp' style="margin-right:0.35rem;"></i> WA: +62 822-7610-0996</li>
+          <li><i class='bx bxs-phone' style="margin-right:0.35rem;"></i> <a href="tel:+6282276100996">+62 822-7610-0996</a></li>
+          <li><i class='bx bxs-envelope' style="margin-right:0.35rem;"></i> <a href="mailto:support@easycar.id">support@easycar.id</a></li>
+          <li><i class='bx bxl-whatsapp' style="margin-right:0.35rem;"></i> <a href="https://wa.me/6282276100996" target="_blank" rel="noopener noreferrer">WA: +62 822-7610-0996</a></li>
         </ul>
       </div>
     </div>
@@ -497,6 +497,12 @@
         openAuthModal("login");
         return;
       }
+      // Admin tidak bisa booking — arahkan ke halaman admin booking
+      const user = await getCurrentUser();
+      if (normalizeRole(user?.role) === "admin") {
+        window.location.href = "./pages/admin/booking.html";
+        return;
+      }
       window.location.href = "./pages/user/booking.html?car_id=" + carId;
     }
 
@@ -616,9 +622,13 @@
         window.location.replace(safeRedirect);
         return;
       }
+      // Jika admin login, abaikan _pendingCarId dan langsung ke admin dashboard
+      if (normalizeRole(user?.role) === "admin") {
+        window.location.replace("./pages/admin/dashboard.html");
+        return;
+      }
       if (_pendingCarId) { window.location.replace("./pages/user/booking.html?car_id=" + _pendingCarId); return; }
-      const dest = normalizeRole(user?.role) === "admin" ? "./pages/admin/dashboard.html" : "./pages/user/dashboard.html";
-      window.location.replace(dest);
+      window.location.replace("./pages/user/dashboard.html");
     }
 
     async function doLogin() {
