@@ -114,9 +114,6 @@
           <a href="#cara-pesan" class="btn btn-lg" style="background:rgba(255,255,255,0.1);color:#fff;border:1.5px solid rgba(255,255,255,0.2);">
             <i class='bx bx-info-circle'></i> Cara Booking
           </a>
-          <a href="#site-footer" class="btn btn-lg" style="background:rgba(255,255,255,0.1);color:#fff;border:1.5px solid rgba(255,255,255,0.2);">
-            <i class='bx bx-info-circle'></i> Tentang Kami
-          </a>
         </div>
       </div>
     </div>
@@ -130,7 +127,7 @@
         <div class="stat-label">Unit Armada</div>
       </div>
       <div class="stat-item" style="border-right:1px solid var(--color-border);">
-        <div class="stat-num" id="statOrders">99+</div>
+        <div class="stat-num" id="statOrders">—</div>
         <div class="stat-label">Total Pemesanan</div>
       </div>
       <div class="stat-item" style="border-right:1px solid var(--color-border);">
@@ -178,31 +175,81 @@
 
   <!-- ═══ CARA PESAN ═══ -->
   <section id="cara-pesan" style="background:var(--color-surface);border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border);padding:4rem 2rem;">
-    <div style="max-width:900px;margin:0 auto;text-align:center;">
+    <div style="max-width:1100px;margin:0 auto;text-align:center;">
       <h2 style="font-size:1.75rem;font-weight:800;color:var(--color-primary);margin-bottom:0.5rem;">Cara Booking</h2>
-      <p style="color:var(--color-text-muted);margin-bottom:3rem;">Hanya 4 langkah mudah untuk memesan kendaraan</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:2rem;">
+      <p style="color:var(--color-text-muted);margin-bottom:3rem;">7 langkah mudah — dari pilih mobil sampai kendaraan siap di tangan Anda</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1.5rem;">
+
         <div style="text-align:center;">
-          <div class="step-icon"><i class='bx bx-search' style="font-size:1.5rem;color:var(--color-primary-mid);"></i></div>
-          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;">Pilih Kendaraan</div>
-          <div style="font-size:0.8125rem;color:var(--color-text-muted);line-height:1.6;">Pilih armada yang cocok dengan kebutuhan Anda</div>
+          <div class="step-icon" style="position:relative;">
+            <i class='bx bx-search' style="font-size:1.5rem;color:var(--color-primary-mid);"></i>
+            <span style="position:absolute;top:-8px;right:-8px;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">1</span>
+          </div>
+          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Pilih Mobil</div>
+          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Pilih armada yang cocok dari katalog</div>
         </div>
+
         <div style="text-align:center;">
-          <div class="step-icon"><i class='bx bx-user' style="font-size:1.5rem;color:var(--color-primary-mid);"></i></div>
-          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;">Daftar / Masuk</div>
-          <div style="font-size:0.8125rem;color:var(--color-text-muted);line-height:1.6;">Buat akun gratis atau masuk jika sudah punya</div>
+          <div class="step-icon" style="position:relative;">
+            <i class='bx bx-calendar-check' style="font-size:1.5rem;color:var(--color-primary-mid);"></i>
+            <span style="position:absolute;top:-8px;right:-8px;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">2</span>
+          </div>
+          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Pilih Jadwal</div>
+          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Tentukan tanggal mulai &amp; selesai sewa</div>
         </div>
+
         <div style="text-align:center;">
-          <div class="step-icon"><i class='bx bx-calendar' style="font-size:1.5rem;color:var(--color-primary-mid);"></i></div>
-          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;">Pilih Tanggal</div>
-          <div style="font-size:0.8125rem;color:var(--color-text-muted);line-height:1.6;">Tentukan periode sewa yang Anda inginkan</div>
+          <div class="step-icon" style="position:relative;">
+            <i class='bx bx-user-pin' style="font-size:1.5rem;color:var(--color-primary-mid);"></i>
+            <span style="position:absolute;top:-8px;right:-8px;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">3</span>
+          </div>
+          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Data Diri</div>
+          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Isi nama, no. HP, KTP &amp; alamat pemesan</div>
         </div>
+
         <div style="text-align:center;">
-          <div class="step-icon"><i class='bx bx-check-circle' style="font-size:1.5rem;color:var(--color-primary-mid);"></i></div>
-          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;">Konfirmasi</div>
-          <div style="font-size:0.8125rem;color:var(--color-text-muted);line-height:1.6;">Booking dikonfirmasi dan kendaraan siap</div>
+          <div class="step-icon" style="position:relative;">
+            <i class='bx bx-file' style="font-size:1.5rem;color:var(--color-primary-mid);"></i>
+            <span style="position:absolute;top:-8px;right:-8px;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">4</span>
+          </div>
+          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Upload Dokumen</div>
+          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Upload KTP, SIM, KK &amp; selfie pemesan</div>
         </div>
+
+        <div style="text-align:center;">
+          <div class="step-icon" style="position:relative;">
+            <i class='bx bx-car' style="font-size:1.5rem;color:var(--color-primary-mid);"></i>
+            <span style="position:absolute;top:-8px;right:-8px;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">5</span>
+          </div>
+          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Jaminan</div>
+          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Pilih jaminan kendaraan atau non-kendaraan</div>
+        </div>
+
+        <div style="text-align:center;">
+          <div class="step-icon" style="position:relative;">
+            <i class='bx bx-credit-card' style="font-size:1.5rem;color:var(--color-primary-mid);"></i>
+            <span style="position:absolute;top:-8px;right:-8px;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">6</span>
+          </div>
+          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Pembayaran</div>
+          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Bayar DP via QRIS / transfer &amp; upload bukti</div>
+        </div>
+
+        <div style="text-align:center;">
+          <div class="step-icon" style="position:relative;">
+            <i class='bx bx-check-shield' style="font-size:1.5rem;color:var(--color-accent);"></i>
+            <span style="position:absolute;top:-8px;right:-8px;background:#22c55e;color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">7</span>
+          </div>
+          <div style="font-weight:700;color:var(--color-primary);margin-bottom:0.35rem;font-size:0.875rem;">Selesai</div>
+          <div style="font-size:0.775rem;color:var(--color-text-muted);line-height:1.6;">Admin konfirmasi &amp; kendaraan siap diambil</div>
+        </div>
+
       </div>
+
+      <!-- catatan kecil -->
+      <p style="margin-top:2.5rem;font-size:0.775rem;color:var(--color-text-subtle);background:var(--color-bg);border:1px solid var(--color-border);border-radius:10px;display:inline-block;padding:0.5rem 1.25rem;">
+        <i class='bx bx-info-circle' style="vertical-align:-2px;margin-right:4px;"></i>
+        Butuh akun untuk booking? <button onclick="openAuthModal('register')" style="background:none;border:none;color:var(--color-accent);font-weight:700;cursor:pointer;font-family:inherit;font-size:inherit;padding:0;">Daftar gratis di sini</button>
+      </p>
     </div>
   </section>
 
@@ -228,7 +275,7 @@
     </div>
   </div>
 
-  <footer id="site-footer" class="site-footer">
+  <footer class="site-footer">
     <div class="footer-grid">
       <div class="footer-card">
         <div class="footer-title">Tentang EasyCar</div>
@@ -246,9 +293,9 @@
       <div class="footer-card">
         <div class="footer-title">Hubungi Kami</div>
         <ul class="footer-list">
-          <li><i class='bx bxs-phone' style="margin-right:0.35rem;"></i> <a href="tel:+6282276100996">+62 822-7610-0996</a></li>
-          <li><i class='bx bxs-envelope' style="margin-right:0.35rem;"></i> <a href="mailto:support@easycar.id">support@easycar.id</a></li>
-          <li><i class='bx bxl-whatsapp' style="margin-right:0.35rem;"></i> <a href="https://wa.me/6282276100996" target="_blank" rel="noopener noreferrer">WA: +62 822-7610-0996</a></li>
+          <li><i class='bx bxs-phone' style="margin-right:0.35rem;"></i> +62 822-7610-0996</li>
+          <li><i class='bx bxs-envelope' style="margin-right:0.35rem;"></i> support@easycar.id</li>
+          <li><i class='bx bxl-whatsapp' style="margin-right:0.35rem;"></i> WA: +62 822-7610-0996</li>
         </ul>
       </div>
     </div>
