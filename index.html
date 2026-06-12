@@ -604,14 +604,21 @@
     }
 
     function redirectAfterLogin(user) {
-      if (_pendingRedirect) {
-        const target = _pendingRedirect.startsWith("/") ? _pendingRedirect : `/${_pendingRedirect}`;
-        window.location.href = target;
+      const safeRedirect = (() => {
+        if (!_pendingRedirect) return null;
+        const target = _pendingRedirect.trim();
+        if (!target || target === "/index.html" || target === "index.html") return null;
+        if (target.includes("tab=login") || target.includes("tab=register")) return null;
+        return target.startsWith("/") ? target : `/${target}`;
+      })();
+
+      if (safeRedirect) {
+        window.location.replace(safeRedirect);
         return;
       }
-      if (_pendingCarId) { window.location.href = "./pages/user/booking.html?car_id=" + _pendingCarId; return; }
-      if (user?.role === "admin") window.location.href = "./pages/admin/dashboard.html";
-      else window.location.href = "./pages/user/dashboard.html";
+      if (_pendingCarId) { window.location.replace("./pages/user/booking.html?car_id=" + _pendingCarId); return; }
+      const dest = user?.role === "admin" ? "./pages/admin/dashboard.html" : "./pages/user/dashboard.html";
+      window.location.replace(dest);
     }
 
     async function doLogin() {
