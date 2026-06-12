@@ -13,16 +13,27 @@ var supabase = window.supabaseClient;
  * Returns null if not logged in.
  */
 async function getCurrentUser() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return null;
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError || !session?.user) return null;
 
-  const { data: profile } = await supabase
+  const { data: profile, error } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", session.user.id)
-    .single();
+    .maybeSingle();
 
-  return profile || null;
+  if (!error && profile) return profile;
+
+  // Fallback agar sesi login tetap dianggap valid meskipun row profil belum tersedia
+  // atau policy RLS menghalangi pembacaan profil saat pertama kali masuk.
+  return {
+    id: session.user.id,
+    email: session.user.email,
+    full_name: session.user.user_metadata?.full_name || session.user.email,
+    phone: session.user.user_metadata?.phone || null,
+    role: session.user.user_metadata?.role || "user",
+    ...session.user.user_metadata,
+  };
 }
 
 /**
