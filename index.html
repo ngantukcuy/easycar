@@ -440,6 +440,7 @@
     async function loadStats() {
       const { data, error } = await supabase.rpc("get_public_stats");
       const su = document.getElementById("statUnits");
+      const so = document.getElementById("statOrders");
       if (!error && data) {
         if (su) su.textContent = data.available_cars ?? "—";
         if (so) so.textContent = data.total_bookings ?? "—";
