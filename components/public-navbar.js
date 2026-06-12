@@ -76,7 +76,7 @@ async function initPublicNavbar() {
 
     const name    = profile?.full_name || session.user.email;
     const initial = name[0].toUpperCase();
-    const isAdmin = profile?.role === "admin";
+    const isAdmin = normalizeRole(profile?.role) === "admin";
     const dashUrl = isAdmin ? "/pages/admin/dashboard.html" : "/pages/user/dashboard.html";
 
     const authHTML = `

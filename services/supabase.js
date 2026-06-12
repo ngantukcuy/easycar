@@ -8,6 +8,10 @@ var supabase = window.supabaseClient;
 
 // ─── CORE AUTH ───────────────────────────────────────
 
+function normalizeRole(role) {
+  return String(role || "").trim().toLowerCase();
+}
+
 /**
  * Get full user profile from "profiles" table.
  * Returns null if not logged in.
@@ -16,24 +20,54 @@ async function getCurrentUser() {
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
   if (sessionError || !session?.user) return null;
 
+  // Refresh user state once so the current session is not stale after login.
+  await supabase.auth.getUser();
+
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", session.user.id)
     .maybeSingle();
 
-  if (!error && profile) return profile;
+  if (!error && profile) {
+    return {
+      ...profile,
+      role: normalizeRole(profile.role || session.user.user_metadata?.role || session.user.app_metadata?.role || "user"),
+    };
+  }
 
-  // Fallback agar sesi login tetap dianggap valid meskipun row profil belum tersedia
-  // atau policy RLS menghalangi pembacaan profil saat pertama kali masuk.
-  return {
+  const fallbackRole = normalizeRole(session.user.user_metadata?.role || session.user.app_metadata?.role || "user");
+  const fallbackProfile = {
     id: session.user.id,
     email: session.user.email,
     full_name: session.user.user_metadata?.full_name || session.user.email,
-    phone: session.user.user_metadata?.phone || null,
-    role: session.user.user_metadata?.role || "user",
+    phone: session.user.user_metadata?.phone || session.user.app_metadata?.phone || null,
+    role: fallbackRole,
     ...session.user.user_metadata,
+    ...session.user.app_metadata,
   };
+
+  // If the profile row is missing, create it from the current session metadata.
+  if (error?.code === "PGRST116" || error?.message?.toLowerCase().includes("row") || !profile) {
+    const { error: insertError } = await supabase
+      .from("profiles")
+      .upsert({
+        id: session.user.id,
+        email: session.user.email,
+        full_name: fallbackProfile.full_name,
+        phone: fallbackProfile.phone,
+        role: fallbackProfile.role,
+      }, { onConflict: "id" });
+
+    if (!insertError) {
+      return {
+        ...fallbackProfile,
+        role: fallbackProfile.role,
+      };
+    }
+  }
+
+  return fallbackProfile;
 }
 
 /**
@@ -71,7 +105,7 @@ async function requireAdmin() {
     return null;
   }
 
-  if (user.role !== "admin") {
+  if (normalizeRole(user?.role) !== "admin") {
     // redirect non-admin away from admin pages — no flash
     window.location.href = "/pages/user/dashboard.html";
     return null;

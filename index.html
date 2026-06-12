@@ -423,7 +423,7 @@
     function _updateNavbarForUser(user) {
       const nav = document.getElementById("navbarRight");
       if (!nav || !user) return;
-      const dest = user.role === "admin" ? "/pages/admin/dashboard.html" : "/pages/user/dashboard.html";
+      const dest = normalizeRole(user?.role) === "admin" ? "/pages/admin/dashboard.html" : "/pages/user/dashboard.html";
       nav.innerHTML = `
         <a href="${dest}" class="btn btn-sm" style="background:rgba(255,255,255,0.12);color:#fff;border:1.5px solid rgba(255,255,255,0.25);">
           <i class='bx bxs-home'></i> Dashboard
@@ -617,7 +617,7 @@
         return;
       }
       if (_pendingCarId) { window.location.replace("./pages/user/booking.html?car_id=" + _pendingCarId); return; }
-      const dest = user?.role === "admin" ? "./pages/admin/dashboard.html" : "./pages/user/dashboard.html";
+      const dest = normalizeRole(user?.role) === "admin" ? "./pages/admin/dashboard.html" : "./pages/user/dashboard.html";
       window.location.replace(dest);
     }
 
