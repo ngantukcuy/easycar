@@ -114,6 +114,9 @@
           <a href="#cara-pesan" class="btn btn-lg" style="background:rgba(255,255,255,0.1);color:#fff;border:1.5px solid rgba(255,255,255,0.2);">
             <i class='bx bx-info-circle'></i> Cara Booking
           </a>
+          <a href="#siteFooter" class="btn btn-lg" style="background:rgba(255,255,255,0.1);color:#fff;border:1.5px solid rgba(255,255,255,0.2);">
+            <i class='bx bx-info-circle'></i> Tentang Kami
+          </a>
         </div>
       </div>
     </div>
@@ -253,21 +256,6 @@
     </div>
   </section>
 
-  <!-- ═══ CTA ═══ -->
-  <section style="max-width:1200px;margin:0 auto;padding:4rem 2rem;">
-    <div style="background:linear-gradient(135deg,#0f2347,#1a3c6e);border-radius:24px;padding:3rem 2rem;position:relative;overflow:hidden;text-align:center;">
-      <div style="position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:rgba(255,255,255,0.04);border-radius:50%;"></div>
-      <div style="position:absolute;bottom:-40px;left:5%;width:150px;height:150px;background:rgba(232,93,4,0.1);border-radius:50%;"></div>
-      <div style="position:relative;z-index:1;">
-        <h2 style="color:#fff;font-size:1.75rem;font-weight:800;margin-bottom:0.75rem;">Siap Mulai Perjalanan?</h2>
-        <p style="color:rgba(255,255,255,0.6);margin-bottom:2rem;">Daftar sekarang dan nikmati kemudahan rental kendaraan</p>
-        <button onclick="openAuthModal('register')" class="btn btn-accent btn-lg" style="display:inline-flex;">
-          <i class='bx bx-user-plus'></i> Daftar Gratis
-        </button>
-      </div>
-    </div>
-  </section>
-
   <!-- Car Detail Modal -->
   <div id="carDetailModal" class="modal-overlay" onclick="handleCarModalClick(event)">
     <div id="carDetailBox" style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;">
@@ -275,7 +263,7 @@
     </div>
   </div>
 
-  <footer class="site-footer">
+  <footer id="siteFooter" class="site-footer">
     <div class="footer-grid">
       <div class="footer-card">
         <div class="footer-title">Tentang EasyCar</div>
