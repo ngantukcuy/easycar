@@ -36,14 +36,19 @@ END $$;
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, email, role)
+  INSERT INTO public.profiles (id, full_name, email, phone, role)
   VALUES (
     NEW.id,
     NEW.raw_user_meta_data->>'full_name',
     NEW.email,
+    NEW.raw_user_meta_data->>'phone',
     COALESCE(NEW.raw_user_meta_data->>'role', 'user')
   )
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (id) DO UPDATE SET
+    full_name = EXCLUDED.full_name,
+    email = EXCLUDED.email,
+    phone = EXCLUDED.phone,
+    role = COALESCE(EXCLUDED.role, profiles.role);
   RETURN NEW;
 END;
 $$;

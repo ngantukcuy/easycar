@@ -36,7 +36,7 @@ async function requireLogin() {
   const user = await getCurrentUser();
   if (!user) {
     const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
-    window.location.href = `/auth.html?tab=login&redirect=${returnTo}`;
+    window.location.href = `/index.html?tab=login&redirect=${returnTo}`;
     return null;
   }
   _hideAuthScreen();
@@ -56,7 +56,7 @@ async function requireAdmin() {
   const user = await getCurrentUser();
 
   if (!user) {
-    window.location.href = "/auth.html";
+    window.location.href = "/index.html?tab=login";
     return null;
   }
 

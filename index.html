@@ -401,7 +401,7 @@
   <script src="./components/public-navbar.js"></script>
 
   <script>
-    let allCars = []; let activeFilter = "all"; let searchTerm = ""; let _pendingCarId = null;
+    let allCars = []; let activeFilter = "all"; let searchTerm = ""; let _pendingCarId = null; let _pendingRedirect = null;
 
     (async () => {
       // Update navbar jika sudah login
@@ -415,6 +415,7 @@
 
       // Check URL params untuk auto-open modal
       const params = new URLSearchParams(window.location.search);
+      _pendingRedirect = params.get("redirect") ? decodeURIComponent(params.get("redirect")) : null;
       if (params.get("tab") === "login")    openAuthModal("login");
       if (params.get("tab") === "register") openAuthModal("register");
     })();
@@ -603,6 +604,11 @@
     }
 
     function redirectAfterLogin(user) {
+      if (_pendingRedirect) {
+        const target = _pendingRedirect.startsWith("/") ? _pendingRedirect : `/${_pendingRedirect}`;
+        window.location.href = target;
+        return;
+      }
       if (_pendingCarId) { window.location.href = "./pages/user/booking.html?car_id=" + _pendingCarId; return; }
       if (user?.role === "admin") window.location.href = "./pages/admin/dashboard.html";
       else window.location.href = "./pages/user/dashboard.html";
@@ -634,12 +640,23 @@
       const successEl = document.getElementById("regSuccess");
       const name  = document.getElementById("regName").value.trim();
       const email = document.getElementById("regEmail").value.trim();
+      const phone = document.getElementById("regPhone").value.trim();
       const pass  = document.getElementById("regPass").value;
       errEl.style.display = successEl.style.display = "none";
-      if (!name || !email || !pass) { errEl.textContent = "Lengkapi semua field."; errEl.style.display = "block"; return; }
+      if (!name || !email || !phone || !pass) { errEl.textContent = "Lengkapi semua field."; errEl.style.display = "block"; return; }
       if (pass.length < 6) { errEl.textContent = "Password minimal 6 karakter."; errEl.style.display = "block"; return; }
       _setAuthBtnLoading(btn, true);
-      const { error } = await supabase.auth.signUp({ email, password: pass, options: { data: { full_name: name, role:"user" } } });
+      const { error } = await supabase.auth.signUp({
+        email,
+        password: pass,
+        options: {
+          data: {
+            full_name: name,
+            phone: phone,
+            role: "user"
+          }
+        }
+      });
       _setAuthBtnLoading(btn, false);
       if (error) {
         errEl.textContent = error.message.includes("already registered") ? "Email sudah terdaftar. Silahkan masuk." : error.message;

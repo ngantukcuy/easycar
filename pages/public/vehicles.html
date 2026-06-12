@@ -340,7 +340,7 @@
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         const returnUrl = encodeURIComponent(`/pages/user/booking.html?car_id=${carId}`);
-        window.location.href = `/auth.html?tab=login&redirect=${returnUrl}`;
+        window.location.href = `/index.html?tab=login&redirect=${returnUrl}`;
         return;
       }
       window.location.href = `/pages/user/booking.html?car_id=${carId}`;
