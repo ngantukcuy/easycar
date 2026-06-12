@@ -33,8 +33,6 @@ DO $$ BEGIN
   END IF;
 END $$;
 
--- FIX: trigger tidak lagi overwrite role yang sudah ada di DB
--- role hanya di-set saat INSERT pertama kali, tidak pernah di-update
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
@@ -47,10 +45,10 @@ BEGIN
     COALESCE(NEW.raw_user_meta_data->>'role', 'user')
   )
   ON CONFLICT (id) DO UPDATE SET
-    full_name = COALESCE(EXCLUDED.full_name, profiles.full_name),
-    email     = COALESCE(EXCLUDED.email,     profiles.email),
-    phone     = COALESCE(EXCLUDED.phone,     profiles.phone);
-    -- SENGAJA tidak update role — role hanya bisa diubah admin via dashboard
+    full_name = EXCLUDED.full_name,
+    email = EXCLUDED.email,
+    phone = EXCLUDED.phone,
+    role = COALESCE(EXCLUDED.role, profiles.role);
   RETURN NEW;
 END;
 $$;
@@ -255,7 +253,9 @@ CREATE POLICY "docs_user_read"
 
 CREATE POLICY "docs_admin"
   ON booking_documents FOR ALL
-  USING (public.is_admin());
+  USING (
+    EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin')
+  );
 
 
 -- ─────────────────────────────────────────────────────
@@ -300,30 +300,7 @@ $$;
 
 
 -- ─────────────────────────────────────────────────────
--- 7. FUNGSI is_admin() — WAJIB dibuat SEBELUM RLS policies
--- ─────────────────────────────────────────────────────
--- FIX CRITICAL: Policies yang query ke tabel profiles dari dalam
--- policy profiles sendiri menyebabkan infinite recursion → HTTP 500.
--- Solusi: buat fungsi SECURITY DEFINER yang bypass RLS saat cek role.
-CREATE OR REPLACE FUNCTION public.is_admin()
-RETURNS BOOLEAN
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE id = auth.uid() AND role = 'admin'
-  );
-$$;
-
-GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated;
-GRANT EXECUTE ON FUNCTION public.is_admin() TO anon;
-
-
--- ─────────────────────────────────────────────────────
--- 8. RLS
+-- 7. RLS
 -- ─────────────────────────────────────────────────────
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cars     ENABLE ROW LEVEL SECURITY;
@@ -331,7 +308,6 @@ ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE promos   ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "profiles_self"         ON profiles;
-DROP POLICY IF EXISTS "profiles_insert"       ON profiles;
 DROP POLICY IF EXISTS "profiles_update"       ON profiles;
 DROP POLICY IF EXISTS "profiles_admin"        ON profiles;
 DROP POLICY IF EXISTS "cars_read_all"         ON cars;
@@ -343,26 +319,24 @@ DROP POLICY IF EXISTS "bookings_admin"        ON bookings;
 DROP POLICY IF EXISTS "promos_read"           ON promos;
 DROP POLICY IF EXISTS "promos_admin"          ON promos;
 
--- Profiles: pakai is_admin() bukan subquery inline → tidak recursive
 CREATE POLICY "profiles_self"   ON profiles FOR SELECT  USING (auth.uid() = id);
-CREATE POLICY "profiles_insert" ON profiles FOR INSERT  WITH CHECK (auth.uid() = id);
 CREATE POLICY "profiles_update" ON profiles FOR UPDATE  USING (auth.uid() = id);
-CREATE POLICY "profiles_admin"  ON profiles FOR ALL     USING (public.is_admin());
+CREATE POLICY "profiles_admin"  ON profiles FOR ALL     USING (EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
 
 CREATE POLICY "cars_read_all"   ON cars FOR SELECT  USING (true);
-CREATE POLICY "cars_admin"      ON cars FOR ALL     USING (public.is_admin());
+CREATE POLICY "cars_admin"      ON cars FOR ALL     USING (EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
 
 CREATE POLICY "bookings_user_read"   ON bookings FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "bookings_user_insert" ON bookings FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "bookings_user_cancel" ON bookings FOR UPDATE USING (auth.uid() = user_id AND status IN ('Menunggu', 'Menunggu Konfirmasi'));
-CREATE POLICY "bookings_admin"       ON bookings FOR ALL   USING (public.is_admin());
+CREATE POLICY "bookings_admin"       ON bookings FOR ALL   USING (EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
 
 CREATE POLICY "promos_read"  ON promos FOR SELECT USING (status = 'aktif');
-CREATE POLICY "promos_admin" ON promos FOR ALL   USING (public.is_admin());
+CREATE POLICY "promos_admin" ON promos FOR ALL   USING (EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
 
 
 -- ─────────────────────────────────────────────────────
--- 9. INDEXES
+-- 8. INDEXES
 -- ─────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_bookings_car_dates  ON bookings (car_id, tanggal_mulai, tanggal_selesai, status);
 CREATE INDEX IF NOT EXISTS idx_bookings_user       ON bookings (user_id, created_at DESC);

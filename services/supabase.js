@@ -1,5 +1,5 @@
 if (!window.supabaseClient) {
-  const SUPABASE_URL     = "https://rgcjbmcmhlsifpstboyd.supabase.co";
+  const SUPABASE_URL      = "https://rgcjbmcmhlsifpstboyd.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnY2pibWNtaGxzaWZwc3Rib3lkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODc5NTYsImV4cCI6MjA5MzY2Mzk1Nn0.DortOaC56Z-OkUYcAzOjPIXAFd4wtsoXIX1GKjtsydk";
   window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
@@ -13,15 +13,17 @@ function normalizeRole(role) {
 }
 
 /**
- * Get full user profile from "profiles" table.
- * Returns null if not logged in.
+ * getCurrentUser()
+ * Ambil profil lengkap dari tabel "profiles".
+ * Returns null jika tidak login.
+ *
+ * FIX: Sebelumnya upsert profile saat fallback bisa overwrite role admin.
+ * Sekarang upsert TIDAK menyertakan role (biarkan nilai DB yang berlaku).
+ * Role hanya dibaca dari DB — tidak pernah ditulis ulang dari session metadata.
  */
 async function getCurrentUser() {
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
   if (sessionError || !session?.user) return null;
-
-  // Refresh user state once so the current session is not stale after login.
-  await supabase.auth.getUser();
 
   const { data: profile, error } = await supabase
     .from("profiles")
@@ -30,51 +32,69 @@ async function getCurrentUser() {
     .maybeSingle();
 
   if (!error && profile) {
+    // Profil ditemukan — role dari DB adalah sumber kebenaran
     return {
       ...profile,
-      role: normalizeRole(profile.role || session.user.user_metadata?.role || session.user.app_metadata?.role || "user"),
+      role: normalizeRole(profile.role || "user"),
     };
   }
 
-  const fallbackRole = normalizeRole(session.user.user_metadata?.role || session.user.app_metadata?.role || "user");
-  const fallbackProfile = {
-    id: session.user.id,
-    email: session.user.email,
-    full_name: session.user.user_metadata?.full_name || session.user.email,
-    phone: session.user.user_metadata?.phone || session.user.app_metadata?.phone || null,
-    role: fallbackRole,
-    ...session.user.user_metadata,
-    ...session.user.app_metadata,
-  };
+  // Jika error bukan "row not found", log untuk debugging
+  if (error && error.code !== "PGRST116") {
+    console.error("[getCurrentUser] profiles query error:", error.message, error.code);
+  }
 
-  // If the profile row is missing, create it from the current session metadata.
-  if (error?.code === "PGRST116" || error?.message?.toLowerCase().includes("row") || !profile) {
-    const { error: insertError } = await supabase
+  // Profil belum ada di DB → buat baru (hanya untuk user baru)
+  // PENTING: jangan sertakan role di upsert ini — trigger handle_new_user yang handle
+  if (!profile) {
+    const metaName  = session.user.user_metadata?.full_name || session.user.email;
+    const metaPhone = session.user.user_metadata?.phone || null;
+
+    const { data: newProfile, error: upsertError } = await supabase
       .from("profiles")
       .upsert({
-        id: session.user.id,
-        email: session.user.email,
-        full_name: fallbackProfile.full_name,
-        phone: fallbackProfile.phone,
-        role: fallbackProfile.role,
-      }, { onConflict: "id" });
+        id:        session.user.id,
+        email:     session.user.email,
+        full_name: metaName,
+        phone:     metaPhone,
+        // role TIDAK disertakan — biarkan nilai DEFAULT 'user' atau nilai yang ada
+      }, { onConflict: "id" })
+      .select()
+      .maybeSingle();
 
-    if (!insertError) {
+    if (!upsertError && newProfile) {
       return {
-        ...fallbackProfile,
-        role: fallbackProfile.role,
+        ...newProfile,
+        role: normalizeRole(newProfile.role || "user"),
       };
+    }
+
+    if (upsertError) {
+      console.error("[getCurrentUser] upsert error:", upsertError.message);
     }
   }
 
-  return fallbackProfile;
+  // Last resort fallback — pakai session metadata saja
+  // role dari metadata dipakai hanya kalau DB benar-benar tidak bisa diakses
+  const fallbackRole = normalizeRole(
+    session.user.user_metadata?.role ||
+    session.user.app_metadata?.role  ||
+    "user"
+  );
+
+  return {
+    id:        session.user.id,
+    email:     session.user.email,
+    full_name: session.user.user_metadata?.full_name || session.user.email,
+    phone:     session.user.user_metadata?.phone || null,
+    role:      fallbackRole,
+  };
 }
 
 /**
  * requireLogin()
- * Call on pages that need any logged-in user.
- * Returns the profile or null (and redirects to login).
- * Shows a full-screen loader while checking — prevents flicker.
+ * Panggil di halaman yang butuh user login.
+ * Returns profil atau null (dan redirect ke login).
  */
 async function requireLogin() {
   _showAuthScreen();
@@ -92,9 +112,12 @@ async function requireLogin() {
 
 /**
  * requireAdmin()
- * Call on pages that need admin role.
- * Returns the admin profile or null (and redirects).
- * NEVER renders admin UI before role is confirmed.
+ * Panggil di halaman admin.
+ * Returns profil admin atau null (dan redirect).
+ *
+ * FIX: Dulu redirect ke user/dashboard jika role bukan admin.
+ * Sekarang jika role bukan admin → redirect ke login dengan pesan error,
+ * BUKAN ke user dashboard, agar tidak confusing.
  */
 async function requireAdmin() {
   _showAuthScreen();
@@ -106,7 +129,8 @@ async function requireAdmin() {
   }
 
   if (normalizeRole(user?.role) !== "admin") {
-    // redirect non-admin away from admin pages — no flash
+    console.warn("[requireAdmin] Akses ditolak. Role user:", user?.role, "| ID:", user?.id);
+    // Redirect ke halaman user yang sesuai, bukan paksa ke admin
     window.location.href = "/pages/user/dashboard.html";
     return null;
   }
@@ -119,8 +143,7 @@ async function requireAdmin() {
 
 /**
  * getSessionUser()
- * Lightweight: just returns session user meta (no profile fetch).
- * Useful for navbar state.
+ * Ringan: hanya kembalikan session user meta (tanpa fetch profile).
  */
 async function getSessionUser() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -175,46 +198,35 @@ function formatTanggalShort(dateStr) {
 
 function statusBadgeClass(status) {
   const map = {
-    "Menunggu":     "badge-warning",
-    "Dikonfirmasi": "badge-info",
-    "Aktif":        "badge-success",
-    "Selesai":      "badge-secondary",
-    "Dibatalkan":   "badge-danger",
-    "Tersedia":     "badge-success",
-    "Disewa":       "badge-warning",
-    "Perawatan":    "badge-danger",
+    "Menunggu":              "badge-warning",
+    "Menunggu Konfirmasi":   "badge-warning",
+    "Dikonfirmasi":          "badge-info",
+    "Aktif":                 "badge-success",
+    "Selesai":               "badge-secondary",
+    "Dibatalkan":            "badge-danger",
+    "Pembayaran Ditolak":    "badge-danger",
+    "Tersedia":              "badge-success",
+    "Disewa":                "badge-warning",
+    "Perawatan":             "badge-danger",
   };
   return map[status] || "badge-secondary";
 }
 
 // ─── ANTI DOUBLE BOOKING ─────────────────────────────
 
-/**
- * checkAvailability(car_id, start_date, end_date)
- * Returns true if the car is AVAILABLE for those dates.
- * Menggunakan Supabase RPC agar cek dilakukan di sisi database.
- */
 async function checkAvailability(carId, startDate, endDate) {
   const { data, error } = await supabase.rpc("check_car_availability", {
     p_car_id: carId,
     p_start:  startDate,
     p_end:    endDate,
   });
-
   if (error) {
     console.error("Availability check error:", error);
-    return false; // fail-safe: deny
+    return false;
   }
-
-  return data === true; // true = tersedia
+  return data === true;
 }
 
-/**
- * insertBookingAtomic(payload)
- * Insert booking dengan cek ketersediaan dalam 1 transaksi database.
- * Mencegah race condition: 2 user booking mobil & tanggal yang sama.
- * Returns { success, booking_id, kode_booking, error, message }
- */
 async function insertBookingAtomic(payload) {
   const { data, error } = await supabase.rpc("insert_booking_if_available", {
     p_user_id:                    payload.user_id,
@@ -241,22 +253,12 @@ async function insertBookingAtomic(payload) {
     p_sudah_dibayar:              payload.sudah_dibayar,
     p_sisa_pelunasan:             payload.sisa_pelunasan,
   });
-
   if (error) {
     return { success: false, error: "RPC_ERROR", message: error.message };
   }
-
-  return data; // { success, booking_id, kode_booking } atau { success:false, error, message }
+  return data;
 }
 
-/**
- * getUnavailableDates(car_id)
- * Returns array of date-range objects [{from, to}] for disabling in calendar.
- * PENTING: Pakai RPC get_unavailable_dates() yang SECURITY DEFINER
- * agar bisa lihat booking SEMUA user, bukan hanya booking sendiri.
- * Query langsung ke tabel bookings kena RLS → hanya lihat booking sendiri
- * → tanggal booking user lain tidak ter-disable → double booking bisa terjadi!
- */
 async function getUnavailableDates(carId) {
   const { data, error } = await supabase.rpc("get_unavailable_dates", {
     p_car_id: carId,
