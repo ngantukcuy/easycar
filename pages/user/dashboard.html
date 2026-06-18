@@ -107,6 +107,18 @@
 
     <main class="page-content fade-in">
 
+      <!-- Banner Pelunasan Tertunda -->
+      <div id="pelunasanBanner" style="display:none;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:14px;padding:0.875rem 1.125rem;margin-bottom:1.25rem;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+        <i class='bx bx-wallet' style="font-size:1.5rem;color:#e85d04;flex-shrink:0;"></i>
+        <div style="flex:1;min-width:200px;">
+          <p style="font-weight:700;color:#9a3412;font-size:0.85rem;margin:0;">Ada pesanan menunggu pelunasan</p>
+          <p id="pelunasanBannerText" style="font-size:0.78rem;color:#9a3412;margin:0.1rem 0 0;">Lunasi sisa pembayaran agar kendaraan dapat diaktifkan.</p>
+        </div>
+        <a href="/pages/user/my-orders.html" class="btn btn-sm" style="background:#e85d04;color:#fff;border-color:#e85d04;flex-shrink:0;">
+          <i class='bx bx-right-arrow-alt'></i> Bayar Sekarang
+        </a>
+      </div>
+
       <!-- Hero Banner -->
       <div class="hero-banner">
         <div style="position:relative;z-index:1;">
@@ -188,6 +200,9 @@
       await loadCars();
       document.body.classList.add("ec-ready");
 
+      // ── Cek apakah ada booking yang menunggu pelunasan ──
+      checkPendingPelunasan(user.id);
+
       // ── REALTIME: notifikasi update booking di dashboard ──
       EasyCarRealtime.subscribeUserBookings(user.id, {
         onUpdate: (payload) => {
@@ -196,9 +211,31 @@
           if (status === "Dikonfirmasi" || status === "Ditolak") {
             setSidebarBadge(1);
           }
+          checkPendingPelunasan(user.id);
         },
       });
     })();
+
+    async function checkPendingPelunasan(userId) {
+      const { data } = await supabase
+        .from("bookings")
+        .select("kode_booking, total_harga, dp_amount, sisa_pelunasan")
+        .eq("user_id", userId)
+        .eq("status_pembayaran", "Menunggu Pelunasan")
+        .order("created_at", { ascending: false })
+        .limit(1);
+      const banner = document.getElementById("pelunasanBanner");
+      if (data && data.length) {
+        const o = data[0];
+        const dp = o.dp_amount || 0;
+        const sisa = o.sisa_pelunasan != null ? o.sisa_pelunasan : Math.max(0, (o.total_harga || 0) - dp);
+        document.getElementById("pelunasanBannerText").textContent =
+          `Booking ${o.kode_booking || ""} — lunasi sisa ${formatRupiah(sisa)} agar kendaraan dapat diaktifkan.`;
+        banner.style.display = "flex";
+      } else {
+        banner.style.display = "none";
+      }
+    }
 
     function getGreeting() {
       const h = new Date().getHours();

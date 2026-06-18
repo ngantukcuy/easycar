@@ -142,6 +142,8 @@ window.EasyCarRealtime = (function () {
 
           if (payload.eventType === "UPDATE") {
             const old = payload.old;
+            let notified = false;
+
             if (old.status !== status) {
               if (status === "Dikonfirmasi") {
                 showNotif(
@@ -150,6 +152,7 @@ window.EasyCarRealtime = (function () {
                   "🎉 Booking Dikonfirmasi",
                   7000
                 );
+                notified = true;
               } else if (status === "Dibatalkan") {
                 const alasan = booking.alasan_tolak || "Tidak ada keterangan.";
                 showNotif(
@@ -158,15 +161,40 @@ window.EasyCarRealtime = (function () {
                   "❌ Booking Ditolak",
                   8000
                 );
+                notified = true;
               } else if (status === "Aktif") {
                 showNotif(
                   `Booking <strong>${booking.kode_booking || ""}</strong> sedang aktif. Selamat menikmati perjalanan!`,
                   "info",
                   "🚗 Booking Aktif"
                 );
+                notified = true;
+              } else if (status === "Selesai") {
+                showNotif(
+                  `Booking <strong>${booking.kode_booking || ""}</strong> telah <strong>selesai</strong>. Terima kasih telah menggunakan EasyCar!`,
+                  "success",
+                  "🏁 Booking Selesai",
+                  7000
+                );
+                notified = true;
               }
-              _incrementBadge();
             }
+
+            // Notif khusus saat admin meminta pelunasan (status_pembayaran berubah,
+            // status booking-nya sendiri tidak berubah — masih "Dikonfirmasi")
+            if (!notified && old.status_pembayaran !== booking.status_pembayaran) {
+              if (booking.status_pembayaran === "Menunggu Pelunasan") {
+                showNotif(
+                  `Booking <strong>${booking.kode_booking || ""}</strong> siap diaktifkan. Silakan lunasi sisa pembayaran melalui menu <strong>Pesanan Saya</strong>.`,
+                  "warning",
+                  "💳 Pelunasan Diperlukan",
+                  8000
+                );
+                notified = true;
+              }
+            }
+
+            if (notified) _incrementBadge();
             if (callbacks.onUpdate) callbacks.onUpdate(payload);
           }
 

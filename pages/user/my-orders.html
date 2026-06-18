@@ -153,6 +153,18 @@
     </div>
   </div>
 
+  <!-- Pelunasan (Sisa Pembayaran) Modal -->
+  <div id="pelunasanOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:220;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#fff;border-radius:24px;box-shadow:0 24px 64px rgba(0,0,0,0.2);width:100%;max-width:440px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.25rem 0.875rem;border-bottom:1px solid var(--color-border);">
+        <h4 style="font-family:var(--font-body);font-weight:800;color:var(--color-primary);margin:0;font-size:1rem;">💳 Lunasi Pembayaran</h4>
+        <button onclick="closePelunasan()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--color-text-muted);">✕</button>
+      </div>
+      <div id="pelunasanContent" style="padding:1.25rem;"></div>
+    </div>
+  </div>
+
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/services/supabase.js"></script>
   <script src="/services/realtime.js"></script>
@@ -165,6 +177,7 @@
     let activeFilter = "all";
     let openBookingId = null;
     let currentUser   = null;
+    let pendingPelunasanId = null;
 
     (async () => {
       currentUser = await requireLogin();
@@ -238,10 +251,20 @@
       const deposit = o.deposit_amount || 0;
       const bayarNow = dp + deposit;
       const statusPay = o.status_pembayaran || (dp > 0 ? "DP" : "Belum Bayar");
+      const sisa = o.sisa_pelunasan != null ? o.sisa_pelunasan : Math.max(0, (o.total_harga || 0) - dp);
+      const needsPelunasan = o.status_pembayaran === "Menunggu Pelunasan";
+      const waitingPelunasanConfirm = o.status === "Dikonfirmasi" && o.status_pembayaran === "Menunggu Konfirmasi";
 
       let tolakBanner = "";
       if ((o.status === "Dibatalkan") && o.alasan_tolak) {
         tolakBanner = `<div class="tolak-banner"><i class='bx bxs-error-circle'></i><div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${o.alasan_tolak}</div></div></div>`;
+      }
+
+      let pelunasanBanner = "";
+      if (needsPelunasan) {
+        pelunasanBanner = `<div class="tolak-banner" style="background:#fff7ed;border-color:#fed7aa;"><i class='bx bx-wallet' style="color:#e85d04;"></i><div><div class="tolak-title" style="color:#9a3412;">Kendaraan Siap Diaktifkan</div><div class="tolak-alasan" style="color:#9a3412;">Lunasi sisa pembayaran ${formatRupiah(sisa)} agar booking bisa diaktifkan.</div></div></div>`;
+      } else if (waitingPelunasanConfirm) {
+        pelunasanBanner = `<div class="tolak-banner" style="background:#eff6ff;border-color:#93c5fd;"><i class='bx bx-time-five' style="color:#2563eb;"></i><div><div class="tolak-title" style="color:#1d4ed8;">Bukti Pelunasan Terkirim</div><div class="tolak-alasan" style="color:#1d4ed8;">Menunggu konfirmasi admin sebelum kendaraan diaktifkan.</div></div></div>`;
       }
 
       return `
@@ -270,6 +293,7 @@
               </div>
             </div>
             ${tolakBanner}
+            ${pelunasanBanner}
           </div>
           <div class="order-card-footer">
             <button onclick="event.stopPropagation();openDetail('${o.id}')" class="btn btn-ghost btn-sm" style="font-size:0.75rem;">
@@ -278,6 +302,7 @@
             <button onclick="event.stopPropagation();doPrintA4('${o.id}')" class="btn btn-sm" style="font-size:0.75rem;background:#1e293b;color:#fff;border-color:#1e293b;">
               <i class='bx bx-printer'></i> Invoice
             </button>
+            ${needsPelunasan ? `<button onclick="event.stopPropagation();openPelunasan('${o.id}')" class="btn btn-sm" style="font-size:0.75rem;background:#e85d04;color:#fff;border-color:#e85d04;margin-left:auto;"><i class='bx bx-wallet'></i> Bayar Sekarang</button>` : ""}
             ${(o.status === "Dibatalkan") ? `<a href="/pages/user/booking.html${car.id ? '?car_id='+car.id : ''}" onclick="event.stopPropagation()" class="btn btn-accent btn-sm" style="font-size:0.75rem;"><i class='bx bx-refresh'></i> Rebooking </a>` : ""}
           </div>
         </div>`;
@@ -295,6 +320,8 @@
       const bayarNow = dp + deposit;
       const sisa     = o.sisa_pelunasan != null ? o.sisa_pelunasan : Math.max(0, (o.total_harga || 0) - dp);
       const statusPay = o.status_pembayaran || (dp > 0 ? "DP" : "Belum Bayar");
+      const needsPelunasan = o.status_pembayaran === "Menunggu Pelunasan";
+      const waitingPelunasanConfirm = o.status === "Dikonfirmasi" && o.status_pembayaran === "Menunggu Konfirmasi";
 
       // Status timeline logic
       const ALL_STATUSES = ["Menunggu Konfirmasi","Dikonfirmasi","Aktif","Selesai"];
@@ -409,6 +436,18 @@
             <div><div class="tolak-title">Alasan Penolakan Admin</div><div class="tolak-alasan">${o.alasan_tolak}</div></div>
           </div>` : ""}
 
+          ${needsPelunasan ? `
+          <div class="tolak-banner" style="margin:0;background:#fff7ed;border-color:#fed7aa;">
+            <i class='bx bx-wallet' style="color:#e85d04;"></i>
+            <div><div class="tolak-title" style="color:#9a3412;">Kendaraan Siap Diaktifkan</div><div class="tolak-alasan" style="color:#9a3412;">Lunasi sisa pembayaran ${formatRupiah(sisa)} agar booking dapat diaktifkan oleh admin.</div></div>
+          </div>` : ""}
+
+          ${waitingPelunasanConfirm ? `
+          <div class="tolak-banner" style="margin:0;background:#eff6ff;border-color:#93c5fd;">
+            <i class='bx bx-time-five' style="color:#2563eb;"></i>
+            <div><div class="tolak-title" style="color:#1d4ed8;">Bukti Pelunasan Terkirim</div><div class="tolak-alasan" style="color:#1d4ed8;">Menunggu konfirmasi admin sebelum kendaraan diaktifkan.</div></div>
+          </div>` : ""}
+
           <!-- Riwayat Status -->
           <div>
             <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 0.75rem;">📌 Riwayat Status</p>
@@ -418,7 +457,16 @@
 
       // Action buttons
       const actionsEl = document.getElementById("detailActions");
-      let actionsHTML = `
+      let actionsHTML = "";
+
+      if (needsPelunasan) {
+        actionsHTML += `
+          <button onclick="closeDetail();openPelunasan('${id}')" class="btn btn-sm" style="width:100%;justify-content:center;background:#e85d04;color:#fff;border-color:#e85d04;">
+            <i class='bx bx-wallet'></i> Bayar Sekarang
+          </button>`;
+      }
+
+      actionsHTML += `
         <button onclick="doPrintA4('${id}')" class="btn btn-sm" style="width:100%;justify-content:center;background:#1e293b;color:#fff;border-color:#1e293b;">
           <i class='bx bx-printer'></i> Cetak Invoice A4
         </button>`;
@@ -458,6 +506,88 @@
     document.getElementById("detailOverlay").addEventListener("click", e => {
       if (e.target === e.currentTarget) closeDetail();
     });
+
+    // ─── PELUNASAN (SISA PEMBAYARAN) ───
+    function openPelunasan(id) {
+      const o = allOrders.find(x => x.id === id);
+      if (!o) return;
+      pendingPelunasanId = id;
+      const dp   = o.dp_amount || 0;
+      const sisa = o.sisa_pelunasan != null ? o.sisa_pelunasan : Math.max(0, (o.total_harga || 0) - dp);
+      const kode = o.kode_booking || ("EC" + o.id.slice(-6).toUpperCase());
+
+      document.getElementById("pelunasanContent").innerHTML = `
+        <p style="font-size:0.825rem;color:var(--color-text-muted);margin:0 0 1rem;line-height:1.6;">
+          Booking <strong style="color:var(--color-primary);">${kode}</strong> sudah dikonfirmasi. Sebelum kendaraan diaktifkan, silakan lunasi sisa pembayaran berikut, lalu kirim bukti transfernya.
+        </p>
+        <div class="card" style="padding:1.25rem;text-align:center;margin-bottom:1rem;">
+          <img src="/assets/qris-gopay.jpeg" alt="QRIS GoPay" style="max-width:200px;width:100%;border-radius:8px;margin-bottom:1rem;"
+            onerror="this.style.display='none';" />
+          <div style="background:var(--color-accent);color:#fff;border-radius:var(--radius-md);padding:0.875rem;">
+            <p style="font-size:0.75rem;margin:0 0 0.25rem;opacity:0.85;">Total sisa pembayaran</p>
+            <p style="font-size:1.25rem;font-weight:800;margin:0;">${formatRupiah(sisa)}</p>
+          </div>
+        </div>
+        <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.5rem;">Upload Bukti Pembayaran *</label>
+        <input type="file" id="pelunasanFile" accept="image/*,.pdf" class="ec-input" style="margin-bottom:0.5rem;" />
+        <div id="pelunasanErr" style="display:none;color:#dc2626;font-size:0.78rem;margin-bottom:0.5rem;"></div>
+        <button id="pelunasanSubmitBtn" onclick="submitPelunasan()" class="btn btn-accent" style="width:100%;justify-content:center;">
+          <i class='bx bx-send'></i> Kirim Bukti Pembayaran
+        </button>
+      `;
+      document.getElementById("pelunasanOverlay").style.display = "flex";
+    }
+
+    function closePelunasan() {
+      document.getElementById("pelunasanOverlay").style.display = "none";
+      pendingPelunasanId = null;
+    }
+    document.getElementById("pelunasanOverlay").addEventListener("click", e => {
+      if (e.target === e.currentTarget) closePelunasan();
+    });
+
+    async function submitPelunasan() {
+      const fileInput = document.getElementById("pelunasanFile");
+      const errEl = document.getElementById("pelunasanErr");
+      const file = fileInput.files[0];
+      if (!file) {
+        errEl.textContent = "Upload bukti pembayaran terlebih dahulu.";
+        errEl.style.display = "block";
+        return;
+      }
+      errEl.style.display = "none";
+
+      const btn = document.getElementById("pelunasanSubmitBtn");
+      setButtonLoading(btn, true);
+
+      try {
+        const ext  = file.name.split('.').pop().toLowerCase();
+        const path = `${pendingPelunasanId}/bukti-pelunasan-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from('booking-documents')
+          .upload(path, file, { upsert: true, contentType: file.type });
+        if (upErr) throw upErr;
+
+        const { data: urlData } = supabase.storage.from('booking-documents').getPublicUrl(path);
+        const publicUrl = urlData?.publicUrl;
+        if (!publicUrl) throw new Error('Gagal mendapatkan URL publik file.');
+
+        const { error } = await supabase.from('bookings').update({
+          bukti_bayar_url:   publicUrl,
+          status_pembayaran: 'Menunggu Konfirmasi',
+        }).eq('id', pendingPelunasanId);
+        if (error) throw error;
+
+        setButtonLoading(btn, false);
+        showToast("Bukti pembayaran terkirim! Menunggu konfirmasi admin.", "success");
+        closePelunasan();
+        await loadOrders();
+      } catch (e) {
+        setButtonLoading(btn, false);
+        errEl.textContent = "Gagal mengirim bukti: " + (e.message || "Coba lagi.");
+        errEl.style.display = "block";
+      }
+    }
 
 // ── SCROLL TO TOP BUTTON ──
     (function initScrollTop() {

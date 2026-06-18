@@ -317,7 +317,8 @@
     function payBadgeClass(sp) {
       if (!sp || sp === 'Belum Bayar')           return 'badge-pay-belum';
       if (sp === 'Menunggu Konfirmasi')           return 'badge-pay-menunggu';
-      if (sp === 'Dikonfirmasi')                  return 'badge-pay-konfirmasi';
+      if (sp === 'Menunggu Pelunasan')            return 'badge-pay-menunggu';
+      if (sp === 'Dikonfirmasi' || sp === 'Lunas') return 'badge-pay-konfirmasi';
       if (sp === 'Ditolak' || sp === 'Dibatalkan') return 'badge-pay-ditolak';
       return 'badge-pay-belum';
     }
@@ -362,6 +363,7 @@
               <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;justify-content:flex-end;">
                 <span class="badge ${statusBadgeClass(b.status)}">${b.status}</span>
                 ${isMenunggu ? `<span style="display:inline-flex;align-items:center;gap:0.2rem;background:#fef9c3;color:#854d0e;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.68rem;font-weight:700;"><i class='bx bx-time-five'></i> Butuh Aksi</span>` : ""}
+                ${sp === "Menunggu Pelunasan" ? `<span style="display:inline-flex;align-items:center;gap:0.2rem;background:#ffedd5;color:#9a3412;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.68rem;font-weight:700;"><i class='bx bx-wallet'></i> Menunggu Pelunasan Customer</span>` : ""}
               </div>
             </div>
             <div class="booking-card-body">
@@ -407,7 +409,9 @@
       const kode = b.kode_booking || ("EC" + b.id.slice(-6).toUpperCase());
       const nama = b.profiles?.full_name || b.nama_pemesan || "—";
       const sp   = b.status_pembayaran || "Belum Bayar";
-      const isMenunggu = sp === "Menunggu Konfirmasi";
+      const isMenunggu  = sp === "Menunggu Konfirmasi";
+      const isPelunasan = isMenunggu && b.status === "Dikonfirmasi"; // konfirmasi ini utk pelunasan, bukan DP awal
+      const isLocked    = b.status === "Selesai"; // (2) status final, tidak bisa diubah lagi
       const dp = b.dp_amount || 0;
       const deposit = b.deposit_amount || 0;
       const bayarNow = dp + deposit;
@@ -523,6 +527,15 @@
             <div><div class="tolak-title">Alasan Penolakan</div><div class="tolak-alasan">${b.alasan_tolak}</div></div>
           </div>` : ""}
 
+          ${sp === "Menunggu Pelunasan" ? `
+          <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:0.75rem 0.875rem;display:flex;gap:0.5rem;align-items:flex-start;">
+            <i class='bx bx-wallet' style="color:#e85d04;font-size:0.95rem;flex-shrink:0;margin-top:2px;"></i>
+            <div>
+              <div style="font-size:0.72rem;font-weight:700;color:#9a3412;">Menunggu Pelunasan dari Customer</div>
+              <div style="font-size:0.78rem;color:#9a3412;margin-top:1px;">Customer perlu melunasi sisa ${formatRupiah(sisa)} sebelum status dapat menjadi Aktif. Booking akan otomatis bisa diaktifkan setelah bukti pelunasan dikonfirmasi.</div>
+            </div>
+          </div>` : ""}
+
           <!-- Riwayat Status -->
           <div>
             <p style="font-size:0.7rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 0.75rem;">📌 Riwayat Status</p>
@@ -533,7 +546,7 @@
           <!-- Aksi Konfirmasi Pembayaran -->
           <div style="display:flex;gap:0.75rem;">
             <button onclick="konfirmasiPembayaran('${id}')" class="btn btn-sm" style="flex:1;justify-content:center;background:#16a34a;color:#fff;border-color:#16a34a;">
-              ✅ Konfirmasi Pembayaran
+              ✅ ${isPelunasan ? "Konfirmasi Pelunasan" : "Konfirmasi Pembayaran"}
             </button>
             <button onclick="openTolak('${id}')" class="btn btn-sm" style="flex:1;justify-content:center;background:#dc2626;color:#fff;border-color:#dc2626;">
               ❌ Tolak
@@ -550,10 +563,15 @@
           <!-- Update Status Manual -->
           <div style="border-top:1px solid var(--color-border);padding-top:1rem;">
             <label style="display:block;font-size:0.75rem;font-weight:600;color:var(--color-text);margin-bottom:0.4rem;">Update Status Booking</label>
+            ${isLocked ? `
+            <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:0.75rem;font-size:0.8rem;color:var(--color-text-muted);display:flex;align-items:center;gap:0.5rem;">
+              <i class='bx bx-lock-alt' style="color:var(--color-text-subtle);font-size:1rem;"></i>
+              Booking sudah <strong>Selesai</strong> — status tidak bisa diubah lagi.
+            </div>` : `
             <select id="newStatus" class="ec-input" style="margin-bottom:0.75rem;">${opts}</select>
             <button onclick="updateStatus('${id}')" class="btn btn-primary btn-sm" style="width:100%;justify-content:center;">
               <i class='bx bx-save'></i> Simpan Status
-            </button>
+            </button>`}
           </div>
 
           <!-- Hapus -->
@@ -578,15 +596,20 @@
     document.getElementById("editOverlay").addEventListener("click", e => { if (e.target===e.currentTarget) closeEdit(); });
 
     // ─── KONFIRMASI PEMBAYARAN ───
+    // Jika booking sudah berstatus "Dikonfirmasi", maka konfirmasi ini adalah
+    // konfirmasi PELUNASAN (sebelum status berubah jadi Aktif).
+    // Jika belum, ini adalah konfirmasi pembayaran DP awal seperti biasa.
     async function konfirmasiPembayaran(id) {
+      const b = allBookings.find(x => x.id === id);
+      const isPelunasan = b && b.status === "Dikonfirmasi";
       showLoading("Mengkonfirmasi...");
-      const { error } = await supabase.from("bookings").update({
-        status:            "Dikonfirmasi",
-        status_pembayaran: "Dikonfirmasi",
-      }).eq("id", id);
+      const updateData = isPelunasan
+        ? { status: "Aktif", status_pembayaran: "Lunas" }
+        : { status: "Dikonfirmasi", status_pembayaran: "Dikonfirmasi" };
+      const { error } = await supabase.from("bookings").update(updateData).eq("id", id);
       hideLoading();
       if (error) { showToast("Gagal: " + error.message, "error"); return; }
-      showToast("✅ Pembayaran dikonfirmasi!", "success");
+      showToast(isPelunasan ? "✅ Pelunasan dikonfirmasi! Booking kini Aktif." : "✅ Pembayaran dikonfirmasi!", "success");
       closeEdit();
       await loadBookings();
     }
@@ -602,26 +625,27 @@
     async function doTolak() {
       const alasan = document.getElementById("alasanTolak").value.trim();
       if (!alasan) { showToast("Isi alasan penolakan.", "warning"); return; }
+      const b = allBookings.find(x => x.id === pendingTolakId);
+      const isPelunasan = b && b.status === "Dikonfirmasi";
       showLoading("Menolak...");
 
-      // Coba update dengan alasan_tolak dulu
-      let { error } = await supabase.from("bookings").update({
-        status:            "Dibatalkan",
-        status_pembayaran: "Belum Bayar",
-        alasan_tolak:      alasan,
-      }).eq("id", pendingTolakId);
+      // Jika ini bukti pelunasan yang ditolak, booking TIDAK dibatalkan —
+      // cukup minta customer kirim ulang bukti pembayaran.
+      let updateData = isPelunasan
+        ? { status_pembayaran: "Menunggu Pelunasan", alasan_tolak: alasan }
+        : { status: "Dibatalkan", status_pembayaran: "Belum Bayar", alasan_tolak: alasan };
+
+      let { error } = await supabase.from("bookings").update(updateData).eq("id", pendingTolakId);
 
       // Jika kolom alasan_tolak belum ada, fallback tanpa kolom itu
       if (error && error.message && error.message.includes("alasan_tolak")) {
-        ({ error } = await supabase.from("bookings").update({
-          status:            "Dibatalkan",
-          status_pembayaran: "Belum Bayar",
-        }).eq("id", pendingTolakId));
+        delete updateData.alasan_tolak;
+        ({ error } = await supabase.from("bookings").update(updateData).eq("id", pendingTolakId));
       }
 
       hideLoading();
       if (error) { showToast("Gagal: " + error.message, "error"); return; }
-      showToast("Pembayaran ditolak.", "success");
+      showToast(isPelunasan ? "Bukti pelunasan ditolak. Customer diminta kirim ulang." : "Pembayaran ditolak.", "success");
       closeTolak();
       closeEdit();
       await loadBookings();
@@ -629,7 +653,36 @@
 
     // ─── UPDATE STATUS MANUAL ───
     async function updateStatus(id) {
+      const b = allBookings.find(x => x.id === id);
+      if (!b) return;
+
+      // (2) Status "Selesai" sudah final — tidak bisa diubah lagi
+      if (b.status === "Selesai") {
+        showToast("Booking ini sudah Selesai. Status tidak bisa diubah lagi.", "warning");
+        return;
+      }
+
       const newStatus = document.getElementById("newStatus").value;
+
+      // (3) Tidak boleh langsung lompat ke "Aktif" jika masih ada sisa pembayaran
+      // yang belum lunas. Customer harus melunasi via QRIS & menunggu konfirmasi admin.
+      const dp   = b.dp_amount || 0;
+      const sisa = b.sisa_pelunasan != null ? b.sisa_pelunasan : Math.max(0, (b.total_harga || 0) - dp);
+      const sudahLunas = b.status_pembayaran === "Lunas" || sisa <= 0;
+
+      if (newStatus === "Aktif" && b.status !== "Aktif" && !sudahLunas) {
+        showLoading("Memproses...");
+        const { error } = await supabase.from("bookings").update({
+          status_pembayaran: "Menunggu Pelunasan",
+        }).eq("id", id);
+        hideLoading();
+        if (error) { showToast("Gagal: " + error.message, "error"); return; }
+        showToast(`Belum bisa diaktifkan. Customer diminta melunasi sisa pembayaran ${formatRupiah(sisa)} lebih dulu lewat menu Pesanan Saya.`, "warning", 7000);
+        closeEdit();
+        await loadBookings();
+        return;
+      }
+
       showLoading("Menyimpan...");
       const updateData = { status: newStatus };
       const { error } = await supabase.from("bookings").update(updateData).eq("id", id);
