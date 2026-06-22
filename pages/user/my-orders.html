@@ -573,8 +573,8 @@
         if (!publicUrl) throw new Error('Gagal mendapatkan URL publik file.');
 
         const { error } = await supabase.from('bookings').update({
-          bukti_bayar_url:   publicUrl,
-          status_pembayaran: 'Menunggu Konfirmasi',
+          bukti_pelunasan_url: publicUrl,
+          status_pembayaran:   'Menunggu Konfirmasi',
         }).eq('id', pendingPelunasanId);
         if (error) throw error;
 

@@ -381,22 +381,38 @@ function injectTopbarNotifBell({ fetchCount, onOpen } = {}) {
   });
 
   async function loadTopbarNotifs() {
+    const body = document.getElementById("topbarNotifBody");
     if (onOpen) {
       const items = await onOpen();
       renderNotifItems(items || []);
-    } else if (typeof supabase !== "undefined" && typeof currentUser !== "undefined" && currentUser) {
-      const { data } = await supabase
-        .from("bookings")
-        .select("id,kode_booking,status,created_at,cars(nama)")
-        .eq("user_id", currentUser.id)
-        .order("created_at", { ascending: false })
-        .limit(10);
-      renderNotifItems((data || []).map(b => ({
-        title: b.kode_booking || ("EC" + b.id.slice(-6).toUpperCase()),
-        sub: (b.cars?.nama || "Kendaraan") + " · " + (b.status || ""),
-        status: b.status,
-      })));
+      return;
     }
+    if (typeof supabase === "undefined") {
+      body.innerHTML = `<div class="notif-empty">Tidak ada koneksi.</div>`;
+      return;
+    }
+    // Ambil session langsung — tidak bergantung pada variabel global halaman
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { body.innerHTML = `<div class="notif-empty">Belum login.</div>`; return; }
+
+    const { data } = await supabase
+      .from("bookings")
+      .select("id,kode_booking,status,status_pembayaran,created_at,cars(nama)")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    renderNotifItems((data || []).map(b => {
+      const sp = b.status_pembayaran || "";
+      let sub = (b.cars?.nama || "Kendaraan") + " · " + (b.status || "");
+      if (sp === "Menunggu Pelunasan")   sub = (b.cars?.nama || "Kendaraan") + " · 💳 Perlu lunasi sisa pembayaran";
+      else if (sp === "Menunggu Konfirmasi") sub = (b.cars?.nama || "Kendaraan") + " · ⏳ Menunggu konfirmasi admin";
+      return {
+        title: b.kode_booking || ("EC" + b.id.slice(-6).toUpperCase()),
+        sub,
+        status: b.status,
+      };
+    }));
   }
 
   function renderNotifItems(items) {

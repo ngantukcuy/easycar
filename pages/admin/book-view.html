@@ -389,10 +389,11 @@
               <button onclick="event.stopPropagation();openEdit('${b.id}')" class="btn btn-ghost btn-sm" style="font-size:0.73rem;">
                 <i class='bx bx-info-circle'></i> Detail & Aksi
               </button>
-              ${b.bukti_bayar_url ? `<button onclick="event.stopPropagation();openBukti('${b.bukti_bayar_url}')" class="btn btn-ghost btn-sm" style="font-size:0.73rem;"><i class='bx bx-image'></i> Bukti Bayar</button>` : ""}
+              ${b.bukti_bayar_url ? `<button onclick="event.stopPropagation();openBukti('${b.bukti_bayar_url}')" class="btn btn-ghost btn-sm" style="font-size:0.73rem;"><i class='bx bx-image'></i> Bukti DP</button>` : ""}
+              ${b.bukti_pelunasan_url ? `<button onclick="event.stopPropagation();openBukti('${b.bukti_pelunasan_url}')" class="btn btn-ghost btn-sm" style="font-size:0.73rem;background:#fff7ed;border-color:#fed7aa;color:#9a3412;"><i class='bx bx-image-alt'></i> Bukti Pelunasan</button>` : ""}
               ${isMenunggu ? `
                 <button onclick="event.stopPropagation();konfirmasiPembayaran('${b.id}')" class="btn btn-sm" style="font-size:0.73rem;background:#16a34a;color:#fff;border-color:#16a34a;margin-left:auto;">
-                  ✅ Konfirmasi
+                  ✅ ${b.status === 'Dikonfirmasi' ? 'Konfirmasi Pelunasan' : 'Konfirmasi DP'}
                 </button>
                 <button onclick="event.stopPropagation();openTolak('${b.id}')" class="btn btn-sm" style="font-size:0.73rem;background:#dc2626;color:#fff;border-color:#dc2626;">
                   ❌ Tolak
@@ -556,7 +557,8 @@
           <!-- Dokumen & Invoice -->
           <div style="display:flex;gap:0.625rem;flex-wrap:wrap;">
             <button onclick="openDocs('${id}')" class="btn btn-ghost btn-sm"><i class='bx bx-file'></i> Lihat Dokumen</button>
-            ${b.bukti_bayar_url ? `<button onclick="openBukti('${b.bukti_bayar_url}')" class="btn btn-ghost btn-sm"><i class='bx bx-image'></i> Bukti Bayar</button>` : ""}
+            ${b.bukti_bayar_url ? `<button onclick="openBukti('${b.bukti_bayar_url}')" class="btn btn-ghost btn-sm"><i class='bx bx-image'></i> Bukti DP</button>` : ""}
+            ${b.bukti_pelunasan_url ? `<button onclick="openBukti('${b.bukti_pelunasan_url}')" class="btn btn-ghost btn-sm" style="background:#fff7ed;border-color:#fed7aa;color:#9a3412;"><i class='bx bx-image-alt'></i> Bukti Pelunasan</button>` : ""}
             <button onclick="doPrintA4('${id}')" class="btn btn-sm" style="background:#1e293b;color:#fff;border-color:#1e293b;"><i class='bx bx-printer'></i> Invoice A4</button>
           </div>
 
